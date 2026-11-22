@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm build",
+  "rewrites": [
+    { "source": "/teachers/:id", "destination": "/index.html" },
+    { "source": "/(login|signup|auth|reset-password|verify-email|onboarding|me|tutor|admin|book|requests|help)(.*)", "destination": "/index.html" }
+  ]
+}

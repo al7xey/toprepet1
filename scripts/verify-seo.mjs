@@ -1,0 +1,95 @@
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { routes, titles, descriptions, canonicalForRoute } from './seo-routes.mjs';
+import privatePages from '../src/shared/config/private-seo-pages.json' with { type: 'json' };
+
+const fail = message => { throw new Error(`SEO: ${message}`); };
+const seenTitles = new Set();
+const seenDescriptions = new Set();
+
+for (const route of routes) {
+  const file = route === '/' ? 'dist/index.html' : `dist${route}/index.html`;
+  const html = await readFile(resolve(file), 'utf8');
+  const canonical = canonicalForRoute(route);
+  const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
+  const description = html.match(/<meta name="description" content="([^"]+)"\s*\/>/)?.[1];
+  const canonicals = [...html.matchAll(/<link rel="canonical" href="([^"]+)"\s*\/>/g)];
+  if (title !== titles[route] || !title || seenTitles.has(title)) fail(`${route}: title`);
+  if (description !== descriptions[route] || !description || seenDescriptions.has(description)) fail(`${route}: description`);
+  if (canonicals.length !== 1 || canonicals[0][1] !== canonical) fail(`${route}: canonical`);
+  if (!/<h1(?:\s|>)/i.test(html) || !/<div id="root"[^>]*>[\s\S]{300,}<\/div>/.test(html)) fail(`${route}: prerender`);
+  if (/<meta name="robots" content="[^"]*noindex/i.test(html)) fail(`${route}: noindex`);
+  if ((html.match(/<meta name="robots"/g) || []).length !== 1 || !html.includes('max-image-preview:large')) fail(`${route}: robots/image preview`);
+  if (route === '/teachers' && !html.includes('"@type": "CollectionPage"')) fail(`${route}: directory schema`);
+  if (['/teachers', '/for-repetitor'].includes(route) && !html.includes('"@type": "BreadcrumbList"')) fail(`${route}: breadcrumb schema`);
+  for (const [key, value] of [['og:title', title], ['og:description', description], ['og:url', canonical]]) {
+    if (!html.includes(`property="${key}" content="${value}"`)) fail(`${route}: ${key}`);
+  }
+  if ((html.match(/<h1(?:\s|>)/gi) || []).length !== 1) fail(`${route}: exactly one h1`);
+  if (html.includes('<!--$?-->') || html.includes('id="S:0"')) fail(`${route}: hidden lazy content`);
+  const main = html.match(/<main(?:\s[^>]*)?>([\s\S]*?)<\/main>/)?.[1] || '';
+  if (!/<h1(?:\s|>)/i.test(main)) fail(`${route}: heading must be inside main, visible without JS`);
+  for (const match of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
+    try { JSON.parse(match[1]); } catch { fail(`${route}: invalid JSON-LD`); }
+  }
+  seenTitles.add(title);
+  seenDescriptions.add(description);
+}
+
+const sitemap = await readFile(resolve('dist/sitemap.xml'), 'utf8');
+const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+const blogSitemap = await readFile(resolve('dist/blog/sitemap.xml'), 'utf8');
+const blogUrls = [...blogSitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+const expected = [...routes.map(canonicalForRoute), ...blogUrls];
+if (urls.length !== expected.length || urls.some((url, index) => url !== expected[index])) fail('sitemap');
+if (new Set(urls).size !== urls.length || !blogUrls.includes('https://toprepet.ru/blog/')) fail('sitemap duplicate/blog');
+if (urls.some(url => url.includes('/teacher/'))) fail('sitemap legacy teacher URL');
+const lastmod = await readFile(resolve('dist/sitemap-lastmod.json'), 'utf8').then(JSON.parse, () => undefined);
+if (lastmod) {
+  const dates = [...sitemap.matchAll(/<loc>([^<]+)<\/loc><lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)];
+  if (dates.length !== urls.length || dates.some(([, url, date]) => lastmod[url]?.date !== date)) fail('sitemap lastmod');
+}
+const robots = await readFile(resolve('dist/robots.txt'), 'utf8');
+if (!robots.includes('User-agent: OAI-SearchBot') || !robots.includes('Sitemap: https://toprepet.ru/sitemap.xml')) fail('robots');
+const notFound = await readFile(resolve('dist/404.html'), 'utf8');
+if (!notFound.includes('noindex,follow') || !notFound.includes('Страница не найдена') || notFound.includes('rel="canonical"')) fail('404');
+console.log(`SEO проверка пройдена: ${routes.length} страниц и 404.html`);
+
+for (const url of blogUrls) {
+  const path = new URL(url).pathname;
+  const html = await readFile(resolve(`dist${path}index.html`), 'utf8');
+  if (!html.includes(`rel="canonical" href="${url}"`) || /name="robots" content="[^"]*noindex/.test(html)) fail(`${path}: blog canonical/robots`);
+  if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`${path}: blog heading`);
+  if (html.includes('<!--$?-->') || html.includes('id="S:0"')) fail(`${path}: hidden blog content`);
+  if ((html.match(/<meta name="robots"/g) || []).length !== 1 || !html.includes('max-image-preview:large')) fail(`${path}: blog robots/image preview`);
+}
+for (const route of ['/blog/admin', '/blog/admin/login', '/blog/admin/articles', '/blog/admin/articles/new', '/blog/admin/articles/edit', '/blog/admin/categories']) {
+  const html = await readFile(resolve(`dist${route}/index.html`), 'utf8');
+  if (!html.includes('noindex,follow') || urls.some(url=>url.includes('/blog/admin'))) fail(`${route}: admin indexed`);
+}
+if (!robots.includes('Clean-param:') || /Disallow:\s*\/(?:\s|$)/m.test(robots)) fail('robots clean-param/public access');
+for (const [from, to] of [['/lessons', '/teachers'], ['/contact', '/help'], ['/free-intro', '/teachers']]) {
+  const html = await readFile(resolve(`dist${from}/index.html`), 'utf8');
+  const destination = canonicalForRoute(to);
+  const redirect = from === '/free-intro' ? `${destination}?intro=1` : destination;
+  if (!html.includes('noindex,follow') || !html.includes(`content="0;url=${redirect}"`) || !html.includes(`rel="canonical" href="${destination}"`)) fail(`${from}: moved page redirect`);
+  if (urls.some(url => url.endsWith(`${from}/`))) fail(`${from}: moved page in sitemap`);
+}
+for (const route of ['/help', '/legal', '/legal/payment-refund', '/legal/terms']) {
+  const html = await readFile(resolve(`dist${route}/index.html`), 'utf8');
+  if (!html.includes('class="tr"') || !html.includes('class="hdr surf')) fail(`${route}: new layout`);
+  if (/менеджер|20 минут|промокод/i.test(html.match(/<main[\s\S]*?<\/main>/)?.[0] ?? '')) fail(`${route}: removed wording returned`);
+}
+
+for (const [route, label] of Object.entries(privatePages).filter(([route]) => !route.includes(':'))) {
+  const html = await readFile(resolve(`dist${route}/index.html`), 'utf8');
+  if (!html.includes(`<title>${label} — TopRepet</title>`) || !html.includes('noindex,follow') || html.includes('rel="canonical"')) fail(`${route}: private metadata`);
+  if (urls.includes(canonicalForRoute(route))) fail(`${route}: private URL in sitemap`);
+}
+const help = await readFile('dist/help/index.html', 'utf8');
+const catalog = await readFile('dist/teachers/index.html', 'utf8');
+if (/<a[^>]*href="[^"]*\/teachers\/[^"/]+/.test(catalog)) fail('static sample profiles in the catalog');
+if (!help.includes('"@type":"FAQPage"') || !help.includes('"acceptedAnswer"')) fail('help FAQ');
+const llms = await readFile('dist/llms.txt', 'utf8');
+for (const path of ['/teachers/', '/help/', '/legal/', '/blog/']) if (!llms.includes(`https://toprepet.ru${path}`)) fail('llms discovery');
+console.log(`SEO: метаданные ${Object.keys(privatePages).length} маршрутов кабинетов/авторизации, FAQ и llms.txt проверены`);

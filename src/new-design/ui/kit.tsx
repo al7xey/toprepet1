@@ -1,0 +1,524 @@
+import { useEffect, useId, useRef, useState, type CSSProperties, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import type { Query } from '../api/hooks';
+import { initial } from '../lib/format';
+import { Icon } from './icon';
+
+export { Icon };
+
+/** Единая строка перехода или действия в настройках и личном кабинете. */
+export function NavigationRow({ icon, children, to, onClick }: { icon: string; children: ReactNode; to?: string; onClick?: () => void }) {
+  const location = useLocation();
+  const content = <><Icon name={icon} /><span>{children}</span><Icon name="right" /></>;
+  return to
+    ? <Link className="trk-navrow" to={to} state={{ from: location.pathname + location.search }}>{content}</Link>
+    : <button type="button" className="trk-navrow" onClick={onClick}>{content}</button>;
+}
+
+const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ');
+
+/* ---------- Кнопки ---------- */
+
+export type ButtonVariant = 'primary' | 'line' | 'warm' | 'fill' | 'soft' | 'ink' | 'danger';
+
+export interface ButtonProps {
+  state?: unknown;
+  children?: ReactNode;
+  variant?: ButtonVariant;
+  size?: 's' | 'md' | 'lg';
+  block?: boolean;
+  icon?: string;
+  iconAfter?: string;
+  /** Внутренняя ссылка. */
+  to?: string;
+  /** Внешняя ссылка, открывается в новой вкладке. */
+  href?: string;
+  onClick?: () => void;
+  type?: 'button' | 'submit';
+  disabled?: boolean;
+  loading?: boolean;
+  className?: string;
+  style?: CSSProperties;
+  'aria-label'?: string;
+}
+
+/** Единственная кнопка интерфейса: все действия и ссылки-кнопки собираются из неё. */
+export function Button({ children, variant = 'primary', size = 'md', block, icon, iconAfter, to, href, onClick, type = 'button', disabled, loading, className, style, state, ...rest }: ButtonProps) {
+  const cls = cx('btn', `btn-${variant}`, size === 'lg' && 'btn-lg', size === 's' && 'btn-s', block && 'btn-block', loading && 'trk-loading', className);
+  const inner = (<>{icon && <Icon name={icon} />}{children}{iconAfter && <Icon name={iconAfter} />}</>);
+  const inactive = disabled || loading;
+  if (to && !inactive) return <Link className={cls} to={to} state={state} style={style} aria-label={rest['aria-label']} onClick={onClick}>{inner}</Link>;
+  if (href && !inactive) return <a className={cls} href={href} target="_blank" rel="noreferrer" style={style} aria-label={rest['aria-label']} onClick={onClick}>{inner}</a>;
+  return (
+    <button type={type} className={cls} onClick={onClick} disabled={inactive} aria-busy={loading || undefined} style={style} aria-label={rest['aria-label']}>
+      {inner}
+    </button>
+  );
+}
+
+/** Круглая кнопка со значком (уведомления, назад, закрыть). */
+export function IconButton({ icon, label, to, onClick, surf, badge, className, type = 'button', disabled, state }: { icon: string; label: string; to?: string; onClick?: () => void; surf?: boolean; badge?: number | boolean; className?: string; type?: 'button' | 'submit'; disabled?: boolean; state?: unknown }) {
+  const cls = cx('trk-iconbtn', surf && 'surf', !className?.includes('trk-addbtn') && 'trk-round', className);
+  // непрочитанное показываем точкой, без числа: так принято в современных приложениях
+  const dot = badge ? <span className="trk-badge" aria-hidden="true" /> : null;
+  if (to && !disabled) return <Link className={cls} to={to} state={state} aria-label={label} data-unread={typeof badge === 'number' ? badge : undefined}><Icon name={icon} />{dot}</Link>;
+  return <button type={type} className={cls} onClick={onClick} aria-label={label} disabled={disabled}><Icon name={icon} />{dot}</button>;
+}
+
+/** Круглая стрелка «назад»: одна на всех страницах. Подпись остаётся для скринридеров. */
+export function BackLink({ to, children, className }: { to: string; children: ReactNode; className?: string }) {
+  // если на страницу пришли по ссылке с другой страницы кабинета (например, из уведомления в профиле), «назад» возвращает туда
+  const from = (useLocation().state as { from?: string } | null)?.from;
+  return <IconButton icon="back" to={from ?? to} label={typeof children === 'string' ? children : 'Назад'} className={cx('trk-back', className)} />;
+}
+
+/* ---------- Заголовки и секции ---------- */
+
+/** Заголовок страницы: 32 px на компьютере, 26 px на телефоне. Одна h1 на странице. */
+export function PageHeader({ title, lead, back, actions, center }: { title: ReactNode; lead?: ReactNode; back?: { to?: string; onClick?: () => void; label: string }; actions?: ReactNode; center?: boolean }) {
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from;
+  if (!back && from && /^\/(me|tutor)\/account(?:\?|$)/.test(from) && from !== location.pathname) back = { to: from, label: 'Профиль' };
+  return (
+    <header className={cx('trk-pagehead', center && 'center', back && 'has-back')}>
+      <div className="trk-pagehead-row">
+        {back && (back.to ? <BackLink to={back.to}>{back.label}</BackLink> : <IconButton icon="back" label={back.label} onClick={back.onClick} className="trk-back" />)}
+        <div className="trk-pagehead-text">
+          <h1 className="trh-h1">{title}</h1>
+          {lead && <p className="lead">{lead}</p>}
+        </div>
+        {actions && <div className="trk-pagehead-actions">{actions}</div>}
+      </div>
+    </header>
+  );
+}
+
+/** Секция с заголовком второго уровня: 24 px на компьютере, 21 px на телефоне. */
+export function Section({ title, action, lead, children, id, className, reveal }: { title?: ReactNode; action?: ReactNode; lead?: ReactNode; children?: ReactNode; id?: string; className?: string; reveal?: boolean }) {
+  const headingId = useId();
+  const section = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!reveal || !section.current || typeof IntersectionObserver === 'undefined' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      section.current?.setAttribute('data-section-visible', '');
+      observer.disconnect();
+    }, { threshold: .15 });
+    observer.observe(section.current);
+    return () => observer.disconnect();
+  }, [reveal]);
+  return (
+    <section ref={section} className={cx('trh-sec', className)} id={id} aria-labelledby={title ? headingId : undefined}>
+      {(title || action) && (
+        <div className="sec-h">
+          {title && <h2 id={headingId} className="h2 trh-h2">{title}</h2>}
+          {action}
+        </div>
+      )}
+      {lead && <p className="cap">{lead}</p>}
+      {children}
+    </section>
+  );
+}
+
+/** Заголовок карточки/блока внутри секции: 18 px. */
+export const CardTitle = ({ children }: { children: ReactNode }) => <h3 className="trk-cardtitle">{children}</h3>;
+
+/* ---------- Поверхности ---------- */
+
+export function Card({ children, className, pad = 'md', as = 'div', style }: { children: ReactNode; className?: string; pad?: 'sm' | 'md' | 'lg'; as?: 'div' | 'section' | 'article' | 'aside'; style?: CSSProperties }) {
+  const Tag = as;
+  return <Tag className={cx('card', 'trk-card', `pad-${pad}`, className)} style={style}>{children}</Tag>;
+}
+
+export function Panel({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cx('panel', 'trh-panel', className)}>{children}</div>;
+}
+
+/* ---------- Статусы и сообщения ---------- */
+
+export type Tone = 'ok' | 'wait' | 'neutral' | 'bad' | 'info';
+
+export function UnreadDot({ label = 'Новое' }: { label?: string }) {
+  return <span className="trk-note-dot"><span className="trk-sr">{label}</span></span>;
+}
+
+export function Status({ tone, icon, children }: { tone: Tone; icon?: string; children: ReactNode }) {
+  return <span className={`st st-${tone}`}>{icon && <Icon name={icon} />}{children}</span>;
+}
+
+export function Note({ tone = 'info', icon, children, action }: { tone?: 'info' | 'ok' | 'bad' | 'plain'; icon?: string; children: ReactNode; action?: ReactNode }) {
+  const ic = icon ?? (tone === 'ok' ? 'check' : tone === 'bad' ? 'alert' : 'info');
+  return (
+    <div className={cx('note', tone !== 'info' && tone, 'trk-note')} role={tone === 'bad' ? 'alert' : undefined}>
+      <Icon name={ic} />
+      <div className="trk-note-text">{children}</div>
+      {action && <div className="trk-note-action">{action}</div>}
+    </div>
+  );
+}
+
+export function EmptyState({ icon = 'inbox', title, text, actions }: { icon?: string; title: string; text?: ReactNode; actions?: ReactNode }) {
+  return (
+    <div className="empty trk-empty">
+      <Icon name={icon} />
+      <b>{title}</b>
+      {text && <span>{text}</span>}
+      {actions && <div className="trk-empty-actions">{actions}</div>}
+    </div>
+  );
+}
+
+export function ErrorState({ text, onRetry }: { text: string; onRetry?: () => void }) {
+  return (
+    <div className="empty trk-empty" role="alert">
+      <Icon name="alert" />
+      <b>Что-то пошло не так</b>
+      <span>{text}</span>
+      {onRetry && <div className="trk-empty-actions"><Button variant="line" onClick={onRetry} icon="repeat">Повторить</Button></div>}
+    </div>
+  );
+}
+
+export function Skeleton({ height = 20, width, radius }: { height?: number; width?: number | string; radius?: number }) {
+  return <span className="skel trk-skel" style={{ height, width, borderRadius: radius }} aria-hidden="true" />;
+}
+
+/** Список-заглушка на время загрузки. */
+export function LoadingList({ rows = 3, height = 120 }: { rows?: number; height?: number }) {
+  return <section className="trk-stack" aria-live="polite" aria-busy="true" aria-label="Загрузка">{Array.from({ length: rows }, (_, i) => <Skeleton key={i} height={height} radius={32} />)}</section>;
+}
+
+/** Показывает загрузку, ошибку или данные запроса. */
+export function QueryView<T>({ query, children, loading, empty }: { query: Query<T>; children: (data: T) => ReactNode; loading?: ReactNode; empty?: (data: T) => ReactNode | null }) {
+  if (query.error && query.data === undefined) return <ErrorState text={query.error} onRetry={query.reload} />;
+  if (query.data === undefined) return <>{loading ?? <LoadingList />}</>;
+  const emptyView = empty?.(query.data);
+  if (emptyView) return query.error ? <ErrorState text={query.error} onRetry={query.reload} /> : <>{emptyView}</>;
+  return <>{query.error && <ErrorState text={query.error} onRetry={query.reload} />}{children(query.data)}</>;
+}
+
+/* ---------- Люди ---------- */
+
+export function Avatar({ name, photo, size = 48 }: { name: string; photo?: string | null; size?: number }) {
+  if (photo) return <img className="avatar" src={photo} alt="" width={size} height={size} style={{ width: size, height: size }} loading="lazy" />;
+  return <span className="avatar trk-avatar-letter" style={{ width: size, height: size, fontSize: Math.round(size * 0.42) }} aria-hidden="true">{initial(name)}</span>;
+}
+
+export function Person({ name, sub, photo, size = 48, right }: { name: string; sub?: ReactNode; photo?: string | null; size?: number; right?: ReactNode }) {
+  return (
+    <div className="person trk-person">
+      <Avatar name={name} photo={photo} size={size} />
+      <div className="trk-person-text"><b>{name}</b>{sub && <span>{sub}</span>}</div>
+      {right && <div className="trk-person-right">{right}</div>}
+    </div>
+  );
+}
+
+/* ---------- Списки и данные ---------- */
+
+/** Строки «название — значение». */
+export function Rows({ rows, boxed }: { rows: ([ReactNode, ReactNode] | [ReactNode, ReactNode, 'block'])[]; boxed?: boolean }) {
+  return (
+    <div className={cx('trk-rows', boxed && 'boxed')}>
+      {rows.map(([k, v, kind], i) => (kind === 'block'
+        ? <div className="rowline block" key={i}><span className="muted">{k}</span><p>{v}</p></div>
+        : <div className="rowline" key={i}><span className="muted">{k}</span><b>{v}</b></div>))}
+    </div>
+  );
+}
+
+/** Плитки с цифрами (опыт, цена, уроки). */
+export function Stats({ items }: { items: [ReactNode, ReactNode][] }) {
+  return <div className="stats trk-stats">{items.map(([v, l], i) => <div key={i}><b>{v}</b><span>{l}</span></div>)}</div>;
+}
+
+export function Tags({ items }: { items: string[] }) {
+  return <div className="trk-tags">{items.map((t) => <span key={t} className="tag">{t}</span>)}</div>;
+}
+
+export interface StepItem { title: ReactNode; text?: ReactNode; state?: 'done' | 'current' | 'todo' | 'bad' }
+
+/**
+ * Нумерованные шаги с линией (главная, «Для репетиторов», «Что будет дальше»).
+ * size="s" — компактный вариант для карточек.
+ */
+export function Steps({ items, size = 'md', revealOnScroll }: { items: StepItem[]; size?: 'md' | 's'; revealOnScroll?: boolean }) {
+  const list = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    if (!revealOnScroll || !list.current || typeof IntersectionObserver === 'undefined' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const element = list.current;
+    element.setAttribute('data-step-reveal', '');
+    const threshold = .22;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.intersectionRatio < threshold) continue;
+        entry.target.setAttribute('data-step-visible', '');
+        observer.unobserve(entry.target);
+      }
+    }, { threshold });
+    for (const step of list.current.children) observer.observe(step);
+    return () => { observer.disconnect(); element.removeAttribute('data-step-reveal'); };
+  }, [revealOnScroll]);
+  return (
+    <ol ref={list} className={cx('tl trh-steps', size === 's' && 's')}>
+      {items.map((item, index) => (
+        <li key={index} className={item.state && item.state !== 'current' ? item.state : undefined} style={{ '--i': index } as CSSProperties}>
+          <i>{index + 1}</i>
+          <div><h3>{item.title}</h3>{item.text && <p>{item.text}</p>}</div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function Faq({ items }: { items: [string, ReactNode][] }) {
+  return (
+    <div className="faq">
+      {items.map(([q, a]) => (
+        <details key={q}><summary>{q}<Icon name="plus" /></summary><p>{a}</p></details>
+      ))}
+    </div>
+  );
+}
+
+export function Ticks({ items }: { items: ReactNode[] }) {
+  return <ul className="ticks">{items.map((t, i) => <li key={i}><span className="trk-dot" aria-hidden="true" />{t}</li>)}</ul>;
+}
+
+export function onChoiceTabKey(event: KeyboardEvent<HTMLButtonElement>) {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  const list = event.currentTarget.closest('[role="tablist"]');
+  if (!list) return;
+  const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('button[role="tab"]:not(:disabled)'));
+  const index = tabs.indexOf(event.currentTarget);
+  if (index < 0) return;
+  const next = event.key === 'ArrowLeft' ? (index - 1 + tabs.length) % tabs.length
+    : event.key === 'ArrowRight' ? (index + 1) % tabs.length
+    : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+  if (next < 0) return;
+  event.preventDefault();
+  tabs[next].focus();
+  tabs[next].click();
+}
+
+/** Сегментный переключатель вкладок. */
+export function Tabs<T extends string>({ items, value, onChange, wide }: { items: { value: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; wide?: boolean }) {
+  return (
+    <div className={cx('seg trk-tabs', wide && 'wide')} role="tablist">
+      {items.map((item) => (
+        <button key={item.value} type="button" role="tab" aria-selected={item.value === value} tabIndex={item.value === value ? 0 : -1} className={item.value === value ? 'on' : undefined} onKeyDown={onChoiceTabKey} onClick={() => onChange(item.value)}>
+          {item.label}{item.count ? <span className="cnt2">{item.count}</span> : null}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Прогресс многошагового мастера. */
+export function WizardProgress({ step, total, label }: { step: number; total: number; label?: string }) {
+  return (
+    <div className="trk-progress">
+      <progress className="trk-sr" aria-label={label ?? 'Заполнение формы'} value={step} max={total} aria-valuetext={`Шаг ${step} из ${total}`} />
+      {label && <span className="mini">{label}</span>}
+      <div className="prog" aria-hidden="true">{Array.from({ length: total }, (_, i) => <i key={i} className={i < step ? 'on' : undefined} />)}</div>
+    </div>
+  );
+}
+
+/* ---------- Формы ---------- */
+
+interface FieldShell { label?: ReactNode; hint?: ReactNode; error?: string | null; right?: ReactNode; labelAction?: ReactNode }
+
+function FieldWrap({ id, label, hint, error, labelAction, children }: FieldShell & { id: string; children: ReactNode }) {
+  return (
+    <div className={cx('field-row trk-field', error && 'has-error')}>
+      {(label || labelAction) && <div className="trk-label-row">{label && <label className="label" htmlFor={id}>{label}</label>}{labelAction}</div>}
+      {children}
+      {error ? <span className="trk-error" id={`${id}-err`}>{error}</span> : hint ? <span className="muted sm" id={`${id}-hint`}>{hint}</span> : null}
+    </div>
+  );
+}
+
+export function TextField({ label, hint, error, right, labelAction, id, ...input }: FieldShell & InputHTMLAttributes<HTMLInputElement>) {
+  const auto = useId();
+  const fid = id ?? auto;
+  return (
+    <FieldWrap id={fid} label={label} hint={hint} error={error} labelAction={labelAction}>
+      <div className="field ink trk-input-box">
+        <input id={fid} className="trk-input" aria-invalid={error ? true : undefined} aria-describedby={error ? `${fid}-err` : hint ? `${fid}-hint` : undefined} {...input} />
+        {right}
+      </div>
+    </FieldWrap>
+  );
+}
+
+export function PasswordField(props: FieldShell & InputHTMLAttributes<HTMLInputElement>) {
+  const [shown, setShown] = useState(false);
+  return (
+    <TextField
+      {...props}
+      type={shown ? 'text' : 'password'}
+      right={<button type="button" className="trk-eye" onPointerDown={(e) => e.preventDefault()} onClick={() => setShown((v) => !v)} aria-label={shown ? 'Скрыть пароль' : 'Показать пароль'} aria-pressed={shown}><Icon name={shown ? 'eye-off' : 'eye'} /></button>}
+    />
+  );
+}
+
+export function TextArea({ label, hint, error, labelAction, id, ...area }: FieldShell & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const auto = useId();
+  const fid = id ?? auto;
+  return (
+    <FieldWrap id={fid} label={label} hint={hint} error={error} labelAction={labelAction}>
+      <div className="field area ink trk-input-box"><textarea id={fid} className="trk-input" aria-invalid={error ? true : undefined} rows={4} {...area} /></div>
+    </FieldWrap>
+  );
+}
+
+export function SelectField({ label, hint, error, options, id, ...select }: FieldShell & SelectHTMLAttributes<HTMLSelectElement> & { options: (string | { value: string; label: string })[] }) {
+  const auto = useId();
+  const fid = id ?? auto;
+  return (
+    <FieldWrap id={fid} label={label} hint={hint} error={error}>
+      <div className="field ink trk-input-box trk-select">
+        <select id={fid} className="trk-input" {...select}>
+          {options.map((o) => (typeof o === 'string' ? <option key={o} value={o}>{o}</option> : <option key={o.value} value={o.value}>{o.label}</option>))}
+        </select>
+        <Icon name="down" />
+      </div>
+    </FieldWrap>
+  );
+}
+
+export function Checkbox({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
+  return (
+    <label className={cx('chk trk-check', checked && 'on')}>
+      <input type="checkbox" className="trk-sr" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <i aria-hidden="true"><Icon name="check" /></i>
+      <span>{children}</span>
+    </label>
+  );
+}
+
+export function Switch({ checked, onChange, title, text, disabled }: { checked: boolean; onChange: (v: boolean) => void; title: ReactNode; text?: ReactNode; disabled?: boolean }) {
+  return (
+    <label className="trk-switch-row">
+      <span className="trk-switch-text"><b>{title}</b>{text && <span className="muted sm">{text}</span>}</span>
+      <input type="checkbox" role="switch" aria-checked={checked} className="trk-sr" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+      <span className={cx('switch', checked && 'on')} aria-hidden="true" />
+    </label>
+  );
+}
+
+/** Выбор вариантов пилюлями: один (radio) или несколько (multiple). */
+type ChipOption<T extends string> = T | { value: T; label: string; hint?: string };
+type OptionChipsProps<T extends string> = { options: ChipOption<T>[]; label?: ReactNode } & (
+  | { multiple: true; value: T[]; onChange: (v: T[]) => void }
+  | { multiple?: false; value: T | null; onChange: (v: T) => void }
+);
+
+export function OptionChips<T extends string>(props: OptionChipsProps<T>) {
+  const { options, label } = props;
+  const selected = (v: T) => (props.multiple ? props.value.includes(v) : props.value === v);
+  const toggle = (v: T) => {
+    if (!props.multiple) return props.onChange(v);
+    props.onChange(props.value.includes(v) ? props.value.filter((x) => x !== v) : [...props.value, v]);
+  };
+  return (
+    <fieldset className="field-row trk-fieldset">
+      {label && <legend className="label">{label}</legend>}
+      <div className="optrow">
+        {options.map((o) => {
+          const item = typeof o === 'string' ? { value: o, label: o } : o;
+          return (
+            <button key={item.value} type="button" className={cx('opt', props.multiple && 'ck', selected(item.value) && 'on')} aria-pressed={selected(item.value)} onClick={() => toggle(item.value)}>
+              {item.label}{'hint' in item && item.hint ? <small>{item.hint}</small> : null}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+export interface ChoiceOption<T extends string> { value: T; title: string; text?: ReactNode; icon?: string }
+
+/** Крупные карточки выбора (роль, онбординг, причина). Выбранная — с оранжевой обводкой. */
+export function ChoiceCards<T extends string>({ options, value, onChange, columns = 2, label }: { options: ChoiceOption<T>[]; value: T | null; onChange: (v: T) => void; columns?: 1 | 2 | 3; label?: string }) {
+  const name = useId();
+  return (
+    <fieldset className={cx('trk-choices trk-fieldset', `c${columns}`)}>
+      {label && <legend className="trk-sr">{label}</legend>}
+      {options.map((o) => (
+        <label key={o.value} className={cx('trk-choice', value === o.value && 'on')}>
+          <input type="radio" className="trk-sr" name={name} value={o.value} checked={value === o.value} onChange={() => onChange(o.value)} />
+          {o.icon && <span className="ic-sq"><Icon name={o.icon} /></span>}
+          <span className="trk-choice-text"><b>{o.title}</b>{o.text && <span>{o.text}</span>}</span>
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+/** Ошибка формы целиком (под кнопкой отправки). */
+export const FormError = ({ error }: { error: string | null | undefined }) => (error ? <Note tone="bad">{error}</Note> : null);
+
+/** Разделитель «или по почте». */
+export const Divider = ({ children }: { children?: ReactNode }) => <div className="divider">{children}</div>;
+
+/** Круглая стрелка «смотреть все» рядом с заголовком секции. */
+export function ArrowLink({ to, label }: { to: string; label: string }) {
+  return <IconButton icon="arrow" label={label} to={to} />;
+}
+
+/** Выбор файла: кнопка-метка с настоящим input[type=file] внутри (работает с клавиатуры). */
+export function FilePick({ children, accept, onPick, loading, icon = 'upload', round, preview }: { children: ReactNode; accept?: string; onPick: (file: File) => void; loading?: boolean; icon?: string; round?: 'add' | 'edit'; preview?: ReactNode }) {
+  const input = <input type="file" className="trk-sr" accept={accept} disabled={loading} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) onPick(file); }} />;
+  if (preview) return <label className="trk-filepick trk-filepick-preview">{input}<span className="trk-sr">{children}</span>{preview}</label>;
+  if (round) {
+    return (
+      <label className={cx('trk-iconbtn trk-filepick-round', round === 'add' ? 'trk-addbtn' : 'trk-round', loading && 'is-loading')} title={typeof children === 'string' ? children : undefined}>
+        {input}
+        <span className="trk-sr">{children}</span><Icon name={loading ? 'clock' : icon} />
+      </label>
+    );
+  }
+  return (
+    <label className={cx('btn btn-line trk-filepick', loading && 'is-loading')}>
+      {input}
+      <Icon name={icon} />{loading ? 'Загружаем…' : children}
+    </label>
+  );
+}
+
+/** Оценка звёздами для чтения: 4,5 из 5 показывается четырьмя заполненными и подписью. */
+export function Stars({ value, label }: { value: number; label?: boolean }) {
+  return (
+    <span className="trk-stars">
+      <span className="sr-only">Оценка {value} из 5</span>
+      {[1, 2, 3, 4, 5].map((n) => <Icon key={n} name={n <= Math.round(value) ? 'star-on' : 'star'} />)}
+      {label && <b>{String(value).replace('.', ',')}</b>}
+    </span>
+  );
+}
+
+const RATING_WORDS = ['', 'Ужасно', 'Плохо', 'Нормально', 'Хорошо', 'Отлично'];
+
+/** Выбор оценки от 1 до 5: радиогруппа со звёздами, стрелки и Tab работают как у обычных радио. */
+export function RatingInput({ value, onChange, label = 'Оценка', error }: { value: number; onChange: (v: number) => void; label?: string; error?: string }) {
+  const name = useId();
+  return (
+    <fieldset className={cx('field-row trk-fieldset', error && 'has-error')}>
+      <legend className="label">{label}</legend>
+      <div className="trk-rating">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <label key={n} className={cx('trk-rating-star', n <= value && 'on')}>
+            <input type="radio" name={name} value={n} checked={value === n} onChange={() => onChange(n)} aria-label={`${n} из 5, ${RATING_WORDS[n].toLowerCase()}`} />
+            <Icon name={n <= value ? 'star-on' : 'star'} />
+          </label>
+        ))}
+        <span className="trk-rating-word" aria-live="polite">{RATING_WORDS[value] ?? ''}</span>
+      </div>
+      {error && <span className="trk-error" role="alert">{error}</span>}
+    </fieldset>
+  );
+}

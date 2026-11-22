@@ -1,0 +1,412 @@
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  readdir,
+} from 'node:fs/promises';
+
+import {
+  dirname,
+  resolve,
+} from 'node:path';
+
+import { pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
+
+const distIndexPath = resolve('dist/index.html');
+const serverEntryPath = resolve('dist-server/entry-server.js');
+
+let template = await readFile(distIndexPath, 'utf8');
+const manifest = JSON.parse(await readFile(resolve('dist/.vite/manifest.json'), 'utf8'));
+const assetBase = (process.env.VITE_BASE_PATH || '/').replace(/^\/+|\/+$/g, '');
+const assetUrl = path => `/${assetBase ? `${assetBase}/` : ''}${path.replace(/^\/+/, '')}`;
+if (assetBase) {
+  template = template.replace(
+    /<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/i,
+    '<meta name="robots" content="noindex,nofollow" />',
+  );
+}
+const fontFiles = (await readdir(resolve('dist/assets')))
+  .filter(file => /^manrope-(?:cyrillic|latin)-wght-normal-.*\.woff2$/.test(file));
+
+// Preload only the page being opened. Keep its CSS in the initial HTML so
+// the prerender stays styled before React and dynamic imports finish loading.
+function addRouteAssets(html, route) {
+  const entry = route.startsWith('/blog/admin') ? 'src/blog/admin.tsx'
+    : route.startsWith('/blog') ? 'src/new-design/pages/public/blog.tsx'
+    : route === '/' ? 'src/pages/home/home-page.tsx'
+    : route === '/teachers' ? 'src/pages/teachers/teachers-page.tsx'
+    : route === '/for-repetitor' ? 'src/pages/for-tutors/for-tutors-page.tsx'
+    : route === '/help' ? 'src/new-design/pages/public/help.tsx'
+    : route.startsWith('/legal') ? 'src/new-design/pages/public/legal.tsx'
+    : null;
+  const visited = new Set();
+  const links = [];
+  const add = (file, rel) => {
+    const url = assetUrl(file);
+    if (!html.includes(`href="${url}"`)) {
+      links.push(`<link rel="${rel}" href="${url}"${rel === 'modulepreload' ? ' crossorigin' : ''}>`);
+    }
+  };
+  const visit = key => {
+    if (visited.has(key)) return;
+    visited.add(key);
+    const chunk = manifest[key];
+    if (!chunk) throw new Error(`Page asset missing from Vite manifest: ${key}`);
+    for (const dependency of chunk.imports || []) visit(dependency);
+    for (const css of chunk.css || []) add(css, 'stylesheet');
+    add(chunk.file, 'modulepreload');
+  };
+  if (entry) visit(entry);
+  for (const file of fontFiles) {
+    links.push(`<link rel="preload" as="font" type="font/woff2" href="${assetUrl(`assets/${file}`)}" crossorigin>`);
+  }
+  return html.replace('</head>', `${[...new Set(links)].join('\n')}\n</head>`);
+}
+
+const { render } = await import(
+  pathToFileURL(serverEntryPath).href
+);
+
+const rootPlaceholder = '<div id="root"></div>';
+
+if (!template.includes(rootPlaceholder)) {
+  throw new Error(
+    'Не найден <div id="root"></div> в dist/index.html',
+  );
+}
+
+import { routes, titles, descriptions, canonicalForRoute } from './seo-routes.mjs';
+import privatePages from '../src/shared/config/private-seo-pages.json' with { type: 'json' };
+
+const breadcrumbNames = {
+  '/help':
+    'Помощь',
+
+  '/for-repetitor':
+    'Работа репетитором',
+
+  '/teachers':
+    'Преподаватели',
+
+};
+
+function updateMetaContent(html, attribute, key, value) {
+  const tag = new RegExp(
+    `<meta\\s+${attribute}="${key}"\\s+content="[^"]*"\\s*\\/?>`,
+    'i',
+  );
+
+  if (!tag.test(html)) {
+    throw new Error(`Не найден метатег ${key}`);
+  }
+
+  return html.replace(
+    tag,
+    `<meta ${attribute}="${key}" content="${value}" />`,
+  );
+}
+
+function addPageMeta(html, route) {
+  const title = titles[route];
+  const description = descriptions[route];
+  const canonical = canonicalForRoute(route);
+
+  let result = html.replace(
+    /<title>.*?<\/title>/s,
+    `<title>${title}</title>`,
+  );
+
+  result = result.replace(
+    /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="description" content="${description}" />`,
+  );
+
+  for (const [attribute, key, value] of [
+    ['property', 'og:title', title],
+    ['property', 'og:description', description],
+    ['property', 'og:url', canonical],
+    ['name', 'twitter:title', title],
+    ['name', 'twitter:description', description],
+  ]) {
+    result = updateMetaContent(result, attribute, key, value);
+  }
+
+  if (route === '/for-repetitor') {
+    const image = 'https://toprepet.ru/images/for-repetitor-hero.png?v=20260929d';
+    result = updateMetaContent(result, 'property', 'og:image', image);
+    result = updateMetaContent(result, 'name', 'twitter:image', image);
+    result = updateMetaContent(result, 'property', 'og:image:alt', 'Преподаватели TopRepet');
+    result = updateMetaContent(result, 'name', 'twitter:image:alt', 'Преподаватели TopRepet');
+    result = updateMetaContent(result, 'property', 'og:image:width', '2172');
+    result = updateMetaContent(result, 'property', 'og:image:height', '1629');
+  }
+
+  result = result.replace(
+    '</head>',
+    `    <link rel="canonical" href="${canonical}" />\n  </head>`,
+  );
+
+  return result;
+}
+
+function addPageSchema(html, route) {
+  const schema = route === '/teachers' ? {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: titles[route],
+    url: canonicalForRoute(route),
+  } : (['/', '/help', '/for-repetitor'].includes(route) || route.startsWith('/legal') ? {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${canonicalForRoute(route)}#webpage`,
+    url: canonicalForRoute(route),
+    name: titles[route],
+    description: descriptions[route],
+    inLanguage: 'ru-RU',
+    isPartOf: { '@id': 'https://toprepet.ru/#website' },
+    ...(route === '/' ? { mainEntity: {
+      '@type': 'Service',
+      name: 'Индивидуальные онлайн-занятия с частным репетитором',
+      serviceType: 'Индивидуальные занятия по школьным предметам',
+      broker: { '@id': 'https://toprepet.ru/#organization' },
+      areaServed: { '@type': 'Country', name: 'Россия' },
+      availableChannel: { '@type': 'ServiceChannel', serviceUrl: 'https://toprepet.ru/teachers/' },
+    } } : {}),
+  } : undefined);
+
+  if (!schema) {
+    return html;
+  }
+
+  const jsonLd = JSON.stringify(
+    schema,
+    null,
+    2,
+  );
+
+  return html.replace(
+    '</head>',
+    `    <script type="application/ld+json" data-prerender-schema>\n${jsonLd}\n    </script>\n  </head>`,
+  );
+}
+
+function addBreadcrumbSchema(html, route) {
+  if (route === '/') {
+    return html;
+  }
+
+  const pageName = breadcrumbNames[route] || (route.startsWith('/legal') ? titles[route].replace(/ — TopRepet$/, '') : undefined);
+
+  if (!pageName) {
+    return html;
+  }
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'TopRepet',
+        item: 'https://toprepet.ru/',
+      },
+      ...(route.startsWith('/teachers/') ? [{
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Преподаватели',
+        item: canonicalForRoute('/teachers'),
+      }] : []),
+      {
+        '@type': 'ListItem',
+        position: route.startsWith('/teachers/') ? 3 : 2,
+        name: pageName,
+        item: canonicalForRoute(route),
+      },
+    ],
+  };
+
+  const jsonLd = JSON.stringify(
+    schema,
+    null,
+    2,
+  );
+
+  return html.replace(
+    '</head>',
+    `    <script type="application/ld+json" data-prerender-schema>\n${jsonLd}\n    </script>\n  </head>`,
+  );
+}
+
+// Sitemap lastmod moves only when a page's content or SEO text changes. CI rebuilds every
+// 15 minutes, so dates of unchanged pages are carried over from the live manifest.
+const lastmodManifestName = 'sitemap-lastmod.json';
+let previousLastmod;
+try {
+  const response = await fetch(`https://toprepet.ru/${lastmodManifestName}`, { signal: AbortSignal.timeout(10000) });
+  if (response.ok) previousLastmod = await response.json();
+  else if (response.status === 404) previousLastmod = {};
+} catch {}
+if (!previousLastmod) console.warn('Не удалось загрузить даты sitemap с сайта: lastmod не будет указан.');
+const today = new Date().toISOString().slice(0, 10);
+const lastmod = {};
+const trackLastmod = (url, html, ...seoText) => {
+  const main = html.match(/<main(?:\s[^>]*)?>[\s\S]*?<\/main>/)?.[0] ?? html;
+  const hash = createHash('sha256').update([...seoText, main].join('\n')).digest('hex').slice(0, 16);
+  const previous = previousLastmod?.[url];
+  lastmod[url] = { hash, date: previous?.hash === hash ? previous.date : today };
+};
+const sitemapEntry = url => previousLastmod
+  ? `  <url><loc>${url}</loc><lastmod>${lastmod[url].date}</lastmod></url>`
+  : `  <url><loc>${url}</loc></url>`;
+
+for (const route of routes) {
+  const appHtml = await render(route);
+  trackLastmod(canonicalForRoute(route), appHtml, titles[route], descriptions[route]);
+
+  let finalHtml = template.replace(
+    rootPlaceholder,
+    `<div id="root" data-prerendered="${route}">${appHtml}</div>`,
+  );
+
+  finalHtml = addPageMeta(
+    finalHtml,
+    route,
+  );
+
+  finalHtml = addPageSchema(
+    finalHtml,
+    route,
+  );
+
+  finalHtml = addBreadcrumbSchema(
+    finalHtml,
+    route,
+  );
+
+  finalHtml = addRouteAssets(finalHtml, route);
+
+  const outputPath =
+    route === '/'
+      ? distIndexPath
+      : resolve(
+          'dist',
+          route.replace(/^\//, ''),
+          'index.html',
+        );
+
+  await mkdir(
+    dirname(outputPath),
+    {
+      recursive: true,
+    },
+  );
+
+  await writeFile(
+    outputPath,
+    finalHtml,
+    'utf8',
+  );
+
+  console.log(`Пререндер создан: ${route}`);
+}
+
+console.log(
+  'Все страницы TopRepet успешно пререндерены.',
+);
+
+const blog = JSON.parse(await readFile('src/blog/snapshot.json', 'utf8'));
+const escapeMeta = value => String(value || '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+const blogCategoryPath = category => {
+  const parts = [category.slug];
+  let parent = blog.categories.find(item => item.id === category.parent_id);
+  while (parent && parts.length < 8) { parts.unshift(parent.slug); parent = blog.categories.find(item => item.id === parent.parent_id); }
+  return `/blog/rubrics/${parts.join('/')}`;
+};
+const blogPages = [
+  { route: '/blog', title: 'Блог TopRepet — статьи об учёбе, ОГЭ и ЕГЭ', description: 'Статьи об учёбе, школьных предметах и подготовке к ОГЭ и ЕГЭ от редакции TopRepet: советы ученикам и родителям.' },
+  ...blog.categories.filter(category => blog.articles.some(article => {
+    let current = blog.categories.find(item => item.id === article.category_id);
+    while (current) { if (current.id === category.id) return true; current = blog.categories.find(item => item.id === current.parent_id); }
+    return false;
+  })).map(category => ({ route: blogCategoryPath(category), title: `${category.name} — Блог TopRepet`, description: category.description || `Статьи по теме «${category.name}» в блоге TopRepet.` })),
+  ...blog.articles.map(article => ({ route: `/blog/articles/${article.slug}`, title: article.seo_title || `${article.title} — Блог TopRepet`, description: article.seo_description || article.excerpt, article })),
+];
+for (const page of blogPages) {
+  const url = `https://toprepet.ru${page.route}/`;
+  const appHtml = await render(page.route);
+  trackLastmod(url, appHtml, page.title, page.description);
+  let html = template.replace(rootPlaceholder, `<div id="root" data-prerendered="${page.route}">${appHtml}</div>`);
+  html = html.replace(/<title>.*?<\/title>/s, `<title>${escapeMeta(page.title)}</title>`)
+    .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeMeta(page.description)}" />`);
+  for (const [key, value] of [['og:title', page.title], ['og:description', page.description], ['og:url', url], ['twitter:title', page.title], ['twitter:description', page.description]]) {
+    html = updateMetaContent(html, key.startsWith('og:') ? 'property' : 'name', key, escapeMeta(value));
+  }
+  if (page.article) {
+    html = updateMetaContent(html, 'property', 'og:type', 'article');
+    if (page.article.cover_image_url) {
+      const image = escapeMeta(new URL(page.article.cover_image_url, 'https://toprepet.ru').href);
+      const alt = escapeMeta(page.article.cover_image_alt || page.article.title);
+      html = updateMetaContent(html, 'property', 'og:image', image);
+      html = updateMetaContent(html, 'name', 'twitter:image', image);
+      html = updateMetaContent(html, 'property', 'og:image:alt', alt);
+      html = updateMetaContent(html, 'name', 'twitter:image:alt', alt);
+      html = html.replace(/<meta property="og:image:(?:width|height)"[^>]*>/g, '');
+    }
+  }
+  html = html.replace('</head>', `<link rel="canonical" href="${url}" /></head>`);
+  html = addRouteAssets(html, page.route);
+  const path = resolve('dist', page.route.slice(1), 'index.html');
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, html, 'utf8');
+}
+// Public auth screens and protected route shells need correct metadata before JavaScript.
+// Never prerender private data or add these URLs to the public sitemap.
+for (const [route, label] of Object.entries(privatePages).filter(([route]) => !route.includes(':'))) {
+  const title = `${label} — TopRepet`;
+  const description = `${label} в TopRepet. Доступ к личным данным и действиям зависит от вашего аккаунта.`;
+  let html = template.replace(rootPlaceholder, `<div id="root" data-prerendered="${route}">${await render(route)}</div>`)
+    .replace(/<title>.*?<\/title>/s, `<title>${escapeMeta(title)}</title>`);
+  html = updateMetaContent(html, 'name', 'description', escapeMeta(description));
+  html = updateMetaContent(html, 'name', 'robots', 'noindex,follow');
+  for (const [attribute, key, value] of [['property', 'og:title', title], ['property', 'og:description', description], ['property', 'og:url', canonicalForRoute(route)], ['name', 'twitter:title', title], ['name', 'twitter:description', description]]) {
+    html = updateMetaContent(html, attribute, key, escapeMeta(value));
+  }
+  html = addRouteAssets(html, route);
+  const path = resolve('dist', route.slice(1), 'index.html');
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, html, 'utf8');
+}
+const blogSitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${blogPages.map(page => sitemapEntry(`https://toprepet.ru${page.route}/`)).join('\n')}\n</urlset>\n`;
+await writeFile(resolve('dist/blog/sitemap.xml'), blogSitemap, 'utf8');
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...routes.map(canonicalForRoute), ...blogPages.map(page => `https://toprepet.ru${page.route}/`)].map(sitemapEntry).join('\n')}\n</urlset>\n`;
+await writeFile(resolve('dist/sitemap.xml'), sitemap, 'utf8');
+if (previousLastmod) await writeFile(resolve('dist', lastmodManifestName), `${JSON.stringify(lastmod, null, 2)}\n`, 'utf8');
+
+// GitHub Pages cannot issue a server-side 301 for an old static path.
+// Keep the legacy URL out of the sitemap and redirect it immediately.
+const legacyTutorPath = resolve('dist/for-tutors/index.html');
+await mkdir(dirname(legacyTutorPath), { recursive: true });
+await writeFile(legacyTutorPath, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=https://toprepet.ru/for-repetitor/"><link rel="canonical" href="https://toprepet.ru/for-repetitor/"><title>Переход на страницу для репетиторов</title></head><body><p>Страница переехала: <a href="https://toprepet.ru/for-repetitor/">работа репетитором с TopRepet</a>.</p></body></html>`, 'utf8');
+
+// Страницы, которые переехали на новые адреса: статический редирект для поисковиков и внешних ссылок.
+const movedPages = { '/lessons': '/teachers', '/contact': '/help', '/free-intro': '/teachers?intro=1' };
+for (const [from, to] of Object.entries(movedPages)) {
+  const destination = to.includes('?') ? canonicalForRoute(to.split('?')[0]) + '?' + to.split('?')[1] : canonicalForRoute(to);
+  const canonical = canonicalForRoute(to.split('?')[0]);
+  const path = resolve('dist', from.slice(1), 'index.html');
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${destination}"><link rel="canonical" href="${canonical}"><title>Страница переехала — TopRepet</title></head><body><p>Страница переехала: <a href="${destination}">открыть новый адрес</a>.</p></body></html>`, 'utf8');
+}
+
+
+let notFoundHtml = addRouteAssets(template, '/this-page-does-not-exist')
+  .replace(rootPlaceholder, `<div id="root">${await render('/this-page-does-not-exist')}</div>`)
+  .replace(/<title>.*?<\/title>/s, '<title>Страница не найдена — TopRepet</title>')
+  .replace(/<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/i, '<meta name="robots" content="noindex,follow" />');
+const missingDescription = 'Страница не найдена. Перейдите в каталог репетиторов или обратитесь к разделу помощи TopRepet.';
+for (const [attribute, key, value] of [['name', 'description', missingDescription], ['property', 'og:title', 'Страница не найдена — TopRepet'], ['property', 'og:description', missingDescription], ['name', 'twitter:title', 'Страница не найдена — TopRepet'], ['name', 'twitter:description', missingDescription]]) {
+  notFoundHtml = updateMetaContent(notFoundHtml, attribute, key, value);
+}
+await writeFile(resolve('dist/404.html'), notFoundHtml, 'utf8');

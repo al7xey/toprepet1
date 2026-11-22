@@ -1,0 +1,25 @@
+/* Minimal black/white SVGs; white outlines on filled action buttons. */
+svg.i {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.tr svg.i {
+  background: none;
+  mask: none;
+  -webkit-mask: none;
+}
+
+:is(.btn-primary, .btn-ink, .trk-addbtn, .tg-send, .blog-button, .button-primary) .i,
+.tr .chk.on > i .i {
+  --icon-ink: currentColor;
+}
+
+.trk-response-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}

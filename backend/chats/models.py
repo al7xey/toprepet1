@@ -1,0 +1,38 @@
+from django.conf import settings
+from django.db import models
+
+from core.ids import ShortIdField
+from services.private_storage import PrivateDocumentStorage
+
+
+class Conversation(models.Model):
+    id = ShortIdField('c')
+    tutor = models.ForeignKey('tutors.Tutor', on_delete=models.CASCADE, related_name='conversations')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='conversations')
+    last_message = models.CharField(max_length=300, blank=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    unread_student = models.PositiveIntegerField(default=0)
+    unread_tutor = models.PositiveIntegerField(default=0)
+    blocked = models.BooleanField(default=False)
+    reports = models.JSONField(default=list)
+    student_read_at = models.DateTimeField(null=True, blank=True)
+    tutor_read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = [('tutor', 'student')]
+        ordering = ['-updated_at']
+
+
+class Message(models.Model):
+    id = ShortIdField('m')
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+    kind = models.CharField(max_length=6, default='text')
+    text = models.TextField(blank=True)
+    image = models.CharField(max_length=300, blank=True)
+    attachment = models.FileField(upload_to='messages/', storage=PrivateDocumentStorage(), blank=True)
+    card = models.JSONField(null=True, blank=True)  # таблица внутри сообщения: {'title': ..., 'rows': [[имя, значение], ...]}
+    at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['at', 'id']
