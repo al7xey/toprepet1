@@ -433,24 +433,16 @@
 }
 
 /* ---- Мессенджер ---- */
-.tr .tg{display:grid;grid-template-columns:340px minmax(0,1fr);height:calc(100dvh - 112px);min-height:520px;border-radius:32px;background:#fff;overflow:hidden}
-.tr .tg-list{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1.5px solid var(--line)}
-.tr .tg-title{margin:0;padding:20px 20px 12px;font-size:24px;letter-spacing:-0.03em}
-.tr .tg-pad{padding:12px 16px}
-.tr .tg-rows{overflow-y:auto;display:grid;align-content:start;padding:0 8px 8px}
+.tr .tg-rows{display:grid;align-content:start}
 .tr .tg-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:22px;min-height:72px}
-.tr .tg-row.on{background:var(--accent-soft)}
 .tr .tg-row-text{display:grid;min-width:0;gap:2px}
 .tr .tg-row-text b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tr .tg-row-text span{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tr .tg-main{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
-.tr .tg-placeholder{margin:auto;display:grid;justify-items:center;gap:10px;color:var(--muted);font-weight:600;padding:24px;text-align:center}
-.tr .tg-placeholder .i{width:40px;height:40px}
+.tr .tg-main{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0}
 .tr .tg-head{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;border-bottom:1.5px solid var(--line)}
 .tr .tg-head-text{display:grid;min-width:0;margin-right:auto}
-.tr .tg-head-text b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr .tg-head-text h1{margin:0;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tr .tg-head-text small{color:var(--muted);font-size:13px}
-.tr .tg-back{display:none;width:40px;height:40px;place-items:center;border-radius:50%}
 .tr .tg-thread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;padding:16px;gap:0}
 .tr .tg-fragment{display:grid}
 .tr .tg-note{margin:auto;text-align:center;color:var(--muted);max-width:320px}
@@ -468,15 +460,7 @@
 .tr .tg-compose-row{display:flex;align-items:flex-end;gap:8px}
 .tr .tg-input{flex:1;min-width:0;resize:none;max-height:140px;padding:12px 18px;border:0;border-radius:24px;background:transparent;font:inherit;font-size:16px;line-height:1.4;color:var(--ink);outline:0}
 .tr .tg-blocked{margin:0;padding:16px;text-align:center;color:var(--muted);background:#fff;border-top:1.5px solid var(--line)}
-@media(max-width:760px){
-  .tr .tg{grid-template-columns:minmax(0,1fr);height:auto;min-height:0;border-radius:0;box-shadow:none;background:transparent}
-  .tr .tg-list{border-right:0}
-  .tr .tg.open .tg-list,.tr .tg:not(.open) .tg-main{display:none}
-  .tr .tg-back{display:grid}
-  .tr .trk-chat-thread .trk-app-hdr,.tr .trk-chat-thread .trk-tabbar{display:none}
-  .tr .trk-chat-thread .trh-main{padding:0;margin:0;max-width:none}
-  .tr .trk-chat-thread .tg{position:fixed;inset:0;z-index:40;height:100dvh;background:#fff}
-}
+
 /* анкета внутри кабинета: панель записи стоит над нижней панелью вкладок */
 @media(max-width:760px){.tr .trk-app .trh-pf-bar{bottom:calc(84px + env(safe-area-inset-bottom,0px))}.tr .trk-app .trh-main:has(.trh-pf-bar){padding-bottom:150px}}
 
@@ -513,8 +497,6 @@
   .tr .hdr.surf:not(.m) .trh-burger:hover{background:#fff;box-shadow:inset 0 0 0 1.5px #f0d9c8}
   .tr .hdr.surf:not(.m) .trh-burger .i{width:24px;height:24px;color:var(--ink)}
   /* анкета без «назад» и без своей шапки: шапка общая */
-  .tr .trh-pf-backwrap{display:none}
-  .tr .trh-pf-back{display:none}
   .tr .trh-pf-photo{margin:-12px -16px 0;height:412px}
   .tr main:has(.trh-pf-bar){padding-bottom:150px}
 }
@@ -528,14 +510,10 @@
 /* ---- v10: детальный просмотр репетитора ---- */
 .tr .trh-pf-intro-tag{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border-radius:999px;background:#fdece3;color:var(--ink);font-size:14px;font-weight:700}
 .tr .trh-pf-intro-tag .i{width:16px;height:16px}
-.tr .trk-iconbtn.trh-pf-share{display:none}
 @media(max-width:760px){
   /* фото закреплено сверху: белый лист при прокрутке наезжает на него */
   .tr .trh-pf-photo{position:sticky;top:0;z-index:0}
   .tr .trh-pf-sheet{position:relative;z-index:1}
-  .tr .trk-iconbtn.trh-pf-back,.tr .trk-iconbtn.trh-pf-share{display:grid;position:absolute;top:14px;width:44px;min-width:44px;height:44px;border-radius:50%;background:#fff;color:var(--ink);box-shadow:none;padding:0}
-  .tr .trk-iconbtn.trh-pf-back{left:14px}
-  .tr .trk-iconbtn.trh-pf-share{right:14px}
 }
 
 /* ---- v11: меню не сдвигает шапку, заявки и занятые слоты ---- */
@@ -625,7 +603,6 @@
 .tr .trk-note-line{display:block;margin-top:2px}
 
 @media (max-width:760px){
-  .tr .tg-rows{padding:0}
   .tr .tg-row{padding:10px 0}
 }
 
@@ -649,8 +626,6 @@
 html{overflow-y:scroll}
 .tr .trh-tools{width:100%}
 .tr .trk-hdr-ic .trk-badge{top:-7px;right:-7px}
-.tr .tg-peer{display:flex;align-items:center;gap:12px;min-width:0;margin-right:auto;color:inherit;text-decoration:none}
-.tr .tg-peer .tg-head-text{margin-right:0}
 .tr .tg-row{position:relative}
 .tr .tg-msg:not(.joined){margin-top:14px}
 
@@ -740,8 +715,6 @@ html{overflow-y:scroll}
 .tr .trk-navrow span{flex:1}
 .tr .trk-navrow .i{width:22px;height:22px;color:var(--accent)}
 .tr .trk-navrow > .i:last-child{width:18px;height:18px;color:var(--muted)}
-.tr .tg-list-title{display:flex;align-items:center;gap:12px;padding:16px}
-.tr .tg-list-title .tg-title{padding:0;margin:0}
 .tr .trk-request{gap:10px}
 .tr .trk-request-title{font-size:18px}
 @media (max-width:760px){
@@ -832,8 +805,6 @@ html{overflow-y:scroll}
 .tr .trk-account-hero>.i{width:20px;height:20px;color:var(--muted);flex:none}
 .tr .trk-student-photo{border-radius:50%;width:56px;height:56px}
 .tr .trk-student.small .trk-student-photo{border-radius:50%}
-.tr .tg-title{font-size:32px;letter-spacing:-0.04em;line-height:1.08;font-weight:700;margin:0;min-height:44px;display:flex;align-items:center}
-@media (max-width:760px){.tr .tg-title{font-size:26px;padding:0;margin-bottom:10px}}
 .tr .trk-settings-who{display:flex;align-items:center;gap:14px}
 .tr .trk-navrow{width:100%;background:none;border-left:0;border-right:0;border-bottom:0;font:inherit;text-align:left;cursor:pointer}
 
@@ -878,8 +849,6 @@ html{overflow-y:scroll}
 .tr .trk-progress .prog{margin-top:0}
 
 /* v45: круглая стрелка чата, удаление сообщений */
-.tr .tg-back.trk-round{display:none}
-@media (max-width:760px){.tr .tg-back.trk-round{display:grid}}
 @media (hover:none){.tr .tg-msg.out{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
 /* стрелка и скрепка в белых кружках, одинаковые отступы до поля ввода */
 .tr .tg-compose-row .trk-iconbtn:disabled{opacity:.55;cursor:default}
@@ -917,12 +886,6 @@ html{overflow-y:scroll}
 .tr .trk-tags{display:flex;flex-wrap:wrap;gap:8px}
 .tr .trk-tags .tag,.tr .trk-tags .tag+.tag{display:inline-flex;align-items:center;min-height:38px;padding:0 16px;border:0;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px #f0d9c8;font-size:15px;font-weight:600;color:var(--ink)}
 .tr .trk-tags .tag::before,.tr .trk-tags .tag+.tag::before{content:none;margin:0}
-.tr .trk-iconbtn.surf.trh-pf-back,.tr .trk-iconbtn.surf.trh-pf-share{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px #f0d9c8}
-.tr .trk-iconbtn.surf.trh-pf-back:hover,.tr .trk-iconbtn.surf.trh-pf-share:hover{background:#fff}
-
-/* v51: верхние кнопки анкеты — ровно как остальные круглые кнопки проекта */
-.tr .trk-iconbtn.trk-round.trh-pf-back,.tr .trk-iconbtn.trk-round.trh-pf-share,.tr .trk-iconbtn.trk-round.trh-pf-back:hover,.tr .trk-iconbtn.trk-round.trh-pf-share:hover{width:44px;min-width:44px;height:44px;border-radius:50%;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px #f0d9c8}
-.tr .trk-iconbtn.trh-pf-back .i,.tr .trk-iconbtn.trh-pf-share .i{width:22px;height:22px;color:var(--ink)}
 
 /* админка на телефоне: шапки нет, кнопка «Выйти» стоит внизу страницы */
 .tr .trk-admin-exit{display:none}
@@ -1062,25 +1025,22 @@ html{overflow-y:scroll}
 .tr .trk-tutor-placeholder{position:absolute;inset:0;display:grid;place-items:center;background:var(--surface);color:var(--muted)}
 .tr .trk-tutor-placeholder .i{width:clamp(32px,8vw,72px);height:auto;aspect-ratio:1;transform:translateY(-24%)}
 
-@media (min-width: 761px) {
-  .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) {
-    height: 100dvh;
-    min-height: 460px;
-    padding-bottom: 20px;
-  }
-  .tr :is(.trk-chat-list, .trk-chat-thread) > .trk-app-hdr {
-    flex-shrink: 0;
-  }
-  .tr :is(.trk-chat-list, .trk-chat-thread) > .trh-main {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-  }
-  .tr .tg {
-    flex: 1;
-    grid-template-columns: clamp(220px, 29%, 340px) minmax(0, 1fr);
-    height: auto;
-    min-height: 0;
-  }
+.tr .trk-app.trk-chat-thread {
+  height: 100dvh;
+  min-height: 0;
+  gap: clamp(8px, 2.5dvh, 24px);
+  padding-bottom: 16px;
+}
+.tr .trk-chat-thread > .trk-app-hdr { flex-shrink: 0; }
+.tr .trk-chat-thread > .trh-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 760px) {
+  .tr .trk-app.trk-chat-thread { padding: 0; }
+  .tr .trk-chat-thread .trk-tabbar { display: none; }
+  .tr .trk-chat-thread .tg-head { padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
 }

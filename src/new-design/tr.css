@@ -313,9 +313,7 @@
 .tr .tc .pl {
   --caption-inset: 8px;
   position: absolute;
-  inset: auto auto var(--caption-inset) var(--caption-inset);
-  inline-size: max-content;
-  max-inline-size: calc(100% - var(--caption-inset) - var(--caption-inset));
+  inset: auto var(--caption-inset) var(--caption-inset);
   border-radius: var(--tr-card-radius);
   padding: 10px 14px;
   display: grid;

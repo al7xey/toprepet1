@@ -29,7 +29,7 @@ export default function TutorProfilePage() {
       <QueryView query={profile}>
         {(p) => (
           <>
-            <PageHeader title="Моя анкета" back={{ to: '/tutor/account', label: 'Профиль' }} actions={<IconButton icon="edit" label="Редактировать анкету" to="/tutor/profile/edit" state={{ from: "/tutor/profile" }} />} />
+            <PageHeader title="Моя анкета" actions={<IconButton icon="edit" label="Редактировать анкету" to="/tutor/profile/edit" state={{ from: "/tutor/profile" }} />} />
             <div className="trk-profile-status"><Status tone={STATUS[p.status].tone}>{STATUS[p.status].text}</Status><span className="muted sm">Так анкету видят ученики</span></div>
             <Card pad="sm">
               <article className="trk-preview">

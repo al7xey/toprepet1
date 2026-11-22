@@ -91,11 +91,17 @@ test('Django: вход → запись → подтверждение репе�
 test('Django: приватное фото чата загружается с cookie и недоступно гостю', async ({ page, request }) => {
   await login(page, 'student');
   await page.setViewportSize({ width: 1024, height: 600 });
-  await page.goto('/me/chats/c-1');
+  await page.getByRole('link', { name: 'Сообщения', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Сообщения', exact: true })).toBeVisible();
+  const dialogs = page.getByRole('navigation', { name: 'Диалоги' });
+  await dialogs.locator('a[href="/me/chats/c-1"]').click();
+  await expect(dialogs).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'К списку сообщений' })).toBeVisible();
   const composer = page.locator('.tg-compose');
   await expect(composer).toBeVisible();
   const bounds = await composer.boundingBox();
   expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(600);
+  expect(bounds!.width).toBeGreaterThan(800);
   const png = await page.evaluate(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 8; canvas.height = 8;
@@ -111,6 +117,8 @@ test('Django: приватное фото чата загружается с coo
   expect(url).toMatch(/\/conversations\/c-1\/messages\/.+\/image$/);
   const denied = await request.get(url!);
   expect(denied.status()).toBe(401);
+  await page.getByRole('link', { name: 'К списку сообщений' }).click();
+  await expect(dialogs).toBeVisible();
 });
 
 
@@ -218,6 +226,30 @@ test('Django: ошибка выхода видна и сессия остаёт�
   expect(errors).toEqual([]);
 });
 
+test('Django: разделы верхнего меню и переход из профиля', async ({ page }) => {
+  await login(page, 'student');
+  const header = page.locator('.trk-app-hdr');
+  const payments = header.getByRole('link', { name: 'Платежи', exact: true });
+  const main = page.getByRole('main');
+  await payments.click();
+  await expect(main.getByRole('heading', { name: 'Платежи', exact: true })).toBeVisible();
+  const back = main.getByRole('link', { name: 'Профиль', exact: true });
+  await expect(back).toHaveCount(0);
+  await header.getByRole('link', { name: 'Заявки', exact: true }).click();
+  await expect(main.getByRole('heading', { name: 'Мои заявки' })).toBeVisible();
+  await expect(back).toHaveCount(0);
+
+  await header.getByRole('link', { name: 'Профиль', exact: true }).click();
+  const sections = main.getByRole('navigation', { name: 'Разделы профиля' });
+  await sections.getByRole('link', { name: 'Платежи', exact: true }).click();
+  await expect(back).toHaveAttribute('href', '/me/account');
+  await back.click();
+  await expect(main.getByRole('heading', { name: 'Профиль', exact: true })).toBeVisible();
+  await sections.getByRole('link', { name: 'Платежи', exact: true }).click();
+  await payments.click();
+  await expect(back).toHaveCount(0);
+});
+
 test('Django: регистрация ученика и подтверждение почты через код', async ({ page }) => {
   const email = `registration-${Date.now()}@example.test`;
   await page.goto('/signup');
@@ -256,11 +288,15 @@ test('Django: регистрация ученика и подтверждени�
       height: panel.offsetHeight,
       width: panel.offsetWidth,
       availableWidth: element.clientWidth,
+      leftInset: panel.offsetLeft,
+      rightInset: element.clientWidth - panel.offsetLeft - panel.offsetWidth,
     };
   });
   expect(caption.panelRadius).toBe(caption.cardRadius);
   expect(caption.height).toBeLessThan(100);
-  expect(caption.width).toBeLessThan(caption.availableWidth);
+  expect(caption.leftInset).toBeGreaterThan(0);
+  expect(caption.leftInset).toBe(caption.rightInset);
+  expect(caption.width).toBe(caption.availableWidth - 2 * caption.leftInset);
 
   const sections = page.getByRole('navigation', { name: 'Разделы кабинета' });
   const nav = await sections.getByRole('link', { name: 'Мои уроки' }).boundingBox();

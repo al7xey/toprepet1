@@ -335,6 +335,11 @@ function useCounters(role: Role) {
     return () => window.removeEventListener('tr:notes', reloadNotes);
   }, [reloadNotes]);
   const chats = useQuery(user ? `chats-${user.id}` : null, () => api.listConversations());
+  const reloadChats = chats.reload;
+  useEffect(() => {
+    window.addEventListener('tr:chats', reloadChats);
+    return () => window.removeEventListener('tr:chats', reloadChats);
+  }, [reloadChats]);
   const prefix = role === 'tutor' ? '/tutor' : '/me';
   return {
     notifications: notes.data?.filter((n) => !n.read).length ?? 0,
@@ -369,7 +374,7 @@ const NAV: Record<Role, { top: NavItem[]; tabs: NavItem[] }> = {
  * Кабинет ученика, репетитора или администратора.
  * Компьютер: стеклянная шапка с разделами и значками. Телефон: без закреплённой шапки, снизу стеклянная панель вкладок.
  */
-export function AppLayout({ role, children, narrow, chat }: { role: Role; children: ReactNode; narrow?: boolean; chat?: 'list' | 'thread' }) {
+export function AppLayout({ role, children, narrow, chatThread }: { role: Role; children: ReactNode; narrow?: boolean; chatThread?: boolean }) {
   const { user, logout } = useSession();
   const exit = useMutation(() => logout());
   const counters = useCounters(role);
@@ -378,7 +383,7 @@ export function AppLayout({ role, children, narrow, chat }: { role: Role; childr
   const tabs = nav.tabs.filter((t) => ready(t.to)).map((t) => (t.icon === 'chat-bubble' ? { ...t, badge: counters.chats } : t));
   const accountTo = role === 'admin' ? '/admin/disputes' : `${counters.prefix}/account`;
   return (
-    <div className={cx('wash trh-page trh-tight trk-app', `tabs-${tabs.length}`, chat && `trk-chat-${chat}`)} style={{ '--n': tabs.length } as CSSProperties}>
+    <div className={cx('wash trh-page trh-tight trk-app', `tabs-${tabs.length}`, chatThread && 'trk-chat-thread')} style={{ '--n': tabs.length } as CSSProperties}>
       <header className="hdr surf trh-hdr trk-app-hdr" data-role={role}>
         <Logo />
         <nav className="trh-nav" aria-label="Разделы кабинета">

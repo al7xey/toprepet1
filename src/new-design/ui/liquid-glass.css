@@ -305,7 +305,6 @@ html:has(.tr) { scrollbar-gutter: stable; }
 .tr.tr .tg-input { width: 100%; min-width: 0; padding: 12px 8px; }
 .tr.tr .tg-main { width: 100%; min-width: 0; overflow: hidden; }
 .tr.tr .tg-head { flex-shrink: 0; gap: 10px; }
-.tr.tr .tg-peer { min-width: 0; }
 .tr.tr .tg-peer-avatar { display: flex; flex-shrink: 0; }
 .tr.tr .tg-msg .tg-message-actions.trk-iconbtn { position: static; transform: none; width: 32px; min-width: 32px; height: 32px; min-height: 32px; border: 0; background: transparent; box-shadow: none; opacity: .65; pointer-events: auto; }
 .tr.tr .tg-msg .tg-message-actions.trk-iconbtn .i { width: 17px; height: 17px; }
@@ -379,18 +378,8 @@ html:has(.tr) { scrollbar-gutter: stable; }
   .tr.tr .trh-public-nav > .hdr .logo-mark { width: 24px; height: 24px; }
 }
 
-/* Tutor identity: rating belongs to the name, with the value before the star. */
 .tr.tr .tc.s .pl .trh-tutor-subjects { font-size: 13px; }
 .tr.tr .tc.s .pl > b { align-items: center; gap: 8px; }
-.tr.tr .tc.s .pl .rt { display: inline-flex; align-items: center; gap: 3px; padding-right: 3px; line-height: 1; }
-.tr.tr .trh-pf-name-row { justify-content: flex-start; flex-wrap: wrap; gap: 10px 14px; }
-.tr.tr .trh-pf-name-row h1 { flex: 0 1 auto; }
-.tr.tr .trh-pf-rating { display: inline-flex; align-items: center; gap: 5px; padding: 7px 10px; border-radius: 20px; background: var(--lg-control-highlight), #f6f7f9; text-decoration: none; }
-.tr.tr .trh-pf-rating span { font-size: 13px; font-weight: 500; }
-.tr.tr .trh-pf .trh-pf-photo .trk-iconbtn,
-.tr.tr .trh-pf-backwrap .trk-iconbtn { width: 48px; min-width: 48px; height: 48px; min-height: 48px; }
-.tr.tr .trh-pf .trh-pf-photo .trk-iconbtn .i { width: 25px; height: 25px; }
-.tr.tr .trh-pf-backwrap a { min-height: 48px; font-size: 18px; }
 .tr.tr input.trk-input[type=password] { font-family: Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0; }
 .tr.tr input.trk-input[type=password]::placeholder { font-family: var(--font); font-size: 16px; font-weight: 400; }
 .tr.tr .trk-calc-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; text-align: left; }

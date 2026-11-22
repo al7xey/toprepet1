@@ -27,11 +27,12 @@ const TUTOR_SECTIONS = [
 
 /** Заголовок блока профиля: тот же уровень, что у заголовка страницы. Справа круглые кнопки: добавить и открыть весь раздел. */
 function BlockHead({ title, add, all }: { title: string; add?: { label: string; onClick: () => void }; all: { label: string; to: string } }) {
+  const { pathname, search } = useLocation();
   return (
     <div className="trk-block-head">
       <h2 className="trk-blocktitle trh-h1">{title}</h2>
       {add && <IconButton icon="plus" label={add.label} onClick={add.onClick} className="trk-addbtn" />}
-      <IconButton icon="arrow" label={all.label} to={all.to} />
+      <IconButton icon="arrow" label={all.label} to={all.to} state={{ from: pathname + search }} />
     </div>
   );
 }

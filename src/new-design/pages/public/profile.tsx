@@ -6,14 +6,15 @@ import { TutorMetadata } from '../../../app/tutor-metadata';
 import { useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
 import { PublicLayout } from '../../layout/layouts';
+import { safeNext } from '../../lib/safeNext';
 import { minutes, rub } from '../../lib/format';
-import { BackLink, Button, ErrorState, Icon, IconButton, LoadingList, Note, PageHeader, Section, SelectField, SlotPicker, Status, Tags, useToast } from '../../ui';
+import { Button, ErrorState, Icon, IconButton, LoadingList, Note, PageHeader, Section, SelectField, SlotPicker, Status, Tags, useToast } from '../../ui';
 import { NotFoundBody } from './notfound';
 import './profile.css';
 import { achievementIcon } from '../../ui/icon';
 
 
-/** Анкета репетитора: данные, календарь записи, цены, отзывы. Карточка записи справа (на телефоне — панель снизу). */
+/** Анкета репетитора и запись на занятие. */
 export default function ProfilePage() {
   const { id = '' } = useParams();
   const tutorQuery = useQuery(`tutor-${id}`, () => api.getTutor(id));
@@ -51,9 +52,9 @@ function Profile({ tutor }: { tutor: Tutor }) {
   });
   const isTutorAccount = user?.role === 'tutor' || user?.role === 'admin';
   const location = useLocation();
-  const fromChat = (location.state as { back?: string } | null)?.back;
-  // назад — по истории, если она есть; иначе к каталогу
-  const close = () => { if (location.key !== 'default') void navigate(-1); else void navigate('/teachers'); };
+  const backTo = safeNext((location.state as { back?: string } | null)?.back, '/teachers');
+  const backLabel = /^\/(me|tutor)\/chats\//.test(backTo) ? 'К сообщениям' : 'Назад';
+  const achievements = tutor.achievements.filter((item) => item.title.trim() || item.text.trim());
   const share = async () => {
     const url = window.location.href;
     try {
@@ -88,59 +89,50 @@ function Profile({ tutor }: { tutor: Tutor }) {
   return (
     <PublicLayout tight bareMobile>
       <TutorMetadata tutor={tutor} />
-      <div className="trh-pf-backwrap"><BackLink to={fromChat ?? '/teachers'}>{fromChat && /^\/(me|tutor)\/chats/.test(fromChat) ? 'К сообщениям' : 'Все преподаватели'}</BackLink></div>
       <div className="trh-pf">
         <div className="trh-pf-main">
           <section className="trh-pf-top" aria-labelledby="tutor-name">
+            <div className="trh-pf-controls">
+              <IconButton icon="back" label={backLabel} to={backTo} className="trk-back" />
+              <IconButton icon="share" label="Поделиться анкетой" onClick={share} />
+            </div>
             <div className="trh-pf-photo">
               {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 300px, 100vw" alt={`Фото: ${tutor.name}`} fetchPriority="high" decoding="async" /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
-              <IconButton icon="back" label="Назад" onClick={close} className="trh-pf-back" />
-              <IconButton icon="share" label="Поделиться" onClick={share} className="trh-pf-share" />
             </div>
             <div className="trh-pf-sheet">
               <div className="trh-sec">
-                <div className="trh-pf-name-row">
-                  <h1 className="trh-h1" id="tutor-name">{tutor.name}</h1>
-                  <Button variant="line" size="s" icon="share" className="trh-pf-share-desktop" onClick={share}>Поделиться</Button>
-                </div>
-                <p className="muted trh-pf-role">{tutor.headline}</p>
-                <div className="fr fw u-gap8">
+                <h1 className="trh-h1" id="tutor-name">{tutor.name}</h1>
+                {tutor.headline && <p className="muted trh-pf-role">{tutor.headline}</p>}
+                {(tutor.documentsVerified || tutor.introMinutes > 0) && <div className="fr fw u-gap8">
                   {tutor.documentsVerified && <Status tone="ok" icon="shield">Документы проверены</Status>}
                   {tutor.introMinutes > 0 && <span className="trh-pf-intro-tag"><Icon name="gift" />Бесплатное знакомство</span>}
-                </div>
+                </div>}
               </div>
-              <p className="trh-pf-intro">{tutor.intro}</p>
+              {tutor.intro && <p className="trh-pf-intro">{tutor.intro}</p>}
             </div>
           </section>
 
-          <hr className="rule" />
-          <Section title="Образование и достижения">
-            <ul className="ach">
-              {tutor.achievements.filter((item) => item.title.trim() || item.text.trim()).map((item) => (
-                <li key={item.title}>
-                  <span className="trh-pf-ach-icon"><Icon name={achievementIcon(item.title)} /></span>
-                  <div>{item.title.trim() && <b>{item.title}</b>}{item.text.trim() && <span className="d">{item.text}</span>}</div>
-                </li>
-              ))}
-            </ul>
-          </Section>
+          {achievements.length > 0 && (
+            <>
+              <hr className="rule" />
+              <Section title="Образование и достижения">
+                <ul className="ach">
+                  {achievements.map((item) => (
+                    <li key={item.title}>
+                      <span className="trh-pf-ach-icon"><Icon name={achievementIcon(item.title)} /></span>
+                      <div>{item.title.trim() && <b>{item.title}</b>}{item.text.trim() && <span className="d">{item.text}</span>}</div>
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            </>
+          )}
 
-          <hr className="rule" />
-          <Section title="Опыт"><p className="cap trh-pf-text">{tutor.experience}</p></Section>
+          {tutor.experience && <><hr className="rule" /><Section title="Опыт"><p className="cap trh-pf-text">{tutor.experience}</p></Section></>}
 
-          <hr className="rule" />
-          <Section title="С чем поможет"><div><Tags items={tutor.helpTopics} /></div>{Boolean(tutor.levels?.length) && <p className="muted">Для кого: {tutor.levels?.join(", ")}</p>}</Section>
+          {tutor.helpTopics.length > 0 && <><hr className="rule" /><Section title="С чем поможет"><Tags items={tutor.helpTopics} /></Section></>}
 
-          <hr className="rule" />
-          <Section title="Как проходят занятия"><p className="cap trh-pf-text">{tutor.approach}</p></Section>
-
-          <hr className="rule" />
-          <Section title="Цены">
-            <div>
-              {tutor.introMinutes > 0 && <div className="rowline"><span><b>Знакомство</b><br /><span className="muted">{minutes(tutor.introMinutes)}, один раз</span></span><b className="u-ok">бесплатно</b></div>}
-              <div className="rowline"><span><b>Занятие</b><br /><span className="muted">{minutes(lessonMinutes)}</span></span><b className="tn">{rub(lessonPrice)}</b></div>
-            </div>
-          </Section>
+          {tutor.approach && <><hr className="rule" /><Section title="Как проходят занятия"><p className="cap trh-pf-text">{tutor.approach}</p></Section></>}
 
           <hr className="rule" />
           <div className="trh-pf-scheduling">

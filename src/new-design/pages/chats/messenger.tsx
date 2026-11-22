@@ -1,13 +1,13 @@
 import { usePolling } from '../../lib/usePolling';
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { Link, NavLink, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { api } from '../../api';
 import { useMutation, useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
 import type { Conversation, Message, Role } from '../../api/types';
 import { AppLayout } from '../../layout/layouts';
 import { timeLabel } from '../../lib/format';
-import { Avatar, BackLink, Button, Checkbox, ConfirmDialog, EmptyState, FormError, Icon, IconButton, Modal, OptionChips, Rows, useToast, UnreadDot } from '../../ui';
+import { Avatar, Button, Checkbox, ConfirmDialog, EmptyState, ErrorState, FormError, Icon, IconButton, Modal, OptionChips, PageHeader, QueryView, Rows, useToast, UnreadDot } from '../../ui';
 
 type Side = Extract<Role, 'student' | 'tutor'>;
 
@@ -23,55 +23,55 @@ function dayLabel(iso: string) {
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
 }
 
-/** Сообщения как в мессенджере: слева список диалогов, справа переписка. На телефоне — два экрана с кнопкой «назад». */
+/** Список и диалог открываются на отдельных страницах. */
 export function Messenger({ role }: { role: Side }) {
   const { id } = useParams();
   const location = useLocation();
-  const fromProfile = (location.state as { from?: string } | null)?.from;
-  const profileBack = fromProfile && /^\/(me|tutor)\/account(?:\?|$)/.test(fromProfile) ? fromProfile : null;
+  const from = (location.state as { from?: string } | null)?.from;
+  const profileBack = from && /^\/(me|tutor)\/account(?:\?|$)/.test(from) ? from : undefined;
   const base = role === 'tutor' ? '/tutor/chats' : '/me/chats';
-  const chats = useQuery('chats', () => api.listConversations());
-  const reloadChats = chats.reload;
-  usePolling(reloadChats, LIST_POLL_MS);
-  const list = chats.data ?? [];
   return (
-    <AppLayout role={role} chat={id ? 'thread' : 'list'}>
-      <div className={`tg${id ? ' open' : ''}`}>
-        <aside className="tg-list" aria-label="Диалоги">
-          <div className="tg-list-title">{!id && profileBack && <BackLink to={profileBack}>Профиль</BackLink>}<h1 className="tg-title">Сообщения</h1></div>
-          {chats.error && <FormError error={chats.error} />}
-          {chats.loading && !chats.data && <p className="muted tg-pad">Загружаем…</p>}
-          {chats.data && list.length === 0 && (
-            <div className="tg-pad">
-              <EmptyState icon="chat" title="Сообщений пока нет"
-                text={role === 'student' ? 'Напишите репетитору из его анкеты.' : 'Ученик пишет первым: когда это случится, диалог появится здесь.'}
-                actions={role === 'student' ? <Button to="/teachers">Найти репетитора</Button> : undefined} />
-            </div>
-          )}
-          <nav className="tg-rows">
+    <AppLayout role={role} chatThread={Boolean(id)}>
+      {id ? (
+        <section className="tg-main" aria-label="Переписка">
+          <Dialog key={id} id={id} role={role} base={base} profileBack={profileBack} />
+        </section>
+      ) : <ConversationList role={role} base={base} profileBack={profileBack} />}
+    </AppLayout>
+  );
+}
+
+function ConversationList({ role, base, profileBack }: { role: Side; base: string; profileBack?: string }) {
+  const chats = useQuery(base, () => api.listConversations());
+  usePolling(chats.reload, LIST_POLL_MS);
+  return (
+    <>
+      <PageHeader title="Сообщения" />
+      <QueryView query={chats} empty={(list) => list.length ? null : (
+        <EmptyState icon="chat" title="Сообщений пока нет"
+          text={role === 'student' ? 'Напишите репетитору из его анкеты.' : 'Здесь появятся сообщения учеников.'}
+          actions={role === 'student' ? <Button to="/teachers">Найти репетитора</Button> : undefined} />
+      )}>
+        {(list) => (
+          <nav className="tg-rows" aria-label="Диалоги">
             {list.map((c) => (
-              <NavLink key={c.id} to={`${base}/${c.id}`} className={({ isActive }) => `tg-row${isActive ? ' on' : ''}`}>
+              <Link key={c.id} to={base + '/' + c.id} className="tg-row" state={profileBack ? { from: profileBack } : undefined}>
                 <Avatar name={c.peerName} photo={c.peerPhoto} size={52} />
                 <span className="tg-row-text">
                   <b>{c.peerName}</b>
                   <span>{c.lastMessage || 'Диалог пока пуст'}</span>
                 </span>
                 {c.unread > 0 && <UnreadDot label="Непрочитано" />}
-              </NavLink>
+              </Link>
             ))}
           </nav>
-        </aside>
-        <section className="tg-main">
-          {id ? <Dialog key={id} id={id} role={role} base={base} onRead={reloadChats} /> : (
-            <div className="tg-placeholder"><Icon name="chat" /><span>Выберите диалог слева</span></div>
-          )}
-        </section>
-      </div>
-    </AppLayout>
+        )}
+      </QueryView>
+    </>
   );
 }
 
-function Dialog({ id, role, base, onRead }: { id: string; role: Side; base: string; onRead: () => void }) {
+function Dialog({ id, role, base, profileBack }: { id: string; role: Side; base: string; profileBack?: string }) {
   const conversation = useQuery(`chat-${id}`, () => api.getConversation(id));
   const messages = useQuery(`messages-${id}`, () => api.listMessages(id));
   const [older, setOlder] = useState<Message[]>([]);
@@ -79,10 +79,13 @@ function Dialog({ id, role, base, onRead }: { id: string; role: Side; base: stri
   const previous = useRef<Message[]>([]);
   const reload = messages.reload;
   usePolling(reload, THREAD_POLL_MS);
-  const mark = useMutation((throughMessageId: string) => api.markConversationRead(id, throughMessageId));
+  const mark = useMutation(async (throughMessageId: string) => {
+    await api.markConversationRead(id, throughMessageId);
+    window.dispatchEvent(new Event('tr:chats'));
+  });
   const markRead = mark.run;
   const lastId = messages.data?.at(-1)?.id;
-  useEffect(() => { if (lastId) void markRead(lastId).then(onRead); }, [lastId, markRead, onRead]);
+  useEffect(() => { if (lastId) void markRead(lastId); }, [lastId, markRead]);
   useEffect(() => {
     const current = messages.data;
     if (!current?.length) return;
@@ -107,28 +110,40 @@ function Dialog({ id, role, base, onRead }: { id: string; role: Side; base: stri
   });
   const list = [...new Map([...older, ...(messages.data ?? [])].map((m) => [m.id, m])).values()].sort((a, b) => a.at.localeCompare(b.at) || a.id.localeCompare(b.id));
   const c = conversation.data;
-  if (conversation.error && !c) return <div className="tg-placeholder"><span>{conversation.error}</span></div>;
-  if (!c) return <div className="tg-placeholder"><span className="muted">Открываем диалог…</span></div>;
   return (
     <>
       <header className="tg-head">
-        <BackLink to={base} className="tg-back">Назад к списку</BackLink>
-        {role === 'student' ? (
-          <Link className="tg-peer" to={`/teachers/${c.tutorId}`} state={{ back: `${base}/${c.id}` }} aria-label={`Анкета: ${c.peerName}`}>
-            <span className="tg-head-text"><b>{c.peerName}</b><small>Репетитор</small></span>
-          </Link>
-        ) : (
-          <span className="tg-peer">
-            <span className="tg-head-text"><b>{c.peerName}</b><small>Ученик</small></span>
-          </span>
-        )}
-        <ReportButton conversation={c} onBlocked={() => conversation.reload()} />
-        {role === 'student'
-          ? <Link className="tg-peer-avatar" to={`/teachers/${c.tutorId}`} state={{ back: `${base}/${c.id}` }} aria-label={`Профиль: ${c.peerName}`}><Avatar name={c.peerName} photo={c.peerPhoto} size={44} /></Link>
-          : <Avatar name={c.peerName} photo={c.peerPhoto} size={44} />}
+        <IconButton icon="back" label="К списку сообщений" to={base} state={profileBack ? { from: profileBack } : undefined} className="trk-back" />
+        <div className="tg-head-text">
+          <h1>{c?.peerName ?? 'Сообщения'}</h1>
+          {c && <small>{role === 'student' ? 'Репетитор' : 'Ученик'}</small>}
+        </div>
+        {c && <ReportButton conversation={c} onBlocked={() => conversation.reload()} />}
+        {c && (role === 'student'
+          ? <Link className="tg-peer-avatar" to={'/teachers/' + c.tutorId} state={{ back: base + '/' + c.id }} aria-label={'Анкета: ' + c.peerName}><Avatar name={c.peerName} photo={c.peerPhoto} size={44} /></Link>
+          : <Avatar name={c.peerName} photo={c.peerPhoto} size={44} />)}
       </header>
-      {(messages.error || history.error || mark.error) && <FormError error={messages.error ?? history.error ?? mark.error} />}
-      <Thread conversation={c} list={list} older={hasOlder && Boolean(older.length || messages.data?.length === 100)} loadingOlder={history.pending} loadOlder={history.run} loading={messages.loading && !messages.data} onSent={(m) => { messages.setData((prev) => [...(prev ?? []), m]); onRead(); }} onRemoved={(removed) => { setOlder((prev) => prev.filter((m) => m.id !== removed)); messages.setData((prev) => (prev ?? []).filter((m) => m.id !== removed)); }} />
+      {!c && (conversation.error
+        ? <ErrorState text={conversation.error} onRetry={conversation.reload} />
+        : <output className="tg-note">Открываем диалог…</output>)}
+      {c && (
+        <>
+          <FormError error={messages.error ?? history.error ?? mark.error} />
+          <Thread
+            conversation={c}
+            list={list}
+            older={hasOlder && Boolean(older.length || messages.data?.length === 100)}
+            loadingOlder={history.pending}
+            loadOlder={history.run}
+            loading={messages.loading && !messages.data}
+            onSent={(m) => messages.setData((prev) => [...(prev ?? []), m])}
+            onRemoved={(removed) => {
+              setOlder((prev) => prev.filter((m) => m.id !== removed));
+              messages.setData((prev) => (prev ?? []).filter((m) => m.id !== removed));
+            }}
+          />
+        </>
+      )}
     </>
   );
 }

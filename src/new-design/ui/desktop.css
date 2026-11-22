@@ -76,7 +76,7 @@
     box-shadow: inset 0 0 0 1px var(--lg-control-rim);
   }
 
-  .tr.tr :is(.trk-navrow, .tg-row:not(.on)):hover {
+  .tr.tr :is(.trk-navrow, .tg-row):hover {
     background-color: #fff5ee;
   }
 

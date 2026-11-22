@@ -34,7 +34,7 @@ export default function NotificationsPage() {
   };
   return (
     <AppLayout role={role}>
-      <PageHeader title="Уведомления" back={{ to: role === 'tutor' ? '/tutor/account' : '/me/account', label: 'Профиль' }} actions={unread ? <IconButton icon="checks" label="Прочитать все" disabled={readAll.pending} onClick={() => void markAll()} /> : undefined} />
+      <PageHeader title="Уведомления" actions={unread ? <IconButton icon="checks" label="Прочитать все" disabled={readAll.pending} onClick={() => void markAll()} /> : undefined} />
       <FormError error={readAll.error} />
       <QueryView query={list} empty={(items) => items.length === 0 ? <EmptyState icon="bell" title="Пока тихо" text="Здесь появятся ответы на заявки, подтверждения уроков и сообщения." /> : null}>
         {(items) => (
