@@ -33,7 +33,6 @@ export const LESSON_MINUTES = 60;
 
 export interface Tutor {
   durations?: number[];
-  levels?: string[];
   id: Id;
   name: string;
   photo: string;

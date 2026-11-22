@@ -78,9 +78,3 @@
 @media (min-width: 1080px) {
   .tr .trh-pf-scheduling { grid-template-columns: minmax(0, 1.5fr) minmax(19rem, 1fr); }
 }
-
-.tr .trh-portrait-credit { font-size: 12px; }
-.tr .trh-portrait-credit a { text-decoration: underline; text-underline-offset: 2px; }
-
-.tr .trh-pf-sheet .trh-pf-intro { max-width: 57ch; }
-.tr .trh-pf-sheet .trh-h2 { font-size: 23px; }

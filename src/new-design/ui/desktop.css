@@ -1,23 +1,13 @@
 @media (min-width: 761px) {
-  .tr.tr .trh-public-nav > .hdr.surf:not(.m) {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
   .tr.tr .hdr .trh-nav a {
-    background: transparent;
-    box-shadow: none;
-    transition: color 150ms ease;
+    border-radius: 999px;
+    transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
   }
 
   .tr.tr .hdr .trh-nav a.cur {
-    color: #bd4818;
-    font-weight: 700;
-  }
-
-  .tr.tr .trh-public-nav .trh-nav a {
-    padding-inline: clamp(6px, 1.2vw, 14px);
+    color: var(--ink);
+    background-color: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px rgb(242 106 46 / 16%);
   }
 
   .tr .trh-main .btn.btn-block {
@@ -35,9 +25,8 @@
 
 @media (min-width: 761px) and (hover: hover) and (pointer: fine) {
   .tr.tr .hdr .trh-nav a:not(.cur):hover {
-    color: #bd4818;
-    background-color: transparent;
-    box-shadow: none;
+    color: var(--ink);
+    background-color: #fff3ec;
   }
 
   .tr.tr .btn.btn-primary:hover:not(:disabled, [aria-disabled="true"]) {
@@ -62,13 +51,3 @@
 @media (prefers-reduced-motion: reduce) {
   .tr.tr .hdr .trh-nav a { transition: none; }
 }
-
-
-@media (min-width: 761px) {
-  .tr.tr .tc .pl .trh-tutor-name { font-size: clamp(16px, 1.5vw, 19px); font-weight: 800; }
-  .tr.tr .tc .pl .trh-price { font-size: 15px; }
-  .tr.tr .trh-grid > .tc .pl { min-height: 0; border-radius: 22px; }
-}
-
-
-.tr.tr .tc .pl .trh-tutor-subjects { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }

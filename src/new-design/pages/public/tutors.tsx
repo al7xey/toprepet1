@@ -4,7 +4,7 @@ import { homeFor, useSession } from '../../api/session';
 import { useQuery } from '../../api/hooks';
 import { PublicLayout } from '../../layout/layouts';
 import { rub } from '../../lib/format';
-import { Button, Faq, IconButton, Panel, Section, Steps } from '../../ui';
+import { Button, Faq, IconButton, Panel, Section, Steps, Ticks } from '../../ui';
 import { TutorShowcase } from '../../ui/tutor-showcase';
 import { TUTOR_FAQ, TUTOR_STEPS } from './content';
 import { publicAssetPath, publicAssetSrcSet } from '../../../shared/lib/public-assets';
@@ -32,14 +32,16 @@ export default function TutorsLandingPage() {
   const entryHref = user ? homeFor(user.role) : '/signup?role=tutor';
   const entryLabel = user?.role === 'tutor' ? 'Мой кабинет' : user ? 'Перейти в кабинет' : 'Создать анкету';
   const canReadRequests = user?.role === 'tutor' || user?.role === 'student';
-  const features = useQuery('features', () => api.features());
   const tutors = useQuery('tutors-landing', () => api.listTutors({ limit: 6 }).then((p) => p.items));
   return (
     <PublicLayout>
       <section className="trh-hero" aria-labelledby="hero-title">
         <div className="trh-hero-text">
-          <h1 id="hero-title" className="hero-h trh-hero-h">Найдите учеников для своих занятий</h1>
-          <p className="trh-hero-lead">Опубликуйте анкету, назначьте цену и откройте удобные часы. Ученики смогут записаться через ваше расписание.</p>
+          <h1 id="hero-title" className="hero-h trh-hero-h">
+            <span className="trh-ln"><span>Вы преподаёте.</span></span>
+            <span className="trh-ln trh-ln2"><span className="trh-shine">Мы находим учеников.</span></span>
+          </h1>
+          <p className="trh-hero-lead">TopRepet показывает вашу анкету ученикам, принимает записи и оплату, напоминает об уроках и переводит выплаты.</p>
           <div className="trh-hero-btns">
             <Button to={entryHref} size="lg" className="trh-cta">{entryLabel}</Button>
             <Button variant="line" size="lg" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })}>Как всё устроено</Button>
@@ -50,12 +52,13 @@ export default function TutorsLandingPage() {
         </div>
       </section>
 
-      <Section title="Как начать" className="trh-home-section trh-home-steps"><Steps items={TUTOR_STEPS} /></Section>
+      <Section title="Как начать" reveal><Steps items={TUTOR_STEPS} revealOnScroll /></Section>
 
       <section id="pricing" className="trk-split trk-price" aria-labelledby="price-title">
         <div className="trh-sec" style={{ flex: '1 1 420px', minWidth: 0 }}>
           <h2 id="price-title" className="h2 trh-h2">Вы берёте столько, сколько напишете</h2>
-          <p className="cap">{features.data?.pilotMode ? "Калькулятор показывает тариф после подключения оплаты." : "Ученик увидит вашу цену с сервисным сбором 10%. Вы получите сумму, указанную в анкете."}</p>
+          <p className="cap u-fs18">Назначьте цену занятия сами. Мы добавим 10% сервиса сверху: ученик заплатит чуть больше, а вы получите ровно свою цену.</p>
+          <Ticks items={['Всего 10% комиссии, и её платит ученик', 'В анкете сразу видно, сколько заплатит ученик', 'Выплата после занятия, в течение 24 часов']} />
         </div>
         <div className="trk-calc-wrap"><PriceCalc /></div>
       </section>
@@ -73,7 +76,15 @@ export default function TutorsLandingPage() {
         </Panel>
       )}
 
-      <Section title={features.data?.pilotMode ? "Примеры анкет" : "Репетиторы TopRepet"} action={<IconButton icon="arrow" label="Все репетиторы" to="/teachers" />}><TutorShowcase query={tutors} /></Section>
+      <Section reveal title="Они уже с TopRepet" action={<IconButton icon="arrow" label="Все репетиторы" to="/teachers" />}><TutorShowcase query={tutors} /></Section>
+
+      <Panel>
+        <div className="trh-sec u-start">
+          <h2 className="trh-panel-h u-mw620">Хотите получать учеников через TopRepet?</h2>
+          <p className="muted u-mw560">Создайте анкету за три минуты, назначьте цену и откройте расписание. Записи подтверждаете сами. Для выплат понадобится статус самозанятого.</p>
+          <Button to={entryHref} size="lg">{entryLabel}</Button>
+        </div>
+      </Panel>
 
       <Section title="Вопросы и ответы" reveal><Faq items={TUTOR_FAQ} /></Section>
     </PublicLayout>

@@ -33,24 +33,18 @@ test('на компактном ПК иллюстрация и обе кнопк
 });
 
 
-test('у каталога один поиск, навигация в одном ряду с текстовым ховером, а кнопки главной ограничены по ширине', async ({ page, isMobile }) => {
+test('у каталога один поиск, у навигации круглая подсветка, а кнопки главной ограничены по ширине', async ({ page, isMobile }) => {
   await page.goto('/teachers');
   await expect(page.getByRole('searchbox')).toHaveCount(1);
   await expect(page.getByText('Подобрать по учебной цели')).toHaveCount(0);
   if (!isMobile) {
     const nav = page.getByRole('navigation', { name: 'Основная навигация' });
     const target = nav.getByRole('link', { name: 'Блог' });
-    await page.setViewportSize({ width: 1072, height: 850 });
-    const login = page.locator('header').getByRole('link', { name: 'Войти' });
-    const [menuBox, loginBox] = await Promise.all([target.boundingBox(), login.boundingBox()]);
-    expect(Math.abs(menuBox!.y + menuBox!.height / 2 - loginBox!.y - loginBox!.height / 2)).toBeLessThan(2);
     await target.hover();
-    await expect(target).toHaveCSS('color', 'rgb(189, 72, 24)');
-    await expect(target).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-    await expect(target).toHaveCSS('box-shadow', 'none');
+    await expect(target).toHaveCSS('border-top-left-radius', '999px');
+    await expect(target).toHaveCSS('background-color', 'rgb(255, 243, 236)');
   }
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Тестовые занятия' })).toHaveCount(0);
   const action = page.getByRole('link', { name: 'Бесплатное знакомство', exact: true });
   await expect(action).toBeVisible();
   const width = await action.boundingBox();
