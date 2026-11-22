@@ -1085,9 +1085,24 @@ html{overflow-y:scroll}
 .tr .trk-tutor-placeholder .i{width:clamp(32px,8vw,72px);height:auto;aspect-ratio:1;transform:translateY(-24%)}
 
 @media (min-width: 761px) {
+  .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) {
+    height: 100dvh;
+    min-height: 460px;
+    padding-bottom: 20px;
+  }
+  .tr :is(.trk-chat-list, .trk-chat-thread) > .trk-app-hdr {
+    flex-shrink: 0;
+  }
+  .tr :is(.trk-chat-list, .trk-chat-thread) > .trh-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
   .tr .tg {
+    flex: 1;
     grid-template-columns: clamp(220px, 29%, 340px) minmax(0, 1fr);
-    height: calc(100dvh - 140px);
-    min-height: 360px;
+    height: auto;
+    min-height: 0;
   }
 }

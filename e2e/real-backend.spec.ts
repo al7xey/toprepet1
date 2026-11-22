@@ -90,7 +90,12 @@ test('Django: вход → запись → подтверждение репе�
 
 test('Django: приватное фото чата загружается с cookie и недоступно гостю', async ({ page, request }) => {
   await login(page, 'student');
+  await page.setViewportSize({ width: 1024, height: 600 });
   await page.goto('/me/chats/c-1');
+  const composer = page.locator('.tg-compose');
+  await expect(composer).toBeVisible();
+  const bounds = await composer.boundingBox();
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(600);
   const png = await page.evaluate(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 8; canvas.height = 8;
@@ -219,7 +224,7 @@ test('Django: регистрация ученика и подтверждени�
   await page.getByLabel('Имя', { exact: true }).fill('Ученик');
   await page.getByLabel('Почта', { exact: true }).fill(email);
   await page.locator('input[name="password"]').fill('Student-local-test-2026!');
-  await page.getByRole('checkbox').check();
+  await page.getByText(/Принимаю/).click();
   await page.getByRole('button', { name: 'Создать аккаунт' }).click();
   await expect(page).toHaveURL(/verify-email/);
   const tokenUrl = new URL('/_test/email-token', process.env.E2E_API_URL);
