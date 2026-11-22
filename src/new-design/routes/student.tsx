@@ -3,6 +3,7 @@ import { Route } from 'react-router-dom';
 import { RequireRole } from '../api/session';
 
 const MyTutorsPage = lazy(() => import('../pages/student/tutors'));
+const ProgressPage = lazy(() => import('../pages/student/progress'));
 const BookPage = lazy(() => import('../pages/student/book'));
 const BookDonePage = lazy(() => import('../pages/student/done'));
 const LessonsPage = lazy(() => import('../pages/student/lessons'));
@@ -23,6 +24,7 @@ const student = (page: React.ReactNode) => <RequireRole role="student">{page}</R
 /** Кабинет ученика: запись, уроки, отзывы, платежи, уведомления, профиль. */
 export const studentRoutes = (
   <>
+    <Route path="/me/progress" element={student(<ProgressPage />)} />
     <Route path="/me/tutors" element={student(<MyTutorsPage />)} />
     <Route path="/book/:id" element={student(<BookPage />)} />
     <Route path="/book/:id/done" element={student(<BookDonePage />)} />

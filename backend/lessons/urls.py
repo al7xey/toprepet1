@@ -6,6 +6,7 @@ urlpatterns = [
     path('bookings', views.BookingView.as_view()),
     path('me/lessons', views.MyLessonsView.as_view()),
     path('lessons/<str:lesson_id>', views.LessonView.as_view()),
+    path('lessons/<str:lesson_id>/meeting', views.MeetingView.as_view()),
     path('lessons/<str:lesson_id>/cancel', views.CancelView.as_view()),
     path('lessons/<str:lesson_id>/move', views.MoveView.as_view()),
     path('lessons/<str:lesson_id>/move/answer', views.MoveAnswerView.as_view()),

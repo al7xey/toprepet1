@@ -19,6 +19,7 @@ class Lesson(models.Model):
     status = models.CharField(max_length=20, default='pending')
     price = models.PositiveIntegerField(default=0)
     tutor_price = models.PositiveIntegerField(default=0)
+    is_demo = models.BooleanField(default=False)
     payment = models.CharField(max_length=10, default='none')
     confirm_by = models.DateTimeField(null=True, blank=True)
     meeting_url = models.CharField(max_length=300, blank=True)
@@ -59,3 +60,14 @@ class Dispute(models.Model):
     tutor_reply = models.TextField(blank=True)
     resolution = models.CharField(max_length=300, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class LessonReminder(models.Model):
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='reminders')
+    start = models.DateTimeField()
+    offset_hours = models.PositiveSmallIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['lesson', 'start', 'offset_hours'], name='lesson_reminder_once'),
+        ]

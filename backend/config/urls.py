@@ -9,7 +9,10 @@ def health(_request):
 
 
 def features(_request):
-    return JsonResponse({'testPayments': settings.DEBUG and settings.PAYMENT_PROVIDER == 'fake'})
+    return JsonResponse({
+        'pilotMode': settings.PILOT_MODE,
+        'testPayments': settings.DEBUG and not settings.PILOT_MODE and settings.PAYMENT_PROVIDER == 'fake',
+    })
 
 
 def readiness(_request):

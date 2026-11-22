@@ -52,13 +52,15 @@ function LessonView({ lesson, onChange }: { lesson: Lesson; onChange: (l: Lesson
           ...(lesson.topic ? [['Тема', lesson.topic] as [string, string]] : []),
           ['Когда', whenLabel(lesson.start)],
           ['Длительность', minutes(lesson.durationMin)],
-          ['Стоимость', lesson.price ? rub(lesson.price) : 'Бесплатно'],
+          ['Стоимость', lesson.isDemo ? '0 ₽ · тестовая запись' : lesson.price ? rub(lesson.price) : 'Бесплатно'],
           ['Оплата', PAYMENT[lesson.payment]],
         ]} />
       </Card>
 
+      {lesson.isDemo && <Note tone="info">Тестовый урок. Оплата не требуется.</Note>}
+      {lesson.status === 'confirmed' && !lesson.meetingUrl && <Note tone="plain">Репетитор ещё не добавил ссылку на встречу. Вы можете написать ему в чате.</Note>}
       {lesson.status === 'pending' && <Note tone="plain" icon="clock">Репетитор ещё не подтвердил запись{lesson.confirmBy ? <>, ответ ожидается до <b>{whenLabel(lesson.confirmBy)}</b></> : null}. Если он не ответит, запись отменится, а деньги вернутся.</Note>}
-      {lesson.status === 'confirmed' && !joinOpen && <Note tone="ok" icon="video">Урок подтверждён. Ссылка на видеосвязь появится здесь за 10 минут до начала ({until(new Date(startMs - 10 * 60_000))}).</Note>}
+      {lesson.status === 'confirmed' && lesson.meetingUrl && now < startMs - 10 * 60_000 && <Note tone="ok" icon="video">Урок подтверждён. Ссылка на видеосвязь появится здесь за 10 минут до начала ({until(new Date(startMs - 10 * 60_000))}).</Note>}
       {lesson.status === 'declined' && <Note tone="bad">Репетитор отклонил запись{lesson.declineReason ? `: ${lesson.declineReason}` : ''}. Деньги разморожены.</Note>}
       {lesson.status === 'expired' && <Note tone="plain" icon="clock">Репетитор не успел ответить, запись отменена. Деньги разморожены.</Note>}
       {lesson.status === 'cancelled' && <Note tone="plain" icon="x">Урок отменён{lesson.cancelReason ? `: ${lesson.cancelReason}` : ''}.</Note>}
@@ -105,7 +107,7 @@ function CancelModal({ lesson, late, open, onClose, onDone }: { lesson: Lesson; 
   const free = !late || lesson.payment === 'hold';
   return (
     <Modal open={open} onClose={onClose} title="Отменить урок?" footer={<><Button variant="fill" onClick={onClose}>Не отменять</Button><Button variant="danger" onClick={submit} disabled={!reason} loading={cancel.pending}>Отменить урок</Button></>}>
-      {free
+      {lesson.isDemo || lesson.price === 0 ? <Note tone="plain">Урок будет удалён из предстоящих.</Note> : free
         ? <Note tone="ok" icon="check">{lesson.payment === 'hold' ? 'Репетитор ещё не подтвердил запись, деньги вернутся полностью.' : 'До начала больше 4 часов, отмена бесплатная.'}</Note>
         : <Note tone="bad" icon="alert">До начала меньше 4 часов: деньги за этот урок получит репетитор.</Note>}
       <OptionChips options={REASONS} value={reason} onChange={setReason} label="Причина" />

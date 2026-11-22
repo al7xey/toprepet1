@@ -15,7 +15,7 @@ def lesson_json(lesson, viewer) -> dict:
     data = {
         'id': lesson.id, 'kind': lesson.kind, 'tutorId': lesson.tutor_id, 'tutorName': lesson.tutor.name, 'tutorPhoto': lesson.tutor.photo,
         'studentId': lesson.student_id, 'studentName': lesson.student.name, 'studentPhoto': lesson.student.photo or None, 'subject': lesson.subject, 'topic': lesson.topic, 'start': iso(lesson.start),
-        'durationMin': lesson.duration_min, 'status': lesson.status, 'price': price, 'tutorPrice': tutor_price, 'payment': lesson.payment,
+        'durationMin': lesson.duration_min, 'status': lesson.status, 'price': price, 'tutorPrice': tutor_price, 'payment': lesson.payment, 'isDemo': lesson.is_demo,
         'meetingUrl': lesson.meeting_url or None, 'moveProposal': {'start': iso(lesson.move_start), 'by': lesson.move_by} if lesson.move_start else None,
         'reviewId': _reverse_id(lesson, 'review'), 'disputeId': _reverse_id(lesson, 'dispute'), 'seriesId': lesson.series_id or None,
     }
@@ -60,3 +60,14 @@ class ReasonIn(serializers.Serializer):
 class ProblemIn(serializers.Serializer):
     reason = serializers.CharField(max_length=200)
     text = serializers.CharField(max_length=3000)
+
+class MeetingIn(serializers.Serializer):
+    url = serializers.URLField(max_length=300)
+
+    def validate_url(self, value):
+        from urllib.parse import urlsplit
+
+        parsed = urlsplit(value)
+        if parsed.scheme != 'https' or parsed.username or parsed.password:
+            raise serializers.ValidationError('Нужна HTTPS-ссылка без имени пользователя и пароля.')
+        return value

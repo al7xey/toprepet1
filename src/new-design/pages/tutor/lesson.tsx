@@ -6,7 +6,7 @@ import type { Lesson } from '../../api/types';
 import { AppLayout } from '../../layout/layouts';
 import { minutes, rub, until, whenLabel } from '../../lib/format';
 import { useNow } from '../../lib/useNow';
-import { Button, Card, FormError, LessonStatus, Modal, Note, OptionChips, PageHeader, QueryView, Rows, SlotPicker, StudentCard, lessonTitle, useToast } from '../../ui';
+import { Button, Card, FormError, LessonStatus, Modal, Note, OptionChips, PageHeader, QueryView, Rows, SlotPicker, StudentCard, TextField, lessonTitle, useToast } from '../../ui';
 import { DeclineModal } from './lessons';
 
 const CANCEL_REASONS = ['Не получается в это время', 'Заболел(а)', 'Другая причина'];
@@ -30,6 +30,7 @@ function View({ lesson, onChange }: { lesson: Lesson; onChange: (l: Lesson) => v
   const [declineOpen, setDeclineOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
+  const [meetingOpen, setMeetingOpen] = useState(false);
   const startMs = new Date(lesson.start).getTime();
   const endMs = startMs + lesson.durationMin * 60_000;
   const joinOpen = lesson.status === 'confirmed' && now >= startMs - 10 * 60_000 && now < endMs;
@@ -50,7 +51,7 @@ function View({ lesson, onChange }: { lesson: Lesson; onChange: (l: Lesson) => v
           ...(lesson.topic ? [['Тема', lesson.topic] as [string, string]] : []),
           ['Когда', whenLabel(lesson.start)],
           ['Длительность', minutes(lesson.durationMin)],
-          ['Вы получите', lesson.tutorPrice ? rub(lesson.tutorPrice) : 'Бесплатное знакомство'],
+          ['Вы получите', lesson.isDemo ? '0 ₽ · тестовая запись' : lesson.tutorPrice ? rub(lesson.tutorPrice) : 'Бесплатное знакомство'],
         ]} />
       </Card>
       {lesson.status === 'pending' && <Note tone="info" icon="clock">Ответьте {lesson.confirmBy ? <b>{until(lesson.confirmBy)}</b> : 'как можно скорее'}: если не ответить вовремя, запись отменится, а деньги ученика вернутся.</Note>}
@@ -67,12 +68,24 @@ function View({ lesson, onChange }: { lesson: Lesson; onChange: (l: Lesson) => v
         {lesson.status === 'pending' && <><Button size="lg" onClick={() => run(confirm.run(), 'Запись подтверждена')} loading={confirm.pending}>Подтвердить</Button><Button size="lg" variant="fill" onClick={() => setDeclineOpen(true)}>Отклонить</Button></>}
         {joinOpen && lesson.meetingUrl && <Button size="lg" icon="video" href={lesson.meetingUrl}>Войти в урок</Button>}
         {ended && <><Button size="lg" onClick={() => run(mark.run('happened'), 'Урок отмечен как состоявшийся')} loading={mark.pending}>Урок состоялся</Button><Button size="lg" variant="fill" onClick={() => run(mark.run('no_show_student'), 'Отметили: ученик не пришёл')}>Ученик не пришёл</Button></>}
-        {lesson.status === 'confirmed' && !ended && <><Button size="lg" variant="line" icon="repeat" onClick={() => setMoveOpen(true)}>Предложить перенос</Button><Button size="lg" variant="danger" onClick={() => setCancelOpen(true)}>Отменить урок</Button></>}
+        {lesson.status === 'confirmed' && !ended && <><Button size="lg" variant="line" icon="video" onClick={() => setMeetingOpen(true)}>{lesson.meetingUrl ? 'Изменить ссылку' : 'Добавить ссылку'}</Button><Button size="lg" variant="line" icon="repeat" onClick={() => setMoveOpen(true)}>Предложить перенос</Button><Button size="lg" variant="danger" onClick={() => setCancelOpen(true)}>Отменить урок</Button></>}
       </div>
+      {meetingOpen && <MeetingModal lesson={lesson} onClose={() => setMeetingOpen(false)} onDone={(updated) => { onChange(updated); setMeetingOpen(false); toast('Ссылка сохранена'); }} />}
       <DeclineModal lesson={lesson} open={declineOpen} onClose={() => setDeclineOpen(false)} onDone={(l) => { onChange(l); setDeclineOpen(false); toast('Запись отклонена'); }} />
-      <CancelModal lesson={lesson} open={cancelOpen} onClose={() => setCancelOpen(false)} onDone={(l) => { onChange(l); setCancelOpen(false); toast('Урок отменён, ученику вернутся деньги'); }} />
+      <CancelModal lesson={lesson} open={cancelOpen} onClose={() => setCancelOpen(false)} onDone={(l) => { onChange(l); setCancelOpen(false); toast(lesson.isDemo || !lesson.price ? 'Урок отменён' : 'Урок отменён, ученику вернутся деньги'); }} />
       <MoveModal lesson={lesson} open={moveOpen} onClose={() => setMoveOpen(false)} onDone={(l) => { onChange(l); setMoveOpen(false); toast('Предложение отправлено ученику'); }} />
     </>
+  );
+}
+
+function MeetingModal({ lesson, onClose, onDone }: { lesson: Lesson; onClose: () => void; onDone: (lesson: Lesson) => void }) {
+  const [url, setUrl] = useState(lesson.meetingUrl ?? '');
+  const update = useMutation(() => api.setLessonMeeting(lesson.id, url.trim()));
+  return (
+    <Modal open onClose={onClose} title="Ссылка на урок" footer={<Button disabled={!url.trim()} loading={update.pending} onClick={async () => { const saved = await update.run(); if (saved) onDone(saved); }}>Сохранить</Button>}>
+      <TextField label="Ссылка на видеовстречу" type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://…" />
+      <FormError error={update.error} />
+    </Modal>
   );
 }
 
@@ -82,7 +95,7 @@ function CancelModal({ lesson, open, onClose, onDone }: { lesson: Lesson; open: 
   const submit = async () => { const updated = await cancel.run(reason ?? ''); if (updated) onDone(updated); };
   return (
     <Modal open={open} onClose={onClose} title="Отменить урок?" footer={<><Button variant="fill" onClick={onClose}>Не отменять</Button><Button variant="danger" onClick={submit} disabled={!reason} loading={cancel.pending}>Отменить урок</Button></>}>
-      <Note tone="bad" icon="alert">Ученику вернутся деньги. Частые отмены снижают позиции анкеты в каталоге.</Note>
+      <Note tone="bad" icon="alert">{lesson.price > 0 && !lesson.isDemo ? 'Ученику вернутся деньги.' : 'Урок будет удалён из предстоящих.'}</Note>
       <OptionChips options={CANCEL_REASONS} value={reason} onChange={setReason} label="Причина" />
       <FormError error={cancel.error} />
     </Modal>

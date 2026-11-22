@@ -61,6 +61,8 @@ _provider: PaymentProvider | None = None
 
 
 def get_provider() -> PaymentProvider:
+    if settings.PILOT_MODE:
+        raise ApiError('В тестовом режиме оплата и привязка карт отключены', 503, 'payments_unavailable')
     if settings.PAYMENT_PROVIDER == 'fake' and not (settings.DEBUG or settings.TESTING):
         raise ApiError('Демонстрационная оплата отключена на рабочем сервере', 503, 'payments_unavailable')
     global _provider

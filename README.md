@@ -26,6 +26,26 @@ pnpm dev --strictPort
 
 Откройте [сайт](http://127.0.0.1:5199/) или [регистрацию](http://127.0.0.1:5199/signup). Vite передаёт запросы `/api` в локальный Django. В пустом каталоге появятся опубликованные анкеты, созданные через сервис. Без SMTP письмо с кодом регистрации и ссылка восстановления выводятся в окне Django. Без платёжного провайдера доступны бесплатные знакомства.
 
+## Локальный пилот без оплаты
+
+В первом окне PowerShell из корня проекта включите пилот и подготовьте отдельные учебные аккаунты.
+
+```powershell
+$env:DEBUG = '1'
+$env:PILOT_MODE = '1'
+$env:SITE_URL = 'http://127.0.0.1:5199'
+$env:LOCAL_EMAIL_DIR = Join-Path (Get-Location) 'work/mail'
+$env:SEND_EVENT_EMAILS = '1'
+New-Item -ItemType Directory -Force work | Out-Null
+& ./backend/.venv/Scripts/python.exe backend/manage.py migrate
+& ./backend/.venv/Scripts/python.exe backend/manage.py seed_pilot > work/pilot-accounts-new.tsv
+& ./backend/.venv/Scripts/python.exe backend/manage.py runserver 127.0.0.1:8011
+```
+
+Код активации, письма о записи и напоминания сохраняются в `work/mail`. Команда `seed_pilot` печатает пароли только при создании аккаунтов. Храните первый файл с паролями локально. Анкеты видны в каталоге сразу, фотографии для них отсутствуют. Привязка карты и выплаты в пилоте отключены. Новые записи сразу подтверждаются и отображаются в кабинетах.
+
+Для напоминаний запустите `python manage.py run_jobs --watch` из `backend` в отдельном окне с теми же переменными окружения. Для реальной почты администратор может задать `EMAIL_URL` и `DEFAULT_FROM_EMAIL`. При настроенном SMTP рассылка событий пропускает адреса с доменом `.test`. Репетитор может добавить свою HTTPS-ссылку в карточке урока. Если настроен `MEETING_ROOM_BASE_URL`, для каждой новой подтверждённой записи будет отдельный адрес комнаты на этом сервере.
+
 ## Сборка и проверка
 
 - `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm test` проверяют фронтенд.

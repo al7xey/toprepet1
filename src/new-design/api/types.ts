@@ -88,6 +88,7 @@ export type LessonStatus =
 export type PaymentState = 'none' | 'hold' | 'captured' | 'refunded' | 'paid_out';
 
 export interface Lesson {
+  isDemo?: boolean;
   id: Id;
   kind: LessonKind;
   tutorId: Id;
@@ -136,6 +137,7 @@ export interface CreateBookingInput {
 export type RequestStatus = 'open' | 'booked' | 'expired' | 'closed';
 
 export interface StudyRequest {
+  urgent?: boolean;
   id: Id;
   studentId: Id;
   studentName: string;
@@ -158,6 +160,7 @@ export interface StudyRequest {
 }
 
 export interface CreateRequestInput {
+  urgent?: boolean;
   subjects: string[];
   customSubject: string;
   goal: string;

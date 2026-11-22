@@ -7,7 +7,7 @@ from django.utils import timezone
 from notifications.service import notify
 from payments import service as money
 
-from .models import Lesson
+from .models import Lesson, LessonReminder
 
 AUTO_COMPLETE_AFTER = timedelta(hours=24)
 PAYOUT_AFTER = timedelta(hours=24)
@@ -73,10 +73,30 @@ def expire_requests(now) -> int:
     return StudyRequest.objects.filter(status='open', expires_at__lt=now).update(status='expired')
 
 
+def remind_upcoming(now) -> int:
+    sent = 0
+    ids = Lesson.objects.filter(status='confirmed', start__gt=now, start__lte=now + timedelta(days=1)).values_list('id', flat=True)
+    for lesson_id in ids:
+        with transaction.atomic():
+            lesson = Lesson.objects.select_for_update(of=('self',)).select_related('student', 'tutor__user').filter(
+                pk=lesson_id, status='confirmed', start__gt=now, start__lte=now + timedelta(days=1),
+            ).first()
+            if lesson is None:
+                continue
+            offset = 1 if lesson.start - now <= timedelta(hours=1) else 24
+            _, created = LessonReminder.objects.get_or_create(lesson=lesson, start=lesson.start, offset_hours=offset)
+            if created:
+                title = 'Урок начнётся в течение часа' if offset == 1 else 'Урок в ближайшие сутки'
+                for user, prefix in [(lesson.student, 'me'), (lesson.tutor.user, 'tutor')]:
+                    notify(user, 'lesson', title, lesson.subject, f'/{prefix}/lessons/{lesson.id}', email_preference='reminders')
+                sent += 1
+    return sent
+
+
 def run_all() -> dict:
     now = timezone.now()
     from tutors.documents import cleanup_document_files
     cleanup_document_files()
     from core.models import RateLimitBucket
     RateLimitBucket.objects.filter(expires_at__lt=now - timedelta(days=1)).delete()
-    return {'expired_lessons': expire_unconfirmed(now), 'auto_completed': auto_complete(now), 'payouts': pay_out(now), 'expired_requests': expire_requests(now)}
+    return {'expired_lessons': expire_unconfirmed(now), 'auto_completed': auto_complete(now), 'payouts': pay_out(now), 'expired_requests': expire_requests(now), 'reminders': remind_upcoming(now)}

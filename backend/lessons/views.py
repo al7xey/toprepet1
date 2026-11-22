@@ -9,7 +9,7 @@ from core.perm import require_role, require_user
 
 from . import services
 from .models import Lesson
-from .serializers import BookingIn, ProblemIn, ReasonIn, dispute_json, lesson_json
+from .serializers import BookingIn, MeetingIn, ProblemIn, ReasonIn, dispute_json, lesson_json
 
 
 class BookingView(APIView):
@@ -40,6 +40,15 @@ class LessonView(APIView):
     def get(self, request, lesson_id):
         user = require_user(request)
         return Response(lesson_json(services.get_lesson(user, lesson_id), user))
+
+
+class MeetingView(APIView):
+    def put(self, request, lesson_id):
+        user = require_role(request, 'tutor')
+        data = MeetingIn(data=request.data)
+        data.is_valid(raise_exception=True)
+        lesson = services.set_meeting_url(user, lesson_id, data.validated_data['url'])
+        return Response(lesson_json(lesson, user))
 
 
 class CancelView(APIView):

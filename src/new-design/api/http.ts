@@ -51,6 +51,7 @@ export function createHttpApi(base: string, fetchImpl: typeof fetch = (...args) 
     createBooking: ({ idempotencyKey, ...input }) => request('POST', '/bookings', input, idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined),
     listLessons: (scope) => get(`/me/lessons${q({ scope })}`),
     getLesson: (id) => get(`/lessons/${id}`),
+    setLessonMeeting: (id, url) => request('PUT', `/lessons/${id}/meeting`, { url }),
     cancelLesson: (id, reason) => post(`/lessons/${id}/cancel`, { reason }),
     proposeMove: (id, start) => post(`/lessons/${id}/move`, { start }),
     answerMove: (id, accept) => post(`/lessons/${id}/move/answer`, { accept }),

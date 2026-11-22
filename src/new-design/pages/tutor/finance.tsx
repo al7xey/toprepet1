@@ -3,7 +3,7 @@ import { api } from '../../api';
 import { useMutation, useQuery } from '../../api/hooks';
 import { AppLayout } from '../../layout/layouts';
 import { dateLong, rub } from '../../lib/format';
-import { Button, Card, EmptyState, FormError, PageHeader, QueryView, Rows, Section, Status, TextField, useToast } from '../../ui';
+import { Button, Card, EmptyState, FormError, Note, PageHeader, QueryView, Rows, Section, Status, TextField, useToast } from '../../ui';
 
 const ENTRY: Record<'pending' | 'paid' | 'held', { tone: 'wait' | 'ok' | 'neutral'; text: string }> = {
   pending: { tone: 'wait', text: 'К выплате' },
@@ -13,6 +13,7 @@ const ENTRY: Record<'pending' | 'paid' | 'held', { tone: 'wait' | 'ok' | 'neutra
 
 /** Финансы: сколько заработано, что ждёт выплаты, реквизиты самозанятого. */
 export default function FinancePage() {
+  const features = useQuery('features', () => api.features());
   const finance = useQuery('my-finance', () => api.getFinance());
   return (
     <AppLayout role="tutor" narrow>
@@ -22,7 +23,7 @@ export default function FinancePage() {
           <>
             <Card pad="sm"><Rows boxed rows={[['К выплате', rub(f.available)], ['Ждёт урока', rub(f.pending)], ['Выплачено в этом месяце', rub(f.paidThisMonth)]]} /></Card>
             <Section title="Операции">
-              {f.entries.length === 0 ? <EmptyState icon="wallet" title="Выплат пока нет" text="После первого проведённого урока здесь появятся начисления." /> : (
+              {f.entries.length === 0 ? <EmptyState icon="wallet" title="Выплат пока нет" text={features.data?.pilotMode ? 'За тестовые занятия выплаты не начисляются.' : 'Здесь появятся начисления после подключения оплаты.'} /> : (
                 <div className="trk-navlist">
                   {f.entries.map((e) => (
                     <div className="trk-notice" key={e.id}>
@@ -36,7 +37,7 @@ export default function FinancePage() {
           </>
         )}
       </QueryView>
-      <Section title="Реквизиты для выплат"><PayoutForm /></Section>
+      {features.data?.testPayments ? <Section title="Реквизиты для выплат"><PayoutForm /></Section> : <Note tone="plain">Выплаты и добавление реквизитов пока отключены.</Note>}
     </AppLayout>
   );
 }

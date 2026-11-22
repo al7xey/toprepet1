@@ -9,6 +9,7 @@ const STUDENT_SECTIONS = [
   { label: 'Мои заявки', to: '/me/requests', icon: 'list' },
   { label: 'Мои репетиторы', to: '/me/tutors', icon: 'book' },
   { label: 'Занятия', to: '/me/lessons', icon: 'clock' },
+  { label: 'Учебный прогресс', to: '/me/progress', icon: 'book' },
   { label: 'Сообщения', to: '/me/chats', icon: 'chat' },
   { label: 'Уведомления', to: '/me/notifications', icon: 'bell' },
   { label: 'Платежи', to: '/me/payments', icon: 'card' },
