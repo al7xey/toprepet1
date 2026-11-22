@@ -42,7 +42,7 @@ export default function TutorsLandingPage() {
           <p className="trh-hero-lead">Опубликуйте анкету, назначьте цену и откройте удобные часы. Ученики смогут записаться через ваше расписание.</p>
           <div className="trh-hero-btns">
             <Button to={entryHref} size="lg" className="trh-cta">{entryLabel}</Button>
-            <button type="button" className="trh-hero-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}>Как всё устроено</button>
+            <Button variant="line" size="lg" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })}>Как всё устроено</Button>
           </div>
         </div>
         <div className="trh-hero-media">

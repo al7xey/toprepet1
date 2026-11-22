@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { api } from '../../api';
 import { useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
@@ -21,7 +20,7 @@ export default function HomePage() {
           <p className="trh-hero-lead">Подготовьтесь к экзамену или разберитесь в сложном предмете. Сравните преподавателей и выберите удобное время.</p>
           <div className="trh-hero-btns">
             <Button to="/teachers" size="lg" className="trh-cta">Найти репетитора</Button>
-            {(!user || user.role === 'student') && <Link className="trh-hero-link" to="/me/requests/new">Создать заявку</Link>}
+            {(!user || user.role === 'student') && <Button to="/me/requests/new" variant="warm" size="lg">Создать заявку</Button>}
           </div>
         </div>
         <div className="trh-hero-media">
@@ -29,7 +28,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Section title="Репетиторы" className="trh-home-section" action={<Link className="trh-section-link" to="/teachers">Все репетиторы</Link>}>
+      <Section title="Репетиторы" className="trh-home-section" action={<Button to="/teachers" variant="line" size="s">Все репетиторы</Button>}>
         <TutorShowcase query={tutors} />
       </Section>
 

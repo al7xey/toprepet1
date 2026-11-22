@@ -56,88 +56,19 @@
     background-color: #fff5ee;
   }
 
-  .tr.tr .tc.trh-tutor-card:hover .trh-tutor-name { color: #bd4818; }
+  .tr.tr .tc:hover { box-shadow: 0 0 0 2px #efcdbb; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tr.tr .hdr .trh-nav a { transition: none; }
 }
 
-.tr .trk-extra-nav { display: none; }
 
 @media (min-width: 761px) {
-  .tr.tr .trk-app .hdr.trk-app-hdr { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; }
-  .tr .trk-app-hdr > :is(.logo, .icons) { flex-shrink: 0; }
-  .tr .trk-app-hdr > .trh-nav { align-items: center; }
-  .tr.tr .trh-teachers > .trh-tutor-card:nth-child(n+5) { display: none; }
+  .tr.tr .tc .pl .trh-tutor-name { font-size: clamp(16px, 1.5vw, 19px); font-weight: 800; }
+  .tr.tr .tc .pl .trh-price { font-size: 15px; }
+  .tr.tr .trh-grid > .tc .pl { min-height: 0; border-radius: 22px; }
 }
 
-@media (761px <= width <= 1200px) {
-  .tr.tr .trk-app .hdr.trk-app-hdr { padding-inline: 12px; gap: 8px; }
-  .tr.tr .trk-app-hdr .logo { font-size: 21px; }
-  .tr.tr .trk-app-hdr > .trh-nav > a { font-size: 15px; padding-inline: clamp(5px, 0.9vw, 10px); }
-  .tr .trk-app-hdr .trh-nav > a.trk-wide-nav-link { display: none; }
-  .tr .trk-extra-nav { display: block; position: relative; flex: none; }
-  .tr .trk-extra-nav summary {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    min-height: 40px;
-    padding-inline: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    list-style: none;
-  }
-  .tr .trk-extra-nav summary::-webkit-details-marker { display: none; }
-  .tr .trk-extra-nav summary:is(:hover, :focus-visible) { color: #bd4818; }
-  .tr .trk-extra-nav[open] > div {
-    position: absolute;
-    inset: calc(100% + 4px) 0 auto auto;
-    z-index: 2;
-    display: grid;
-    min-width: 144px;
-    padding: 4px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background-color: #fff;
-  }
-}
 
-.tr.tr :is(.trh-teachers, .trh-grid) > .trh-tutor-card {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  aspect-ratio: auto;
-  border-radius: 22px;
-  background: #fff;
-  box-shadow: 0 0 0 1px var(--line);
-}
-.tr .trh-tutor-picture { display: block; position: relative; aspect-ratio: 5 / 4; overflow: hidden; background: var(--surface); }
-.tr .trh-tutor-picture img { object-position: center 35%; }
-.tr.tr .tc.trh-tutor-card.s > .pl {
-  position: static;
-  inset: auto;
-  min-height: 0;
-  align-content: start;
-  gap: 4px;
-  padding: 12px 14px 14px;
-  border-radius: 0;
-  background: #fff;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-.tr.tr .tc.trh-tutor-card .trh-tutor-subjects {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  white-space: normal;
-}
-.tr.tr .tc.trh-tutor-card .pl .trh-tutor-name { font-size: clamp(16px, 1.5vw, 19px); font-weight: 800; }
-.tr.tr .tc.trh-tutor-card .trh-price { margin-top: 2px; font-size: 14px; }
-.tr.tr .tc.trh-tutor-card:focus-visible { outline-offset: 3px; }
-
-@media (max-width: 760px) {
-  .tr.tr :is(.trh-grid, .trh-teachers) > .trh-tutor-card { border-radius: 18px; }
-  .tr .trh-tutor-picture { aspect-ratio: 1; }
-  .tr.tr .tc.trh-tutor-card.s > .pl { padding: 9px 10px 12px; }
-}
+.tr.tr .tc .pl .trh-tutor-subjects { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
