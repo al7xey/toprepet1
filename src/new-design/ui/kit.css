@@ -413,7 +413,6 @@
 /* шапка: жирнее, выбранный и наведённый пункт — ярко-оранжевый */
 .tr .hdr nav a{font-weight:700}
 .tr .hdr nav a:hover,.tr .hdr nav a.cur,.tr .hdr .trh-nav a:hover,.tr .hdr .trh-nav a:focus-visible{color:#c8460f}
-.tr .hdr .btn{font-weight:800}
 /* уведомления и сообщения: круглые кнопки с рамкой */
 .tr .trk-app .trk-hdr-ic{width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line)}
 .tr .trk-app .trk-hdr-ic:hover{box-shadow:inset 0 0 0 1.5px var(--accent);background:#fff}
@@ -424,13 +423,12 @@
 /* поиск крупнее */
 .tr .trh-tools .search{min-height:58px;padding-left:22px}
 .tr .search .trh-search-input{font-size:18px;min-height:56px}
-.tr .trh-tools .search .btn{min-height:48px;padding:0 24px;font-size:18.7px;font-weight:800}
 .tr .trh-sort{margin-left:auto}
 /* телефон: Войти у правого края, меню слева от неё */
 @media(max-width:760px){
   .tr .hdr.surf:not(.m) .trh-burger{order:2;margin-left:auto}
   .tr .hdr.surf:not(.m) .trh-actions{order:3;margin-left:6px;flex-shrink:0}
-  .tr .hdr.surf:not(.m) .trh-actions .btn{padding:0 18px;white-space:nowrap}
+  .tr .hdr.surf:not(.m) .trh-actions .btn{white-space:nowrap}
   .tr .hdr.surf:not(.m) .trh-actions .btn .i{display:none}
 }
 
@@ -487,12 +485,10 @@
 .tr .hdr .logo{font-size:26px}
 .tr .hdr .logo-mark{width:34px;height:34px}
 .tr .hdr nav a{font-size:17px}
-.tr .hdr .btn{min-height:48px;padding:0 24px;font-size:18.7px;font-weight:800}
 @media(max-width:760px){
   .tr .hdr.surf:not(.m){margin-inline:0;top:8px;height:64px;padding:0 10px 0 18px}
   .tr .hdr .logo{font-size:23px}
   .tr .hdr .logo-mark{width:30px;height:30px}
-  .tr .hdr.surf:not(.m) .trh-actions .btn{min-height:46px;padding:0 20px;font-size:18.7px;font-weight:800}
   .tr .hdr.surf:not(.m) .trh-burger{width:46px;min-width:46px;height:46px}
   .tr .hdr.surf:not(.m) .trh-burger .i{width:26px;height:26px}
 }
@@ -528,7 +524,6 @@
   .tr main:has(.trh-pf-bar){padding-bottom:170px}
 }
 /* белый текст на оранжевом: крупный и жирный, чтобы проходил контраст */
-.tr main .btn.btn-primary{font-size:18.7px;font-weight:800}
 
 /* ---- v10: детальный просмотр репетитора ---- */
 .tr .trh-pf-intro-tag{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border-radius:999px;background:#fdece3;color:var(--ink);font-size:14px;font-weight:700}
@@ -648,7 +643,7 @@
 /* v21: выход — красная кнопка внизу страницы */
 
 /* v22: шапка на телефоне — кнопка входа/кабинета короче, не наезжает на логотип */
-@media (max-width:760px){.tr .hdr.surf:not(.m) .trh-actions .btn{padding-left:18px;padding-right:18px;font-size:18.7px;white-space:nowrap}}
+@media (max-width:760px){.tr .hdr.surf:not(.m) .trh-actions .btn{white-space:nowrap}}
 
 /* v23: экраны не двигаются при смене вкладок и фокусе (полоса прокрутки всегда на месте), поиск на всю ширину, переписка */
 html{overflow-y:scroll}
@@ -723,7 +718,6 @@ html{overflow-y:scroll}
 .tr .btn{min-height:44px;padding:0 18px}
 .tr .btn.btn-lg{min-height:46px}
 .tr .btn.btn-s,.tr main .btn.btn-s:not(.btn-icon){min-height:40px;padding:0 16px}
-.tr .btn-primary,.tr .btn-primary.btn-s,.tr .btn-primary.btn-lg{font-size:18.7px;font-weight:700}
 .tr .trk-tags{display:flex;flex-wrap:wrap;gap:4px 0}
 .tr .tag{min-height:0;padding:0;border:0;border-radius:0;box-shadow:none;background:none;font-size:14px;font-weight:600;color:var(--muted)}
 .tr .tag+.tag::before{content:'·';margin:0 8px}
@@ -883,8 +877,7 @@ html{overflow-y:scroll}
 .tr .rowline.block p{margin:0;font-weight:500;line-height:1.5;color:var(--ink);overflow-wrap:anywhere}
 .tr .trk-progress .prog{margin-top:0}
 
-/* v45: кнопки одного размера шрифта, круглая стрелка чата, удаление сообщений */
-.tr .btn,.tr .btn.btn-lg,.tr .btn.btn-s,.tr .btn-primary,.tr .btn-primary.btn-s,.tr .btn-primary.btn-lg{font-size:18.7px;font-weight:700}
+/* v45: круглая стрелка чата, удаление сообщений */
 .tr .tg-back.trk-round{display:none}
 @media (max-width:760px){.tr .tg-back.trk-round{display:grid}}
 @media (hover:none){.tr .tg-msg.out{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
@@ -894,8 +887,6 @@ html{overflow-y:scroll}
 .tr .tg-input{min-height:44px;padding:10px 18px}
 /* опасные действия: красная кнопка */
 .tr .btn-danger,.tr .btn-danger:hover{background:#fde4df;color:var(--bad);box-shadow:none}
-/* окна: кнопки как на остальном сайте */
-.tr .trk-modal-foot .btn{height:52px;min-height:52px;padding:0 20px;font-size:18.7px;font-weight:700;line-height:1}
 /* выбранный день в расписании по датам: без оранжевой заливки */
 .tr .trk-month-day.on{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
 .tr .trk-window{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:end;gap:12px}
@@ -918,10 +909,9 @@ html{overflow-y:scroll}
 
 /* v48: страница фильтров в стиле проекта */
 .tr .trh-fpage-head h2{font-size:28px;line-height:1.15}
-.tr .trh-fpage-foot .btn{height:52px;min-height:52px;padding:0 20px;font-size:18.7px;font-weight:700;line-height:1}
 
 /* v49: кнопки в окнах и на странице фильтров: умеренный шрифт, длинная подпись переносится и не выходит за края */
-.tr .trk-modal-foot .btn,.tr .trh-fpage-foot .btn{font-size:16px;font-weight:700;padding:0 14px;min-width:0;height:auto;min-height:52px;line-height:1.2;white-space:normal;text-align:center;overflow-wrap:anywhere}
+.tr .trk-modal-foot .btn,.tr .trh-fpage-foot .btn{min-width:0;white-space:normal;text-align:center;overflow-wrap:anywhere}
 
 /* v50: анкета репетитора: теги-таблетки в стиле проекта, круглые белые кнопки с обводкой на фото */
 .tr .trk-tags{display:flex;flex-wrap:wrap;gap:8px}
@@ -989,9 +979,6 @@ html{overflow-y:scroll}
 
 .tr .trk-filepick-preview{display:grid;flex:none;border-radius:50%}
 
-/* v55: «Показать» и «Сбросить» на странице фильтров — подписи короткие, шрифт как у основных кнопок; в окнах чуть меньше */
-.tr .trh-fpage-foot .btn{font-size:18.7px}
-.tr .trk-modal-foot .btn{font-size:17px}
 
 
 /* Tablet account navigation must not collide with branding or account controls. */
@@ -1011,7 +998,8 @@ html{overflow-y:scroll}
 
 /* Shared scale for actions and page headings. */
 .tr {
-  --tr-button-label: 19px;
+  --tr-button-label: 16px;
+  --tr-button-padding: 8px 14px;
   --tr-button-height: 48px;
   --tr-button-small: 44px;
   --tr-button-large: 52px;
@@ -1026,18 +1014,19 @@ html{overflow-y:scroll}
 .tr .trh-pf-text,
 .tr .trh-pf-intro { font-size: 16px; line-height: 1.6; }
 
-.tr .btn.btn-s { --tr-action-height: var(--tr-button-small); --tr-action-padding: 0 14px; }
-.tr .btn.btn-lg { --tr-action-height: var(--tr-button-large); --tr-action-padding: 8px 18px; }
+.tr .btn.btn-s { --tr-action-height: var(--tr-button-small); }
+.tr .btn.btn-lg { --tr-action-height: var(--tr-button-large); }
 .tr :is(.btn:not(.btn-icon), .hdr .btn:not(.btn-icon), main .btn:not(.btn-icon):not(.search .btn), .trk-modal-foot .btn, .trh-fpage-foot .btn) {
   min-height: var(--tr-action-height, var(--tr-button-height));
   height: auto;
-  padding: var(--tr-action-padding, 0 16px);
+  padding: var(--tr-button-padding);
   font-size: var(--tr-button-label);
   line-height: 1.2;
   font-weight: 700;
   max-width: 100%;
 }
-.tr .trh-tools .search .btn { --tr-action-height: 44px; --tr-action-padding: 0 16px; }
+.tr .trh-tools .search .btn { --tr-action-height: var(--tr-button-small); }
+.tr :is(.trk-modal-foot, .trh-fpage-foot) .btn { --tr-action-height: var(--tr-button-large); }
 .tr .btn.btn-primary, .tr .btn.btn-primary:hover:not(:disabled) { background: var(--accent); }
 .tr .btn:not(.btn-block, .btn-icon) { justify-self: start; }
 
@@ -1051,7 +1040,6 @@ html{overflow-y:scroll}
   }
   .tr .trh-public-nav > .hdr .logo { justify-self: start; }
   .tr .trh-public-nav > .hdr .trh-actions { grid-column: 2; grid-row: 1; }
-  .tr .trh-public-nav > .hdr.surf:not(.m) .trh-actions .btn { min-height: 46px; padding-inline: 14px; }
   .tr .trh-public-nav > .hdr.surf:not(.m) .trh-burger {
     grid-column: 3;
     grid-row: 1;

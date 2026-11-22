@@ -55,7 +55,7 @@ export default function HomePage() {
         <Button to="/teachers?intro=1" size="lg" block>Бесплатное знакомство</Button>
       </Section>
 
-      {features.data?.pilotMode ? <Section className="p-home-trust" title="Тестовые занятия"><p className="cap">Выберите репетитора и удобное время. Запись сразу появится в расписании, карта не нужна.</p></Section> : <Section className="p-home-trust" title="100% гарантия возврата средств">
+      {features.data && !features.data.pilotMode && <Section className="p-home-trust" title="100% гарантия возврата средств">
           <p className="cap">Если оплаченное занятие не состоялось, вернём деньги полностью. Оплата списывается после подтверждения записи, а репетитор получает её после занятия. В спорной ситуации поможет поддержка.</p>
       </Section>}
 

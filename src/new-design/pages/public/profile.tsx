@@ -126,10 +126,10 @@ function Profile({ tutor }: { tutor: Tutor }) {
           </Section>
 
           <hr className="rule" />
-          <Section title="Опыт"><div><Tags items={[tutor.experience]} /></div></Section>
+          <Section title="Опыт"><p className="cap trh-pf-text">{tutor.experience}</p></Section>
 
           <hr className="rule" />
-          <Section title="С чем поможет"><div><Tags items={tutor.helpTopics} /></div></Section>
+          <Section title="С чем поможет"><div><Tags items={tutor.helpTopics} /></div>{Boolean(tutor.levels?.length) && <p className="muted">Для кого: {tutor.levels?.join(", ")}</p>}</Section>
 
           <hr className="rule" />
           <Section title="Как проходят занятия"><p className="cap trh-pf-text">{tutor.approach}</p></Section>
@@ -152,6 +152,7 @@ function Profile({ tutor }: { tutor: Tutor }) {
             </div>
             {booking}
           </div>
+          {tutor.photo.startsWith("/images/pilot/") && <small className="muted trh-portrait-credit">Портрет вымышленного персонажа · <a href="https://ambravo.github.io/sigils-people/">Ariel Bravo Ayala, sigils people</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></small>}
         </div>
       </div>
 

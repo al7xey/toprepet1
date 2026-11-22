@@ -1,13 +1,22 @@
 @media (min-width: 761px) {
+  .tr.tr .trh-public-nav > .hdr.surf:not(.m) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tr.tr .trh-public-nav .trh-nav a {
+    padding-inline: clamp(6px, 1.1vw, 14px);
+  }
+
   .tr.tr .hdr .trh-nav a {
-    border-radius: 999px;
-    transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+    background: transparent;
+    box-shadow: none;
+    transition: color 150ms ease;
   }
 
   .tr.tr .hdr .trh-nav a.cur {
-    color: var(--ink);
-    background-color: var(--accent-soft);
-    box-shadow: inset 0 0 0 1px rgb(242 106 46 / 16%);
+    color: #bd4818;
   }
 
   .tr .trh-main .btn.btn-block {
@@ -25,8 +34,9 @@
 
 @media (min-width: 761px) and (hover: hover) and (pointer: fine) {
   .tr.tr .hdr .trh-nav a:not(.cur):hover {
-    color: var(--ink);
-    background-color: #fff3ec;
+    color: #bd4818;
+    background-color: transparent;
+    box-shadow: none;
   }
 
   .tr.tr .btn.btn-primary:hover:not(:disabled, [aria-disabled="true"]) {

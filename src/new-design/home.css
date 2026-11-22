@@ -283,9 +283,12 @@
   }
   .tr .trh-hero-btns .btn {
     min-width: 0;
-    height: auto;
-    min-height: 52px;
-    padding: 8px clamp(8px, 1.5vw, 20px);
-    line-height: 1.25;
+    white-space: nowrap;
+  }
+}
+
+@media (761px <= width <= 920px) {
+  .tr .trh-hero {
+    grid-template-columns: minmax(0, 1.17fr) minmax(0, .83fr);
   }
 }
