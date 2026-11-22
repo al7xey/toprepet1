@@ -1,33 +1,32 @@
 import { useState, type SyntheticEvent } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api';
 import { trackGoal } from '../../../shared/lib/analytics';
 import { useMutation } from '../../api/hooks';
-import { homeFor, useSession } from '../../api/session';
+import { needsEmailVerification, useSession } from '../../api/session';
 import { AuthLayout } from '../../layout/layouts';
 import { safeNext } from '../../lib/safeNext';
 import { Button, Divider, FormError, PageHeader, PasswordField, TextField } from '../../ui';
-import { AuthCard, emailValid } from './shared';
+import { afterRegistration, AuthCard, emailValid } from './shared';
 
 /** Вход: почта и пароль или Яндекс ID. После входа возвращает туда, откуда пришли (?next=). */
 export default function LoginPage() {
   const [params] = useSearchParams();
-  const navigate = useNavigate();
   const { user, setUser } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const next = params.get('next');
+  const next = safeNext(params.get('next'), '');
+  const query = next ? '?next=' + encodeURIComponent(next) : '';
   const login = useMutation((e: string, p: string) => api.login(e, p));
   const yandex = useMutation(() => api.loginWithYandex());
 
-  if (user) return <Navigate to={safeNext(next, homeFor(user.role))} replace />;
+  if (user) return <Navigate to={needsEmailVerification(user) ? '/verify-email' + query : afterRegistration(user, next)} replace />;
 
   const finish = (u: Awaited<ReturnType<typeof api.login>> | undefined) => {
     if (!u) return;
     setUser(u);
     trackGoal('login_submit', { role: u.role });
-    void navigate(safeNext(next, homeFor(u.role)), { replace: true });
   };
 
   const submit = async (e: SyntheticEvent) => {
@@ -38,7 +37,6 @@ export default function LoginPage() {
     finish(await login.run(email.trim(), password));
   };
 
-  const query = next ? `?next=${encodeURIComponent(next)}` : '';
   return (
     <AuthLayout>
       <PageHeader title="Вход" center />

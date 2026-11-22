@@ -20,7 +20,7 @@ export function TutorCard({ tutor, priority }: { priority?: boolean; tutor: Pick
       {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
       <span className="pl">
         <b><span className="trh-tutor-name">{tutor.name}</span></b>
-        <span>{tutor.cardSubjects}</span>
+        <span className="trh-tutor-subjects">{tutor.cardSubjects}</span>
         <span className="trh-price">{fromRub(tutor.studentPrice)}</span>
       </span>
     </Link>

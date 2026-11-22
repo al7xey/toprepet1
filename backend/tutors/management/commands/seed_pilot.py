@@ -10,13 +10,13 @@ from tutors.models import Tutor
 
 
 TUTORS = [
-    ('vera', 'Вера · демо', ['Информатика', 'Математика'], 1250, 20,
+    ('vera', 'Вера', ['Информатика', 'Математика'], 1250, 20,
      ['ЕГЭ по информатике', 'Python', 'Алгоритмы', 'Системы счисления', 'Логика']),
-    ('maksim', 'Максим · демо', ['Математика', 'Физика'], 1850, 0,
+    ('maksim', 'Максим', ['Математика', 'Физика'], 1850, 0,
      ['ОГЭ по математике', 'Геометрия', 'Механика', 'Уравнения', 'Электричество']),
-    ('alina', 'Алина · демо', ['Английский язык'], 950, 15,
+    ('alina', 'Алина', ['Английский язык'], 950, 15,
      ['Разговорный английский', 'Школьная программа', 'Грамматика', 'Аудирование', 'Английский для поездок', 'Подготовка к собеседованию']),
-    ('maria', 'Мария · демо', ['Русский язык', 'Литература'], 1450, 20,
+    ('maria', 'Мария', ['Русский язык', 'Литература'], 1450, 20,
      ['ЕГЭ по русскому языку', 'Сочинение', 'Анализ текста', 'Орфография', 'Пунктуация']),
 ]
 
@@ -82,8 +82,12 @@ class Command(BaseCommand):
             email = f'{login}@pilot.example.test'
             user = User.objects.filter(email=email).first()
             if user:
-                if user.name != name or user.role != role:
+                legacy_name = role == 'tutor' and user.name == f'{name} · демо'
+                if user.role != role or (user.name != name and not legacy_name):
                     raise CommandError(f'Адрес {email} уже занят другим аккаунтом')
+                if legacy_name:
+                    user.name = name
+                    user.save(update_fields=['name'])
                 return user
             password = secrets.token_urlsafe(16)
             user = User.objects.create_user(
@@ -124,6 +128,8 @@ class Command(BaseCommand):
             })
             if not created and options['refresh_profiles']:
                 Tutor.objects.filter(pk=tutor.pk).update(**profile)
+            if not created and tutor.name == f'{name} · демо':
+                Tutor.objects.filter(pk=tutor.pk).update(name=name)
 
         for role, email, password in credentials:
             self.stdout.write(f'{role}	{email}	{password}')

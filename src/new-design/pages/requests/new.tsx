@@ -121,7 +121,7 @@ export function RequestWizard({ onDone, embedded }: { onDone: (id: string) => vo
         )}
       </div>
       <FormError error={create.error} />
-      <div className="trk-actions">
+      <div className="trk-actions trk-step-actions">
         {step === 2 && <Button variant="fill" size="lg" onClick={() => setStep(1)}>Назад</Button>}
         <Button size="lg" onClick={next} loading={create.pending}>{step === 1 ? 'Дальше' : 'Опубликовать заявку'}</Button>
       </div>

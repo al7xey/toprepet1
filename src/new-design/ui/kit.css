@@ -99,7 +99,7 @@
 .tr .trk-choices{display:grid;gap:16px}
 .tr .trk-choices.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .tr .trk-choices.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.tr .trk-choice{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;text-align:left;padding:24px;border:0;border-radius:32px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);font:inherit;color:inherit;cursor:pointer;transition:transform .3s var(--spring),box-shadow .25s,background .25s}
+.tr .trk-choice{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;text-align:left;padding:24px;border:0;border-radius:var(--tr-card-radius);background:#fff;box-shadow:inset 0 0 0 1px var(--line);font:inherit;color:inherit;cursor:pointer;transition:transform .3s var(--spring),box-shadow .25s,background .25s}
 .tr .trk-choice.on{background:#fff;box-shadow:inset 0 0 0 2px var(--accent)}
 .tr .trk-choice .ic-sq{width:48px;height:48px;border-radius:16px}
 .tr .trk-choice .ic-sq .i{width:24px;height:24px}
@@ -153,13 +153,14 @@
 .tr .trk-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 .tr .trk-list{display:grid;gap:16px}
 .tr .trk-actions{display:flex;flex-wrap:wrap;gap:10px}
+.tr .trk-step-actions > :last-child{margin-inline-start:auto}
 .tr .trk-form{display:grid;gap:20px}
 
 @media (max-width:760px){
   .tr .trk-cardtitle{font-size:20px}
   .tr .trk-card.pad-md,.tr .trk-card.pad-lg{padding:22px}
   .tr .trk-choices.c2,.tr .trk-choices.c3{grid-template-columns:1fr}
-  .tr .trk-choice{padding:20px;border-radius:28px}
+  .tr .trk-choice{padding:20px}
   .tr .trk-two,.tr .trk-grid2,.tr .trk-grid3{grid-template-columns:1fr;gap:16px}
   .tr .trk-two>aside{position:static}
   .tr.trk-modal-root{align-items:end;padding:0}
@@ -412,7 +413,6 @@
 .tr .btn:active,.tr .opt:active,.tr .chipf:active,.tr .tab:active,.tr .gbtn:active,.tr .icbtn:active{transform:none}
 /* шапка: жирнее, выбранный и наведённый пункт — ярко-оранжевый */
 .tr .hdr nav a{font-weight:700}
-.tr .hdr nav a:hover,.tr .hdr nav a.cur,.tr .hdr .trh-nav a:hover,.tr .hdr .trh-nav a:focus-visible{color:#c8460f}
 /* уведомления и сообщения: круглые кнопки с рамкой */
 .tr .trk-app .trk-hdr-ic{width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line)}
 .tr .trk-app .trk-hdr-ic:hover{box-shadow:inset 0 0 0 1.5px var(--accent);background:#fff}
@@ -704,7 +704,7 @@ html{overflow-y:scroll}
 /* v33: единые размеры и стили. Без анимаций появления и наведения, компактные карточки и кнопки, понятные кнопки и подписи */
 .tr .trh-hero-h .trh-ln>span,.tr .trh-hero-lead,.tr .trh-hero-btns,.tr .trh-benefits,.tr .trh-hero-media>img,.tr .tcg>*,.tr .tab.cur .i,.tr .tab .dot,.tr .cnt2,.tr .side .cnt{animation:none!important}
 .tr .trh-hero-h .trh-ln>span{transform:none}
-.tr .card,.tr .lesson{border-radius:20px;transition:none}
+.tr .card,.tr .lesson{transition:none}
 .tr .trk-card.pad-sm{padding:16px}
 .tr .trk-card.pad-md,.tr .trk-card.pad-lg{padding:18px}
 .tr .lesson{padding:16px;gap:10px}
@@ -820,7 +820,7 @@ html{overflow-y:scroll}
 .tr .tag::before{content:'';display:inline-block;width:5px;height:5px;margin-right:7px;border-radius:50%;background:var(--accent);vertical-align:middle}
 
 /* v36: крупные скругления проекта, одинаковые заголовки и отступы, круглые аватары, спокойные блоки профиля */
-.tr .card,.tr .lesson,.tr .trk-navlist,.tr .trk-account-hero{border-radius:28px}
+.tr .lesson,.tr .trk-navlist,.tr .trk-account-hero{border-radius:var(--tr-card-radius)}
 .tr .trk-rows.boxed{border-radius:20px}
 .tr .trk-pagehead-row{min-height:44px}
 .tr .trk-blocktitle.trh-h1{font-size:32px;flex:1}
@@ -948,7 +948,7 @@ html{overflow-y:scroll}
 /* v54: превью анкеты в кабинете репетитора, таблица записей, сообщение-карточка, выбранные окошки */
 .tr .trk-profile-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .tr .trk-preview{display:grid;gap:22px}
-.tr .trk-preview-photo{width:100%;max-width:320px;aspect-ratio:4/5;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px var(--line);justify-self:center}
+.tr .trk-preview-photo{width:100%;max-width:320px;aspect-ratio:4/5;border-radius:var(--tr-card-radius);overflow:hidden;background:#fff;box-shadow:0 0 0 1px var(--line);justify-self:center}
 .tr .trk-preview-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;display:block}
 .tr .trk-preview-head{display:grid;gap:8px;justify-items:start}
 .tr .trk-preview-head h2{margin:0;font-size:28px;letter-spacing:-0.03em;line-height:1.1}
@@ -981,15 +981,6 @@ html{overflow-y:scroll}
 
 
 
-/* Tablet account navigation must not collide with branding or account controls. */
-@media (min-width:761px) and (max-width:1200px){
-  .tr .trk-app .hdr.trk-app-hdr{display:grid;grid-template-columns:minmax(0,1fr) auto;height:auto;gap:8px 20px;padding:12px 0}
-  .tr .trk-app .trk-app-hdr>.logo{grid-column:1;grid-row:1;justify-self:start}
-  .tr .trk-app .trk-app-hdr>.icons{grid-column:2;grid-row:1}
-  .tr .trk-app .trk-app-hdr>nav{grid-column:1/-1;grid-row:2;justify-content:flex-start;flex-wrap:wrap;gap:4px}
-  .tr .trk-app .trk-app-hdr>nav a{padding:8px}
-}
-
 .tr .trk-session-state{width:100%;max-width:640px;margin-inline:auto;padding:48px 16px;min-height:50vh;gap:24px}
 
 /* Existing message actions remain available by pointer, keyboard and assistive technology. */
@@ -998,7 +989,7 @@ html{overflow-y:scroll}
 
 /* Shared scale for actions and page headings. */
 .tr {
-  --tr-button-label: 16px;
+  --tr-button-label: 19px;
   --tr-button-padding: 8px 14px;
   --tr-button-height: 48px;
   --tr-button-small: 44px;
@@ -1062,7 +1053,6 @@ html{overflow-y:scroll}
 .tr .trk-account-hero { gap: 10px; flex-wrap: wrap; }
 .tr .trk-account-identity { flex: 1 1 160px; min-width: 0; display: flex; align-items: center; gap: 12px; }
 .tr .trk-account-identity .trk-account-who { min-width: 0; overflow-wrap: anywhere; }
-.tr .trk-auth-card .trk-choice { border-radius: 34px; }
 .tr .trk-auth-foot a { white-space: nowrap; }
 .tr .trk-lesson-status .st { min-height: 30px; }
 .tr .trk-lesson-status .st .i { width: 17px; height: 17px; }

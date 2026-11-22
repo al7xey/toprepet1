@@ -29,7 +29,7 @@ test('на компактном ПК иллюстрация и обе кнопк
     expect(b!.x + b!.width).toBeLessThan(media!.x);
     expect(a!.height).toBe(b!.height);
     for (const action of [first, second]) {
-      await expect(action).toHaveCSS('font-size', '16px');
+      await expect(action).toHaveCSS('font-size', '19px');
       await expect(action).toHaveCSS('padding-inline-start', '14px');
       const lineCount = await action.evaluate((button) => {
         const range = document.createRange();
@@ -55,7 +55,7 @@ test('у каталога один поиск, навигация в одной 
     const [navBox, loginBox] = await Promise.all([target.boundingBox(), login.boundingBox()]);
     expect(Math.abs(navBox!.y + navBox!.height / 2 - loginBox!.y - loginBox!.height / 2)).toBeLessThan(2);
     await target.hover();
-    await expect(target).toHaveCSS('color', 'rgb(189, 72, 24)');
+    await expect(target).toHaveCSS('color', 'rgb(242, 106, 46)');
     await expect(target).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
     await expect(target).toHaveCSS('box-shadow', 'none');
   }

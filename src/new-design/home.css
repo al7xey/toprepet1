@@ -73,7 +73,6 @@
   .tr .trh-teachers::-webkit-scrollbar{display:none}
   .tr .trh-teachers>.tc:nth-child(n+5){display:block}
   .tr .trh-teachers>.tc{flex:0 0 236px;aspect-ratio:3/4;scroll-snap-align:start;animation:none}
-  .tr .trh-teachers .tc .pl{left:10px;right:10px;bottom:10px;padding:10px 14px 11px}
   .tr .trh-teachers .tc .pl b{font-size:17px}
   .tr .trh-teachers .tc .pl span{font-size:13px}
 
@@ -152,8 +151,7 @@
   .tr .trh-tools .trh-chips{position:absolute;top:50%;right:124px;transform:translateY(-50%)}
   .tr .trh-tools .search .btn{margin-inline-start:124px}
   .tr .trh-grid{column-gap:24px;row-gap:32px}
-  .tr .trh-grid>.tc{aspect-ratio:4/5;border-radius:40px}
-  .tr .trh-grid>.tc .pl{inset:auto 14px 14px;min-height:114px;border-radius:34px;padding:14px 18px;align-content:center;gap:5px}
+  .tr .trh-grid>.tc{aspect-ratio:4/5}
 }
 
 @media (max-width:760px){
@@ -163,8 +161,7 @@
   .tr .trh-drop-menu{position:fixed;left:16px;right:16px;top:auto;bottom:16px;width:auto;max-height:60vh;border-radius:32px}
   .tr .trh-sort-t{display:none}
   .tr .trh-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .tr .trh-grid>.tc{aspect-ratio:3/4;border-radius:32px}
-  .tr .trh-grid .tc.s .pl{left:8px;right:8px;bottom:8px;padding:8px 12px 9px;border-radius:22px}
+  .tr .trh-grid>.tc{aspect-ratio:3/4}
   .tr .trh-grid .tc.s .pl b{font-size:15px;gap:6px}
   .tr .trh-grid .tc.s .pl b .rt{font-size:12px}
   .tr .trh-grid .tc.s .pl span{font-size:12px}
@@ -178,7 +175,7 @@
 .tr .trh-pf-main{flex:1 1 640px;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:32px;align-content:start;overflow-wrap:anywhere}
 .tr .trh-pf-aside{flex:0 0 380px;max-width:100%;min-width:0;position:sticky;top:96px}
 .tr .trh-pf-top{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
-.tr .trh-pf-photo{position:relative;flex:0 0 300px;aspect-ratio:4/5;border-radius:40px;overflow:hidden;background:var(--surface)}
+.tr .trh-pf-photo{position:relative;flex:0 0 300px;aspect-ratio:4/5;border-radius:var(--tr-card-radius);overflow:hidden;background:var(--surface)}
 .tr .trh-pf-photo img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
 .tr .trh-pf-back{display:none}
 .tr .trh-pf-sheet{flex:1 1 360px;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
@@ -230,7 +227,7 @@
 .tr .trh-steps li::before{transform-origin:top}
 
 /* Плашка карточки: цена третьей строкой */
-.tr .tc.s .pl .trh-price{font-weight:700;font-size:15px;margin-top:3px}
+.tr .tc.s .pl .trh-price{font-weight:700;font-size:15px}
 .tr .tc.s .pl b .trh-tutor-name{min-width:0;flex:1;font:inherit;color:inherit}
 
 /* Фильтры: белое стекло */
@@ -275,7 +272,7 @@
 @media (min-width: 761px) {
   .tr .trh-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(424px, 1fr) minmax(0, 1fr);
     gap: clamp(24px, 4vw, 56px);
   }
   .tr .trh-hero-btns {
@@ -284,11 +281,5 @@
   .tr .trh-hero-btns .btn {
     min-width: 0;
     white-space: nowrap;
-  }
-}
-
-@media (761px <= width <= 920px) {
-  .tr .trh-hero {
-    grid-template-columns: minmax(0, 1.17fr) minmax(0, .83fr);
   }
 }

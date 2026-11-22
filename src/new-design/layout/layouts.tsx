@@ -379,7 +379,7 @@ export function AppLayout({ role, children, narrow, chat }: { role: Role; childr
   const accountTo = role === 'admin' ? '/admin/disputes' : `${counters.prefix}/account`;
   return (
     <div className={cx('wash trh-page trh-tight trk-app', `tabs-${tabs.length}`, chat && `trk-chat-${chat}`)} style={{ '--n': tabs.length } as CSSProperties}>
-      <header className="hdr surf trh-hdr trk-app-hdr">
+      <header className="hdr surf trh-hdr trk-app-hdr" data-role={role}>
         <Logo />
         <nav className="trh-nav" aria-label="Разделы кабинета">
           {top.map((item) => <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'cur' : undefined)}>{item.label}</NavLink>)}
@@ -388,7 +388,7 @@ export function AppLayout({ role, children, narrow, chat }: { role: Role; childr
           <span className="icons">
             {ready(`${counters.prefix}/notifications`) && <IconButton icon="bell" label="Уведомления" to={`${counters.prefix}/notifications`} badge={counters.notifications} className="trk-hdr-ic" />}
             {ready(`${counters.prefix}/chats`) && <IconButton icon="chat" label="Сообщения" to={`${counters.prefix}/chats`} badge={counters.chats || false} className="trk-hdr-ic" />}
-            <Link className="trk-ava-link" to={accountTo} aria-label="Профиль"><Avatar name={user?.name ?? '•'} size={44} /></Link>
+            <Link className="trk-ava-link" to={accountTo} aria-label="Профиль"><Avatar name={user?.name ?? '•'} photo={user?.photo} size={44} /></Link>
           </span>
         )}
       </header>

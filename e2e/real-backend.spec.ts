@@ -235,4 +235,37 @@ test('Django: регистрация ученика и подтверждени�
   await expect(page).not.toHaveURL(/verify-email/);
   const me = await page.request.get(new URL('/auth/me', process.env.E2E_API_URL).href);
   expect(await me.json()).toMatchObject({ email, emailVerified: true });
+
+  const next = page.getByRole('button', { name: 'Дальше', exact: true });
+  await expect(page.getByRole('heading', { name: 'Для кого занятия?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Пропустить' })).toHaveCount(0);
+  await next.click();
+  await expect(page.getByRole('heading', { name: 'Какие предметы нужны?' })).toBeVisible();
+  await next.click();
+  await page.getByRole('button', { name: 'Готово', exact: true }).click();
+  await expect(page).toHaveURL(/\/teachers$/);
+
+  await page.setViewportSize({ width: 1070, height: 813 });
+  const card = page.locator('a.tc').first();
+  await expect(card).toBeVisible();
+  const caption = await card.evaluate((element) => {
+    const panel = element.querySelector<HTMLElement>('.pl')!;
+    return {
+      cardRadius: getComputedStyle(element).borderRadius,
+      panelRadius: getComputedStyle(panel).borderRadius,
+      height: panel.offsetHeight,
+      width: panel.offsetWidth,
+      availableWidth: element.clientWidth,
+    };
+  });
+  expect(caption.panelRadius).toBe(caption.cardRadius);
+  expect(caption.height).toBeLessThan(100);
+  expect(caption.width).toBeLessThan(caption.availableWidth);
+
+  const sections = page.getByRole('navigation', { name: 'Разделы кабинета' });
+  const nav = await sections.getByRole('link', { name: 'Мои уроки' }).boundingBox();
+  const avatar = await page.getByRole('link', { name: 'Профиль', exact: true }).boundingBox();
+  expect(Math.abs(nav!.y + nav!.height / 2 - avatar!.y - avatar!.height / 2)).toBeLessThan(2);
+  await sections.getByRole('link', { name: 'Мои уроки' }).click();
+  await expect(page.getByRole('heading', { name: 'Мои уроки', exact: true })).toBeVisible();
 });

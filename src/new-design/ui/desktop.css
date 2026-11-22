@@ -1,12 +1,23 @@
 @media (min-width: 761px) {
-  .tr.tr .trh-public-nav > .hdr.surf:not(.m) {
+  .tr.tr .hdr.trh-hdr {
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
-  .tr.tr .trh-public-nav .trh-nav a {
-    padding-inline: clamp(6px, 1.1vw, 14px);
+  .tr .trk-app-hdr > .logo,
+  .tr .trk-app-hdr > .icons { flex-shrink: 0; }
+
+  .tr .trk-app-hdr > .trh-nav {
+    justify-content: safe center;
+    overflow-x: auto;
+    padding: 3px;
+  }
+
+  .tr .trk-app-hdr > .trh-nav a { flex: none; }
+
+  .tr.tr .hdr .trh-nav a {
+    padding-inline: clamp(4px, 0.9vw, 12px);
   }
 
   .tr.tr .hdr .trh-nav a {
@@ -15,8 +26,8 @@
     transition: color 150ms ease;
   }
 
-  .tr.tr .hdr .trh-nav a.cur {
-    color: #bd4818;
+  .tr.tr .hdr .trh-nav a:is(.cur, :focus-visible) {
+    color: var(--accent);
   }
 
   .tr .trh-main .btn.btn-block {
@@ -32,9 +43,23 @@
   }
 }
 
+@media (761px <= width <= 1150px) {
+  .tr.tr .trk-app-hdr[data-role="tutor"] > .trh-nav a {
+    font-size: 16px;
+    padding-inline: 4px;
+  }
+}
+
+@media (761px <= width <= 860px) {
+  .tr.tr .trk-app-hdr > .trh-nav a {
+    font-size: 16px;
+    padding-inline: 4px;
+  }
+}
+
 @media (min-width: 761px) and (hover: hover) and (pointer: fine) {
-  .tr.tr .hdr .trh-nav a:not(.cur):hover {
-    color: #bd4818;
+  .tr.tr .hdr .trh-nav a:hover {
+    color: var(--accent);
     background-color: transparent;
     box-shadow: none;
   }
