@@ -2,22 +2,12 @@ import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api';
 import { useMutation, useQuery } from '../../api/hooks';
-import { homeFor, useSession } from '../../api/session';
-import type { User } from '../../api/types';
+import { needsEmailVerification, useSession } from '../../api/session';
 import { AuthLayout } from '../../layout/layouts';
-import { safeNext } from '../../lib/safeNext';
 import { Button, EmptyState, ErrorState, FormError, PageHeader, TextField, useToast } from '../../ui';
-import { AuthCard } from './shared';
+import { afterRegistration, AuthCard } from './shared';
 
 const RESEND_SECONDS = 60;
-
-/** Куда вести после подтверждения почты: ученика — на онбординг, остальных — в их кабинет. */
-export const afterVerify = (user: Pick<User, 'role' | 'onboarded'>, next?: string | null) => {
-  if (!user.onboarded && user.role === 'tutor') return '/tutor/profile/edit';
-  const destination = safeNext(next, '');
-  if (!user.onboarded && user.role === 'student') return '/onboarding' + (destination && !destination.startsWith('/onboarding') ? `?next=${encodeURIComponent(destination)}` : '');
-  return destination || homeFor(user.role);
-};
 
 /** «Проверьте почту»: письмо отправлено, можно отправить ещё раз. */
 export default function VerifyEmailPage() {
@@ -39,7 +29,7 @@ export default function VerifyEmailPage() {
 
   if (checking) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.emailVerified) return <Navigate to={afterVerify(user, next)} replace />;
+  if (!needsEmailVerification(user)) return <Navigate to={afterRegistration(user, next)} replace />;
 
   const sendAgain = async () => {
     if (!(await resend.run())) return;
@@ -49,7 +39,7 @@ export default function VerifyEmailPage() {
   const submitCode = async () => {
     if (!/^\d{6}$/.test(code)) return;
     const verified = await confirm.run(code);
-    if (verified) { setUser(verified); void navigate(afterVerify(verified, next), { replace: true }); }
+    if (verified) { setUser(verified); void navigate(afterRegistration(verified, next), { replace: true }); }
   };
 
   return (
@@ -76,7 +66,7 @@ export function VerifyByTokenPage() {
   const verified = result.data;
   useEffect(() => { if (verified) setUser(verified); }, [verified, setUser]);
 
-  if (verified) return <Navigate to={afterVerify(verified)} replace />;
+  if (verified) return <Navigate to={afterRegistration(verified)} replace />;
   return (
     <AuthLayout>
       <PageHeader title="Подтверждаем почту" center />

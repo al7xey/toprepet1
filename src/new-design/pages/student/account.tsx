@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../../api';
 import { useQuery } from '../../api/hooks';
-import { useSession } from '../../api/session';
+import { needsEmailVerification, useSession } from '../../api/session';
 import { AppLayout } from '../../layout/layouts';
 import { ago, count } from '../../lib/format';
 import { Avatar, Button, Card, ErrorState, IconButton, LoadingList, Note, NavigationRow, PageHeader, UnreadDot, useToast } from '../../ui';
@@ -92,7 +92,7 @@ export function AccountView({ role }: { role: 'student' | 'tutor' }) {
           ) : <span className="muted">Пока тихо: здесь появятся ответы на заявки, подтверждения уроков и сообщения.</span>}
         </section>}
 
-        {user && !user.emailVerified && (
+        {user && needsEmailVerification(user) && (
           <Note tone="bad">Почта не подтверждена. <Button to="/verify-email" variant="line" size="s">Подтвердить</Button></Note>
         )}
       </div>

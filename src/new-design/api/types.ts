@@ -14,6 +14,7 @@ export interface User {
   name: string;
   email: string;
   emailVerified: boolean;
+  emailVerificationRequired?: boolean;
   timezone: string;
   /** Для репетитора: id его анкеты. */
   tutorId?: Id;

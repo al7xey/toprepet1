@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 
 
@@ -10,6 +11,8 @@ def user_json(user) -> dict:
         'timezone': user.timezone, 'onboarded': user.onboarded, 'photo': user.photo or None,
         'notifications': {**NOTIFY_DEFAULTS, **(user.notify_prefs or {})},
     }
+    if settings.PILOT_MODE:
+        data['emailVerificationRequired'] = False
     if user.role == 'tutor' and user.tutor_id:
         data['tutorId'] = user.tutor_id
     return data

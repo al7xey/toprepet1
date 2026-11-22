@@ -7,7 +7,7 @@ import { useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
 import { PublicLayout } from '../../layout/layouts';
 import { minutes, rub } from '../../lib/format';
-import { BackLink, Button, ErrorState, Icon, IconButton, LoadingList, Note, PageHeader, Section, SelectField, SlotPicker, Status, Tags } from '../../ui';
+import { BackLink, Button, ErrorState, Icon, IconButton, LoadingList, Note, PageHeader, Section, SelectField, SlotPicker, Status, Tags, useToast } from '../../ui';
 import { NotFoundBody } from './notfound';
 import './profile.css';
 import { achievementIcon } from '../../ui/icon';
@@ -28,6 +28,7 @@ export default function ProfilePage() {
 
 function Profile({ tutor }: { tutor: Tutor }) {
   const navigate = useNavigate();
+  const toast = useToast();
   const { user } = useSession();
   const lessonMinutes = tutor.durations?.includes(LESSON_MINUTES) ? LESSON_MINUTES : tutor.durations?.[0] ?? LESSON_MINUTES;
   const lessonPrice = Math.round(tutor.studentPrice * lessonMinutes / 60);
@@ -53,10 +54,18 @@ function Profile({ tutor }: { tutor: Tutor }) {
   const fromChat = (location.state as { back?: string } | null)?.back;
   // назад — по истории, если она есть; иначе к каталогу
   const close = () => { if (location.key !== 'default') void navigate(-1); else void navigate('/teachers'); };
-  const share = () => {
+  const share = async () => {
     const url = window.location.href;
-    if (navigator.share) void navigator.share({ title: tutor.name, url }).catch(() => undefined);
-    else void navigator.clipboard?.writeText(url).catch(() => undefined);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: tutor.name, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast('Ссылка скопирована');
+      }
+    } catch (error) {
+      if (!(error instanceof DOMException) || error.name !== 'AbortError') toast('Ссылку можно скопировать из адресной строки');
+    }
   };
 
   const bookHref = `/book/${tutor.id}?kind=${kind}&subject=${encodeURIComponent(kind === 'intro' ? tutor.subjects[0] ?? '' : subject)}${start ? `&start=${encodeURIComponent(start)}` : ''}`;
@@ -90,7 +99,10 @@ function Profile({ tutor }: { tutor: Tutor }) {
             </div>
             <div className="trh-pf-sheet">
               <div className="trh-sec">
-                <h1 className="trh-h1" id="tutor-name">{tutor.name}</h1>
+                <div className="trh-pf-name-row">
+                  <h1 className="trh-h1" id="tutor-name">{tutor.name}</h1>
+                  <Button variant="line" size="s" icon="share" className="trh-pf-share-desktop" onClick={share}>Поделиться</Button>
+                </div>
                 <p className="muted trh-pf-role">{tutor.headline}</p>
                 <div className="fr fw u-gap8">
                   {tutor.documentsVerified && <Status tone="ok" icon="shield">Документы проверены</Status>}

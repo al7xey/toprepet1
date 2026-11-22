@@ -8,7 +8,7 @@ import { readCatalogFilter, writeCatalogFilter } from '../../lib/catalog-filter'
 import { useSession } from '../../api/session';
 import { CatalogMetadata } from '../../../app/catalog-metadata';
 import { CATALOG_PAGE_SIZE as PAGE, listReducer, type ListState } from '../../lib/catalog-list';
-import { Button, Dropdown, EmptyState, ErrorState, FilterMenu, Icon, PageHeader, SelectField, Skeleton, TextField, TutorGrid } from '../../ui';
+import { Button, Dropdown, EmptyState, ErrorState, FilterMenu, Icon, PageHeader, Skeleton, TutorGrid } from '../../ui';
 
 const SUBJECTS = subjects.filter((s) => s !== 'Другой предмет');
 const SORTS = [{ value: 'recommended', label: 'Рекомендуемые' }, { value: 'price_asc', label: 'Сначала дешевле' }, { value: 'price_desc', label: 'Сначала дороже' }] as const;
@@ -77,11 +77,9 @@ export default function CatalogPage() {
           />
           <Dropdown label="Сортировка" icon="sort" value={filter.sort ?? 'recommended'} options={SORTS.map((s) => ({ ...s }))} onChange={(v) => set({ sort: (v ?? 'recommended') as TutorFilter['sort'] })} align="right" iconOnly />
         </div>
-        <GoalSearch key={JSON.stringify([filter.subject ?? '', filter.query ?? ''])} subject={filter.subject ?? undefined} topic={filter.query ?? undefined} onFind={(subject, topic) => set({ subject, query: topic || undefined })} />
       </search>
 
       <section className="trh-sec" aria-label="Преподаватели" aria-busy={loading}>
-        {fresh && !error && total !== null && filter.subject && <p className="muted">Подбор по предмету <b>{filter.subject}</b>{filter.query && <> и запросу «{filter.query}»</>}.</p>}
         {error ? <ErrorState text={error} onRetry={() => setAttempt((value) => value + 1)} /> : null}
         {!loading && total === 0 ? (
           <EmptyState icon="search" title={filter.query || filter.subject || filter.priceMin != null || filter.priceMax != null || filter.hasIntro ? "По вашему запросу преподавателей не нашлось" : "Анкеты скоро появятся"} text={user?.role === 'student' ? 'Попробуйте другое имя, предмет или тему. Или опишите задачу в заявке: подходящие репетиторы откликнутся сами.' : 'Попробуйте другое имя, предмет или тему.'}
@@ -105,19 +103,4 @@ function CatalogSearch({ query, onSearch }: { query: string; onSearch: (query: s
     <input className="ym-disable-keys trh-search-input" type="search" autoComplete="off" name="query" aria-label="Поиск по предмету, теме или имени преподавателя" placeholder="Предмет или имя" maxLength={200} value={input} onChange={(e) => setInput(e.target.value)} />
     <Button type="submit" size="s">Найти</Button>
   </form>;
-}
-
-function GoalSearch({ subject, topic, onFind }: { subject?: string; topic?: string; onFind: (subject: string, topic: string) => void }) {
-  const [selected, setSelected] = useState(subject ?? '');
-  const [goal, setGoal] = useState(topic ?? '');
-  return (
-    <details className="trk-goal-search">
-      <summary>Подобрать по учебной цели</summary>
-      <form className="trk-form" onSubmit={(event) => { event.preventDefault(); if (selected) onFind(selected, goal.trim()); }}>
-        <SelectField label="Предмет" value={selected} onChange={(event) => setSelected(event.target.value)} options={[{ value: '', label: 'Выберите предмет' }, ...SUBJECTS.map((value) => ({ value, label: value }))]} />
-        <TextField label="Тема или цель" value={goal} onChange={(event) => setGoal(event.target.value)} maxLength={120} placeholder="Например, ЕГЭ или алгоритмы" />
-        <Button type="submit" size="s" disabled={!selected}>Подобрать репетитора</Button>
-      </form>
-    </details>
-  );
 }

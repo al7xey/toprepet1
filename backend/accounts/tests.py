@@ -166,3 +166,16 @@ def test_code_preserves_leading_zeros_and_requires_a_session(api):
     assert 'Код подтверждения: 000042' in mail.outbox[-1].body
     assert Api().call('post', '/auth/verify', {'token': '000042'}).status_code == 401
     assert api.post_ok('/auth/verify', {'token': '000042'})['emailVerified']
+
+
+def test_pilot_signup_opens_session_without_changing_email_status(api, settings, mailoutbox):
+    settings.PILOT_MODE = True
+    result = api.post_ok('/auth/signup', {
+        'role': 'student', 'name': 'Пилот',
+        'email': 'student@pilot.example.test', 'password': 'strong-local-test-2026',
+    }, 201)
+    assert result['emailVerificationRequired'] is False
+    assert result['emailVerified'] is False
+    assert api.get_ok('/auth/me')['id'] == result['id']
+    api.post_ok('/auth/verify/resend', status=204)
+    assert not mailoutbox

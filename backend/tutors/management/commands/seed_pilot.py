@@ -21,8 +21,43 @@ TUTORS = [
 ]
 
 
+PROFILE_TEXT = {
+    'vera': (
+        'Информатика и математика для 8–11 классов',
+        'Готовлю к ЕГЭ по информатике и помогаю освоить Python с нуля. Сложные алгоритмы разбираем на небольших задачах.',
+        'Начинаем с разбора одной задачи, затем решаем похожую вместе. В конце фиксируем, что повторить к следующему уроку.',
+        '5 лет индивидуальных занятий',
+        ['Прикладная информатика', 'Подготовка к ЕГЭ'],
+    ),
+    'maksim': (
+        'Математика и физика для 7–11 классов',
+        'Объясняю, откуда берутся формулы и как выбирать метод решения. Помогаю подготовиться к ОГЭ и контрольным.',
+        'Рисуем схему, составляем уравнение и проверяем ответ. После урока остаётся конспект с одним разобранным примером.',
+        '7 лет преподавания',
+        ['Физика и математика', 'Подготовка к ОГЭ'],
+    ),
+    'alina': (
+        'Английский для школьников и взрослых',
+        'Помогаю перейти от учебника к разговору: обсуждаем знакомые темы, исправляем типичные ошибки и расширяем словарь.',
+        'На каждом уроке есть короткий диалог, упражнение на грамматику и задание, которое можно повторить самостоятельно.',
+        '4 года разговорной практики',
+        ['Английская филология', 'Разговорная практика A2–B2'],
+    ),
+    'maria': (
+        'Русский язык и литература для 8–11 классов',
+        'Разбираю с учениками структуру сочинения, аргументацию и задания ЕГЭ. Показываю, как редактировать собственный текст.',
+        'Читаем фрагмент, собираем план, пишем один абзац и проверяем его по критериям. Дорабатываем текст по обратной связи.',
+        '6 лет подготовки школьников',
+        ['Русская филология', 'Сочинения и анализ текста'],
+    ),
+}
+
+
 class Command(BaseCommand):
-    help = 'Добавляет локальные тестовые аккаунты и анкеты без фотографий'
+    help = 'Добавляет локальные тестовые аккаунты и вымышленные анкеты'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--refresh-profiles', action='store_true', help='Обновить описание и портреты существующих демо-анкет')
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -51,14 +86,22 @@ class Command(BaseCommand):
         account('moderator', 'Модератор · тест', 'admin')
         for index, (login, name, subjects, price, intro, topics) in enumerate(TUTORS):
             user = account(login, name, 'tutor')
-            Tutor.objects.get_or_create(user=user, defaults={
+            headline, intro_text, approach, experience, achievements = PROFILE_TEXT[login]
+            profile = {
+                'headline': headline,
+                'photo': f'/images/pilot/{login}.webp',
+                'photo_srcset': '',
+                'intro': intro_text,
+                'approach': approach,
+                'experience': experience,
+                'achievements': [{'title': title, 'text': ''} for title in achievements],
+            }
+            tutor, created = Tutor.objects.get_or_create(user=user, defaults={
+                **profile,
                 'name': name,
-                'headline': 'Тестовая анкета преподавателя',
                 'subjects': subjects,
                 'card_subjects': ' / '.join(subjects),
                 'help_topics': topics,
-                'intro': 'Вымышленная анкета для проверки поиска и записи на занятие.',
-                'approach': 'В начале знакомимся с задачей ученика, затем разбираем примеры и планируем следующий шаг.',
                 'price': price,
                 'intro_minutes': intro,
                 'durations': [45, 60],
@@ -66,6 +109,8 @@ class Command(BaseCommand):
                 'week': [{'weekday': day, 'intervals': [{'from': '09:00', 'to': '21:00'}]} for day in range(1, 8)],
                 'sort_order': index + 1,
             })
+            if not created and options['refresh_profiles']:
+                Tutor.objects.filter(pk=tutor.pk).update(**profile)
 
         for role, email, password in credentials:
             self.stdout.write(f'{role}	{email}	{password}')

@@ -31,3 +31,23 @@ test('на компактном ПК иллюстрация и обе кнопк
     await expectNoHorizontalScroll(page);
   }
 });
+
+
+test('у каталога один поиск, у навигации круглая подсветка, а кнопки главной ограничены по ширине', async ({ page, isMobile }) => {
+  await page.goto('/teachers');
+  await expect(page.getByRole('searchbox')).toHaveCount(1);
+  await expect(page.getByText('Подобрать по учебной цели')).toHaveCount(0);
+  if (!isMobile) {
+    const nav = page.getByRole('navigation', { name: 'Основная навигация' });
+    const target = nav.getByRole('link', { name: 'Блог' });
+    await target.hover();
+    await expect(target).toHaveCSS('border-top-left-radius', '999px');
+    await expect(target).toHaveCSS('background-color', 'rgb(255, 243, 236)');
+  }
+  await page.goto('/');
+  const action = page.getByRole('link', { name: 'Бесплатное знакомство', exact: true });
+  await expect(action).toBeVisible();
+  const width = await action.boundingBox();
+  if (!isMobile) expect(width!.width).toBeLessThan(400);
+  await expectNoHorizontalScroll(page);
+});

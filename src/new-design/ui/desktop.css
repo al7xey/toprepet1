@@ -1,0 +1,53 @@
+@media (min-width: 761px) {
+  .tr.tr .hdr .trh-nav a {
+    border-radius: 999px;
+    transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .tr.tr .hdr .trh-nav a.cur {
+    color: var(--ink);
+    background-color: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px rgb(242 106 46 / 16%);
+  }
+
+  .tr .trh-main .btn.btn-block {
+    inline-size: fit-content;
+    min-inline-size: min(100%, 10rem);
+    max-inline-size: 100%;
+    justify-self: start;
+  }
+
+  .tr :is(.trk-narrow, .trh-pf-actions) .btn.btn-block {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+}
+
+@media (min-width: 761px) and (hover: hover) and (pointer: fine) {
+  .tr.tr .hdr .trh-nav a:not(.cur):hover {
+    color: var(--ink);
+    background-color: #fff3ec;
+  }
+
+  .tr.tr .btn.btn-primary:hover:not(:disabled, [aria-disabled="true"]) {
+    background-color: #ed642a;
+    box-shadow: inset 0 0 0 1px rgb(145 58 19 / 18%);
+  }
+
+  .tr.tr :is(.btn-line, .btn-fill, .btn-warm, .btn-soft, .trk-iconbtn, .chipf):not(.trh-burger, .trk-addbtn, .on):hover:not(:disabled, [aria-disabled="true"]) {
+    --lg-control-fill: #fff5ee;
+    --lg-control-rim: #efcdbb;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--lg-control-rim);
+  }
+
+  .tr.tr :is(.trk-navrow, .tg-row:not(.on)):hover {
+    background-color: #fff5ee;
+  }
+
+  .tr.tr .tc:hover { box-shadow: 0 0 0 2px #efcdbb; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr.tr .hdr .trh-nav a { transition: none; }
+}
