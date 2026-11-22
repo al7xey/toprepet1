@@ -352,7 +352,7 @@ const ready = (to: string) => READY.some((p) => to === p || to.startsWith(`${p}/
 
 const NAV: Record<Role, { top: NavItem[]; tabs: NavItem[] }> = {
   student: {
-    top: [{ label: 'Найти репетитора', to: '/teachers', icon: 'search' }, { label: 'Мои уроки', to: '/me/lessons', icon: 'cal' }, { label: 'Заявки', to: '/me/requests', icon: 'list' }, { label: 'Платежи', to: '/me/payments', icon: 'card' }],
+    top: [{ label: 'Поиск', to: '/teachers', icon: 'search' }, { label: 'Мои уроки', to: '/me/lessons', icon: 'cal' }, { label: 'Заявки', to: '/me/requests', icon: 'list' }, { label: 'Платежи', to: '/me/payments', icon: 'card' }],
     tabs: [{ label: 'Поиск', to: '/teachers', icon: 'search' }, { label: 'Занятия', to: '/me/lessons', icon: 'book' }, { label: 'Чаты', to: '/me/chats', icon: 'chat-bubble' }, { label: 'Профиль', to: '/me/account', icon: 'user', also: ['/me/progress', '/me/tutors', '/me/requests', '/me/payments', '/me/notifications'] }],
   },
   tutor: {
@@ -365,16 +365,26 @@ const NAV: Record<Role, { top: NavItem[]; tabs: NavItem[] }> = {
   },
 };
 
+function closeExtraNavOnEscape(event: React.KeyboardEvent<HTMLElement>) {
+  if (event.key !== 'Escape') return;
+  const menu = event.currentTarget.closest('details');
+  if (!menu?.open) return;
+  menu.open = false;
+  menu.querySelector('summary')?.focus();
+}
+
 /**
  * Кабинет ученика, репетитора или администратора.
  * Компьютер: стеклянная шапка с разделами и значками. Телефон: без закреплённой шапки, снизу стеклянная панель вкладок.
  */
 export function AppLayout({ role, children, narrow, chat }: { role: Role; children: ReactNode; narrow?: boolean; chat?: 'list' | 'thread' }) {
   const { user, logout } = useSession();
+  const { pathname } = useLocation();
   const exit = useMutation(() => logout());
   const counters = useCounters(role);
   const nav = NAV[role];
   const top = nav.top.filter((item) => ready(item.to));
+  const extra = role === 'tutor' ? top.slice(3) : [];
   const tabs = nav.tabs.filter((t) => ready(t.to)).map((t) => (t.icon === 'chat-bubble' ? { ...t, badge: counters.chats } : t));
   const accountTo = role === 'admin' ? '/admin/disputes' : `${counters.prefix}/account`;
   return (
@@ -382,7 +392,15 @@ export function AppLayout({ role, children, narrow, chat }: { role: Role; childr
       <header className="hdr surf trh-hdr trk-app-hdr">
         <Logo />
         <nav className="trh-nav" aria-label="Разделы кабинета">
-          {top.map((item) => <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'cur' : undefined)}>{item.label}</NavLink>)}
+          {top.map((item, index) => <NavLink key={item.to} to={item.to} className={({ isActive }) => cx(isActive && 'cur', role === 'tutor' && index >= 3 && 'trk-wide-nav-link')}>{item.label}</NavLink>)}
+          {extra.length > 0 && (
+            <details key={pathname} className="trk-extra-nav">
+              <summary onKeyDown={closeExtraNavOnEscape}>Ещё <Icon name="down" size={14} /></summary>
+              <div className="surf-strong">
+                {extra.map(item => <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? 'cur' : undefined} onKeyDown={closeExtraNavOnEscape} onClick={(event) => event.currentTarget.closest('details')?.removeAttribute('open')}>{item.label}</NavLink>)}
+              </div>
+            </details>
+          )}
         </nav>
         {role !== 'admin' && (
           <span className="icons">

@@ -7,9 +7,9 @@ import { Button, EmptyState, ErrorState } from './kit';
 export function TutorShowcase({ query }: { query: Query<Tutor[]> }) {
   if (query.error) return <ErrorState text={query.error} onRetry={query.reload} />;
   if (query.loading || !query.data) return (
-    <div role="region" aria-label="Загрузка" className="trh-teachers">
+    <section aria-label="Загрузка" className="trh-teachers">
       {[0, 1, 2, 3].map((key) => <span key={key} className="skel trk-skel trh-tutor-skeleton" aria-hidden="true" />)}
-    </div>
+    </section>
   );
   if (!query.data.length) return <EmptyState icon="search" title="Анкеты скоро появятся" text="Пока нет опубликованных анкет. Загляните позже или откройте раздел помощи." actions={<Button to="/help" variant="line">Помощь</Button>} />;
   return <TutorGrid tutors={query.data} layout="row" />;

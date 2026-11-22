@@ -16,8 +16,10 @@ export function TutorCard({ tutor, priority }: { priority?: boolean; tutor: Pick
   const { pathname, search } = useLocation();
   const back = /^\/teachers\/?$/.test(pathname) ? pathname + search : undefined;
   return (
-    <Link state={back ? { back } : undefined} className="tc s" to={`/teachers/${tutor.id}/`} aria-label={`${tutor.name}, ${tutor.cardSubjects}`} draggable={false}>
-      {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
+    <Link state={back ? { back } : undefined} className="tc s trh-tutor-card" to={`/teachers/${tutor.id}/`} aria-label={`${tutor.name}, ${tutor.cardSubjects}`} draggable={false}>
+      <span className="trh-tutor-picture">
+        {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
+      </span>
       <span className="pl">
         <b><span className="trh-tutor-name">{tutor.name}</span></b>
         <span className="trh-tutor-subjects">{tutor.cardSubjects}</span>
