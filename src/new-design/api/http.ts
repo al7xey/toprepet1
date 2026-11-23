@@ -1,7 +1,7 @@
 import { optimizeImage } from '../lib/images';
 import { ApiError, type Api } from './contract';
 
-/** Реальный клиент: включается, когда задан VITE_API_URL. Сессия — в httpOnly cookie, поэтому credentials: 'include'. */
+/** HTTP-клиент Django. Сессия — в httpOnly cookie, поэтому credentials: 'include'. */
 /** `fetchImpl` нужен тестам в Node (там нет cookie-хранилища браузера); в приложении используется обычный fetch. */
 export function createHttpApi(base: string, fetchImpl: typeof fetch = (...args) => fetch(...args)): Api {
   const request = async <T>(method: string, path: string, body?: unknown, extraHeaders?: Record<string, string>): Promise<T> => {
@@ -28,7 +28,7 @@ export function createHttpApi(base: string, fetchImpl: typeof fetch = (...args) 
   };
 
   return {
-    mode: 'http',
+    features: () => get('/features'),
     me: async () => { try { return await get('/auth/me'); } catch (error) { if (error instanceof ApiError && error.status === 401) return null; throw error; } },
     login: (email, password) => post('/auth/login', { email, password }),
     loginWithYandex: () => post('/auth/yandex'),

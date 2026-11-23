@@ -27,7 +27,7 @@ function NewPasswordPage({ token }: { token: string }) {
     if (await confirm.run(password)) { toast('Пароль изменён. Войдите с новым паролем'); void navigate('/login', { replace: true }); }
   };
   return (
-    <AuthLayout view="recovery">
+    <AuthLayout>
       <PageHeader title="Новый пароль" center />
       <AuthCard>
         <form className="trk-form" onSubmit={submit} noValidate>
@@ -55,7 +55,7 @@ function RequestPage() {
   };
 
   return (
-    <AuthLayout view="recovery">
+    <AuthLayout>
       <PageHeader title="Сброс пароля" center />
       <AuthCard>
         {sent ? (

@@ -1,4 +1,3 @@
-import { useSpringPill } from '../lib/useSpringPill';
 import { useEffect, useId, useRef, useState, type CSSProperties, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import type { Query } from '../api/hooks';
@@ -80,8 +79,6 @@ export function PageHeader({ title, lead, back, actions, center }: { title: Reac
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
   if (!back && from && /^\/(me|tutor)\/account(?:\?|$)/.test(from) && from !== location.pathname) back = { to: from, label: 'Профиль' };
-  const rootSection = /^\/(?:me\/(?:payments|requests)|tutor\/(?:finance|schedule|students|reviews|profile))\/?$/.test(location.pathname);
-  if (rootSection && !from && back?.to && back.to.endsWith('/account')) back = undefined;
   return (
     <header className={cx('trk-pagehead', center && 'center', back && 'has-back')}>
       <div className="trk-pagehead-row">
@@ -97,7 +94,7 @@ export function PageHeader({ title, lead, back, actions, center }: { title: Reac
 }
 
 /** Секция с заголовком второго уровня: 24 px на компьютере, 21 px на телефоне. */
-export function Section({ title, action, lead, children, id, className, reveal = true }: { title?: ReactNode; action?: ReactNode; lead?: ReactNode; children?: ReactNode; id?: string; className?: string; reveal?: boolean }) {
+export function Section({ title, action, lead, children, id, className, reveal }: { title?: ReactNode; action?: ReactNode; lead?: ReactNode; children?: ReactNode; id?: string; className?: string; reveal?: boolean }) {
   const headingId = useId();
   const section = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -163,8 +160,8 @@ export function Note({ tone = 'info', icon, children, action }: { tone?: 'info' 
 
 export function EmptyState({ icon = 'inbox', title, text, actions }: { icon?: string; title: string; text?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="empty trk-empty studio-empty">
-      <span className="studio-empty-icon"><Icon name={icon} /></span>
+    <div className="empty trk-empty">
+      <Icon name={icon} />
       <b>{title}</b>
       {text && <span>{text}</span>}
       {actions && <div className="trk-empty-actions">{actions}</div>}
@@ -246,7 +243,7 @@ export interface StepItem { title: ReactNode; text?: ReactNode; state?: 'done' |
  * Нумерованные шаги с линией (главная, «Для репетиторов», «Что будет дальше»).
  * size="s" — компактный вариант для карточек.
  */
-export function Steps({ items, size = 'md', revealOnScroll = true }: { items: StepItem[]; size?: 'md' | 's'; revealOnScroll?: boolean }) {
+export function Steps({ items, size = 'md', revealOnScroll }: { items: StepItem[]; size?: 'md' | 's'; revealOnScroll?: boolean }) {
   const list = useRef<HTMLOListElement>(null);
   useEffect(() => {
     if (!revealOnScroll || !list.current || typeof IntersectionObserver === 'undefined' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -307,10 +304,8 @@ export function onChoiceTabKey(event: KeyboardEvent<HTMLButtonElement>) {
 
 /** Сегментный переключатель вкладок. */
 export function Tabs<T extends string>({ items, value, onChange, wide }: { items: { value: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; wide?: boolean }) {
-  const { host, pill } = useSpringPill(value);
   return (
-    <div ref={host} className={cx('seg trk-tabs studio-tabs', wide && 'wide')} role="tablist">
-      <span ref={pill} className="studio-tab-pill" aria-hidden="true" />
+    <div className={cx('seg trk-tabs', wide && 'wide')} role="tablist">
       {items.map((item) => (
         <button key={item.value} type="button" role="tab" aria-selected={item.value === value} tabIndex={item.value === value ? 0 : -1} className={item.value === value ? 'on' : undefined} onKeyDown={onChoiceTabKey} onClick={() => onChange(item.value)}>
           {item.label}{item.count ? <span className="cnt2">{item.count}</span> : null}
@@ -323,10 +318,10 @@ export function Tabs<T extends string>({ items, value, onChange, wide }: { items
 /** Прогресс многошагового мастера. */
 export function WizardProgress({ step, total, label }: { step: number; total: number; label?: string }) {
   return (
-    <div className="trk-progress screen-progress">
-      <div className="screen-progress-head"><span>{label ?? 'Заполнение'}</span><b>Шаг {step} из {total}</b></div>
-      <progress aria-label={label ?? 'Заполнение формы'} value={step} max={total} aria-valuetext={`Шаг ${step} из ${total}`} />
-      <ol className="screen-progress-stages" aria-label="Этапы">{Array.from({ length: total }, (_, i) => <li key={i} aria-current={i === step - 1 ? 'step' : undefined} className={i < step ? 'on' : ''}><span>{i < step - 1 ? <Icon name="check" /> : i + 1}</span></li>)}</ol>
+    <div className="trk-progress">
+      <progress className="trk-sr" aria-label={label ?? 'Заполнение формы'} value={step} max={total} aria-valuetext={`Шаг ${step} из ${total}`} />
+      {label && <span className="mini">{label}</span>}
+      <div className="prog" aria-hidden="true">{Array.from({ length: total }, (_, i) => <i key={i} className={i < step ? 'on' : undefined} />)}</div>
     </div>
   );
 }
@@ -526,13 +521,4 @@ export function RatingInput({ value, onChange, label = 'Оценка', error }: 
       {error && <span className="trk-error" role="alert">{error}</span>}
     </fieldset>
   );
-}
-
-/** One search surface for catalogue and messaging. */
-export function SearchInput({ value, onChange, label, placeholder = 'Поиск', action }: { value: string; onChange: (value: string) => void; label: string; placeholder?: string; action?: ReactNode }) {
-  return <label className="search trk-search"><Icon name="search" /><input className="trh-search-input" type="search" autoComplete="off" aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange(event.target.value)} />{action}</label>;
-}
-
-export function MetricCard({ label, value, hint, icon }: { label: string; value: ReactNode; hint?: string; icon: string }) {
-  return <div className="studio-metric"><span className="studio-metric-label"><Icon name={icon} />{label}</span><b>{value}</b>{hint && <small>{hint}</small>}</div>;
 }

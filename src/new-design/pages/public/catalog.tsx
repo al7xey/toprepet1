@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { subjects } from '../../../entities/lesson';
-import { api, staticTutors, type TutorFilter } from '../../api';
+import { api, type TutorFilter } from '../../api';
 import { safeChoice, trackGoal } from '../../../shared/lib/analytics';
 import { PublicLayout } from '../../layout/layouts';
 import { readCatalogFilter, writeCatalogFilter } from '../../lib/catalog-filter';
@@ -19,17 +19,14 @@ export default function CatalogPage() {
   const setFilter = (next: TutorFilter) => setParams(writeCatalogFilter(params, next));
   const [attempt, setAttempt] = useState(0);
   const [searchReset, setSearchReset] = useState(0);
-  const [list, dispatch] = useReducer(listReducer, undefined, (): ListState => ({ key: '', items: staticTutors().slice(0, PAGE), total: null, cursor: null, more: false, error: null }));
+  const [list, dispatch] = useReducer(listReducer, undefined, (): ListState => ({ key: '', items: [], total: null, cursor: null, more: false, error: null }));
   const sentinel = useRef<HTMLDivElement>(null);
   const key = JSON.stringify(filter) + attempt;
   const fresh = list.key === key;
   const { items, total, cursor } = list;
   const loading = !fresh || list.more;
   const error = fresh ? list.error : null;
-  // The build snapshot is valid only for the unfiltered catalogue. Never let a
-  // quick click on stale results open an unrelated tutor while filters load.
-  const initialUnfiltered = list.key === '' && !filter.query && !filter.subject && filter.priceMin == null && filter.priceMax == null && !filter.hasIntro && filter.sort === 'recommended';
-  const visibleItems = fresh || initialUnfiltered ? items : [];
+  const visibleItems = fresh ? items : [];
 
   // первая страница при смене фильтров
   useEffect(() => {
@@ -64,7 +61,7 @@ export default function CatalogPage() {
   const reset = () => { setSearchReset((value) => value + 1); setFilter({ sort: filter.sort }); };
 
   return (
-    <PublicLayout view="catalog" tight>
+    <PublicLayout tight>
       <CatalogMetadata tutors={visibleItems} />
       <PageHeader title="Топ репеты" />
 
@@ -85,11 +82,11 @@ export default function CatalogPage() {
       <section className="trh-sec" aria-label="Преподаватели" aria-busy={loading}>
         {error ? <ErrorState text={error} onRetry={() => setAttempt((value) => value + 1)} /> : null}
         {!loading && total === 0 ? (
-          <EmptyState icon="search" title="По вашему запросу преподавателей не нашлось" text={user?.role === 'student' ? 'Попробуйте другое имя, предмет или тему. Или опишите задачу в заявке: подходящие репетиторы откликнутся сами.' : 'Попробуйте другое имя, предмет или тему.'}
-            actions={<><Button onClick={reset}>Показать всех</Button>{user?.role === 'student' && <Button to="/me/requests/new" variant="line">Создать заявку</Button>}</>} />
+          <EmptyState icon="search" title={filter.query || filter.subject || filter.priceMin != null || filter.priceMax != null || filter.hasIntro ? "По вашему запросу преподавателей не нашлось" : "Анкеты скоро появятся"} text={user?.role === 'student' ? 'Попробуйте другое имя, предмет или тему. Или опишите задачу в заявке: подходящие репетиторы откликнутся сами.' : 'Попробуйте другое имя, предмет или тему.'}
+            actions={<>{(filter.query || filter.subject || filter.priceMin != null || filter.priceMax != null || filter.hasIntro) && <Button onClick={reset}>Сбросить поиск</Button>}{user?.role === 'student' && <Button to="/me/requests/new" variant="line">Создать заявку</Button>}</>} />
         ) : (
           <TutorGrid tutors={visibleItems}>
-            {((!fresh && !initialUnfiltered) || (loading && cursor)) && Array.from({ length: 4 }, (_, i) => <Skeleton key={i} height={360} radius={36} />)}
+            {(!fresh || (loading && cursor)) && Array.from({ length: 4 }, (_, i) => <Skeleton key={i} height={360} radius={36} />)}
           </TutorGrid>
         )}
         {cursor && <div ref={sentinel} className="trh-sentinel" aria-hidden="true" />}

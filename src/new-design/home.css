@@ -271,3 +271,21 @@
 .tr.trh-mock .trh-mock-main[data-v=m] .wash{max-width:none}
 .tr.trh-mock .anim>*{animation:none}
 .tr .hero-h .trh-ln:not(.trh-ln2)>span{color:var(--ink)}
+
+@media (min-width: 761px) {
+  .tr .trh-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+  }
+  .tr .trh-hero-btns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tr .trh-hero-btns .btn {
+    min-width: 0;
+    height: auto;
+    min-height: 52px;
+    padding: 8px clamp(8px, 1.5vw, 20px);
+    line-height: 1.25;
+  }
+}

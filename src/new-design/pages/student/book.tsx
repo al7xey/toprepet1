@@ -1,18 +1,17 @@
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { api, LESSON_MINUTES, staticTutors, type Card as PayCard, type Tutor } from '../../api';
+import { api, LESSON_MINUTES, type Card as PayCard, type Tutor } from '../../api';
 import { useMutation, useQuery } from '../../api/hooks';
 import { AppLayout } from '../../layout/layouts';
 import { minutes, rub, whenLabel } from '../../lib/format';
-import { AddCardModal, Button, Card, Checkbox, CardTitle, EmptyState, FormError, IconButton, PageHeader, QueryView, Rows, Section, SelectField, SlotPicker } from '../../ui';
+import { AddCardModal, Button, Card, Checkbox, CardTitle, EmptyState, FormError, IconButton, Note, PageHeader, QueryView, Rows, Section, SelectField, SlotPicker } from '../../ui';
 
 /** Запись на урок или бесплатное знакомство: проверить сводку, выбрать карту и подтвердить. */
 export default function BookPage() {
   const { id = '' } = useParams();
-  const initial = useMemo(() => staticTutors().find((t) => t.id === id), [id]);
-  const tutor = useQuery(`tutor-${id}`, () => api.getTutor(id), initial);
+  const tutor = useQuery(`tutor-${id}`, () => api.getTutor(id));
   return (
-    <AppLayout view="booking" role="student" narrow>
+    <AppLayout role="student" narrow>
       <QueryView query={tutor} empty={() => null}>
         {(t) => <BookForm key={id} tutor={t} />}
       </QueryView>
@@ -43,7 +42,9 @@ function BookForm({ tutor }: { tutor: Tutor }) {
   const duration = kind === 'intro' ? tutor.introMinutes : regularDuration;
   const from = useMemo(() => new Date().toISOString(), []);
   const slots = useQuery(`slots-${tutor.id}-${duration}`, () => api.getTutorSlots(tutor.id, from, 14, duration));
-  const cards = useQuery('cards', () => api.listCards());
+  const features = useQuery(kind === 'regular' ? 'features' : null, () => api.features());
+  const canPay = features.data?.testPayments === true;
+  const cards = useQuery(canPay ? 'cards' : null, () => api.listCards());
   const book = useMutation((input: Parameters<typeof api.createBooking>[0]) => api.createBooking(input));
 
   const total = kind === 'intro' ? 0 : Math.round((response?.price ?? tutor.studentPrice) * duration / 60);
@@ -54,7 +55,7 @@ function BookForm({ tutor }: { tutor: Tutor }) {
 
   const submit = async () => {
     setShowErrors(true);
-    if (problems.start || problems.card || problems.agree || !start) return;
+    if ((needCard && !canPay) || problems.start || problems.card || problems.agree || !start) return;
     if (requestId && !response) return;
     const input = { tutorId: tutor.id, kind, start, durationMin: duration, subject, cardId: card?.id, requestId };
     const signature = JSON.stringify(input);
@@ -66,7 +67,6 @@ function BookForm({ tutor }: { tutor: Tutor }) {
   return (
     <>
       <PageHeader title={kind === 'intro' ? 'Запись на знакомство' : 'Запись на урок'} back={{ to: `/teachers/${tutor.id}/`, label: 'К анкете' }} lead={`${tutor.name} · ${tutor.cardSubjects}`} />
-      <div className="screen-booking-grid"><div className="screen-booking-choice">
       {kind === 'regular' && durations.length > 1 && <SelectField label="Длительность занятия" value={regularDuration} onChange={(e) => { setRegularDuration(Number(e.target.value)); setStart(null); }} options={durations.map((d) => ({ value: String(d), label: minutes(d) }))} />}
       <Section title="Когда">
         <Card>
@@ -78,7 +78,6 @@ function BookForm({ tutor }: { tutor: Tutor }) {
       </Section>
       {tutor.subjects.length > 1 && <SelectField label="Предмет" value={subject} onChange={(e) => setSubject(e.target.value)} options={tutor.subjects} />}
 
-      </div><aside className="screen-booking-summary">
       <Section title="Итог">
         <Card className="trk-summary">
           <Rows boxed rows={[
@@ -88,7 +87,8 @@ function BookForm({ tutor }: { tutor: Tutor }) {
             ['Длительность', minutes(duration)],
           ]} />
           <div className="trk-total"><span>К оплате</span><b className="tn trk-price-xl">{kind === 'intro' ? 'Бесплатно' : rub(total)}</b></div>
-          {kind === 'regular' && (
+          {needCard && !features.loading && !canPay && <Note tone="plain">Оплата пока недоступна. Если репетитор предлагает бесплатное знакомство, его можно выбрать в анкете.</Note>}
+          {needCard && canPay && (
             <>
               <div className="trk-pay-head"><CardTitle>Способ оплаты</CardTitle><IconButton icon="plus" label="Добавить способ оплаты" onClick={() => setCardOpen(true)} className="trk-addbtn" /></div>
               <QueryView query={cards} loading={<span className="muted">Загружаем карты…</span>}>
@@ -107,11 +107,10 @@ function BookForm({ tutor }: { tutor: Tutor }) {
             {showErrors && problems.agree && <span className="trk-error">Подтвердите согласие</span>}
           </div>
           <FormError error={book.error ?? responses.error ?? (requestId && !responses.loading && !response ? 'Отклик больше недоступен. Вернитесь к заявке.' : null)} />
-          <Button size="lg" block onClick={submit} disabled={Boolean(requestId && (!response || responses.loading))} loading={book.pending}>{kind === 'intro' ? 'Записаться на знакомство' : 'Записаться'}</Button>
+          <Button size="lg" block onClick={submit} disabled={(needCard && !canPay) || Boolean(requestId && (!response || responses.loading))} loading={book.pending}>{kind === 'intro' ? 'Записаться на знакомство' : 'Записаться'}</Button>
         </Card>
       </Section>
-      </aside></div>
-      <AddCardModal open={cardOpen} onClose={() => setCardOpen(false)} onAdded={(c) => { setCardId(c.id); cards.reload(); setCardOpen(false); }} />
+      <AddCardModal open={canPay && cardOpen} onClose={() => setCardOpen(false)} onAdded={(c) => { setCardId(c.id); cards.reload(); setCardOpen(false); }} />
     </>
   );
 }

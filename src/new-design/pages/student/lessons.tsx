@@ -2,20 +2,18 @@ import { useState } from 'react';
 import { api } from '../../api';
 import { useQuery } from '../../api/hooks';
 import { AppLayout } from '../../layout/layouts';
-import { Button, EmptyState, LessonCard, LoadingList, PageHeader, QueryView, SearchInput, Tabs } from '../../ui';
+import { Button, EmptyState, LessonCard, LoadingList, PageHeader, QueryView, Tabs } from '../../ui';
 
 type Scope = 'upcoming' | 'past';
 
 /** Мои уроки: предстоящие и прошедшие. */
 export default function LessonsPage() {
-  const [search, setSearch] = useState('');
   const [scope, setScope] = useState<Scope>('upcoming');
   const lessons = useQuery(`lessons-${scope}`, () => api.listLessons(scope));
   return (
-    <AppLayout view="lessons" role="student">
+    <AppLayout role="student">
       <PageHeader title="Мои уроки" />
       <Tabs<Scope> items={[{ value: 'upcoming', label: 'Предстоящие' }, { value: 'past', label: 'Прошедшие' }]} value={scope} onChange={setScope} />
-      <SearchInput label="Найти занятие" placeholder="Предмет или преподаватель" value={search} onChange={setSearch} />
       <QueryView
         query={lessons}
         loading={<LoadingList rows={3} height={132} />}
@@ -25,7 +23,7 @@ export default function LessonsPage() {
             : <EmptyState icon="cal" title="Прошедших уроков пока нет" text="Здесь появятся состоявшиеся и отменённые уроки." />
         ))}
       >
-        {(items) => { const filtered = items.filter((lesson) => `${lesson.subject} ${lesson.tutorName}`.toLocaleLowerCase('ru-RU').includes(search.trim().toLocaleLowerCase('ru-RU'))); return filtered.length ? <div className="trk-list">{filtered.map((l) => <LessonCard key={l.id} lesson={l} role="student" />)}</div> : <EmptyState icon="search" title="Занятия не найдены" text="Попробуйте другое имя или предмет." actions={<Button variant="line" onClick={() => setSearch('')}>Сбросить поиск</Button>} />; }}
+        {(items) => <div className="trk-list">{items.map((l) => <LessonCard key={l.id} lesson={l} role="student" />)}</div>}
       </QueryView>
     </AppLayout>
   );

@@ -134,7 +134,7 @@ function ArticleView() {
 /** Публичный блог: главная, рубрики, статьи. Данные берутся из snapshot.json (его обновляет sync-blog). */
 export default function BlogPage({ page }: { page: BlogView }) {
   return (
-    <PublicLayout view="editorial" tight>
+    <PublicLayout tight>
       {page === 'home' ? <Home /> : page === 'rubric' ? <Rubric /> : page === 'article' ? <ArticleView /> : <NotFoundBody />}
     </PublicLayout>
   );

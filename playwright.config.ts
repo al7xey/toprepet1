@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 /**
- * Сквозные проверки на собранном сайте (`vite preview`) с мок-сервером в браузере.
+ * Сквозные проверки на собранном сайте (`vite preview`) с Django.
  * Запуск: `pnpm build:e2e && pnpm e2e`. Два экрана: компьютер 1440 и телефон 390.
  * Один сценарий (`e2e/real-backend.spec.ts`) идёт против настоящего Django: нужен `E2E_API_URL`.
  */
@@ -9,6 +9,7 @@ const port = 4173;
 
 export default defineConfig({
   testDir: 'e2e',
+  testMatch: /(?:real-backend|public-layout|header-fixed)\.spec\.ts$/,
   timeout: 60_000,
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,

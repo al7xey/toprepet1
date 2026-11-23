@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { api, LESSON_MINUTES, staticTutors, type Tutor } from '../../api';
+import { api, LESSON_MINUTES, type Tutor } from '../../api';
 import { trackGoal } from '../../../shared/lib/analytics';
 import { TutorMetadata } from '../../../app/tutor-metadata';
 import { useQuery } from '../../api/hooks';
@@ -16,14 +16,13 @@ import { achievementIcon } from '../../ui/icon';
 /** Анкета репетитора: данные, календарь записи, цены, отзывы. Карточка записи справа (на телефоне — панель снизу). */
 export default function ProfilePage() {
   const { id = '' } = useParams();
-  const initial = useMemo(() => staticTutors().find((t) => t.id === id), [id]);
-  const tutorQuery = useQuery(`tutor-${id}`, () => api.getTutor(id), initial);
+  const tutorQuery = useQuery(`tutor-${id}`, () => api.getTutor(id));
   const tutor = tutorQuery.data;
   if (tutorQuery.status === 404 || (!tutor && !tutorQuery.loading && !tutorQuery.error)) {
-    return <PublicLayout view="profile" tight><TutorMetadata tutor={null} /><NotFoundBody title="Анкета не найдена" text="Возможно, ссылка устарела или анкета снята с публикации." action={<Button to="/teachers" size="lg">К преподавателям</Button>} /></PublicLayout>;
+    return <PublicLayout tight><TutorMetadata tutor={null} /><NotFoundBody title="Анкета не найдена" text="Возможно, ссылка устарела или анкета снята с публикации." action={<Button to="/teachers" size="lg">К преподавателям</Button>} /></PublicLayout>;
   }
-  if (tutorQuery.error) return <PublicLayout view="profile" tight><PageHeader title="Анкета преподавателя" /><ErrorState text={tutorQuery.error} onRetry={tutorQuery.reload} /></PublicLayout>;
-  if (!tutor) return <PublicLayout view="profile" tight><PageHeader title="Анкета преподавателя" /><LoadingList rows={3} /></PublicLayout>;
+  if (tutorQuery.error) return <PublicLayout tight><PageHeader title="Анкета преподавателя" /><ErrorState text={tutorQuery.error} onRetry={tutorQuery.reload} /></PublicLayout>;
+  if (!tutor) return <PublicLayout tight><PageHeader title="Анкета преподавателя" /><LoadingList rows={3} /></PublicLayout>;
   return <Profile key={id} tutor={tutor} />;
 }
 
@@ -78,14 +77,14 @@ function Profile({ tutor }: { tutor: Tutor }) {
   );
 
   return (
-    <PublicLayout view="profile" tight bareMobile>
+    <PublicLayout tight bareMobile>
       <TutorMetadata tutor={tutor} />
-      <div className="trh-pf-backwrap"><BackLink to={fromChat ?? '/teachers'}>{fromChat && /^\/(me|tutor)\/chats/.test(fromChat) ? 'К сообщениям' : 'Все преподаватели'}</BackLink><IconButton icon="share" label="Поделиться" onClick={share} className="screen-profile-share-desktop" /></div>
+      <div className="trh-pf-backwrap"><BackLink to={fromChat ?? '/teachers'}>{fromChat && /^\/(me|tutor)\/chats/.test(fromChat) ? 'К сообщениям' : 'Все преподаватели'}</BackLink></div>
       <div className="trh-pf">
         <div className="trh-pf-main">
           <section className="trh-pf-top" aria-labelledby="tutor-name">
             <div className="trh-pf-photo">
-              <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 300px, 100vw" alt={`Фото: ${tutor.name}`} fetchPriority="high" decoding="async" />
+              {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 300px, 100vw" alt={`Фото: ${tutor.name}`} fetchPriority="high" decoding="async" /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
               <IconButton icon="back" label="Назад" onClick={close} className="trh-pf-back" />
               <IconButton icon="share" label="Поделиться" onClick={share} className="trh-pf-share" />
             </div>

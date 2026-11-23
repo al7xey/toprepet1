@@ -155,7 +155,7 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', 'TopRepet <noreply@toprepet.ru>')
 SITE_URL = env('SITE_URL', 'http://localhost:5173').rstrip('/')
 
 # Платежи: сейчас заглушка; провайдера меняет одна переменная (см. payments/providers.py).
-PAYMENT_PROVIDER = env('PAYMENT_PROVIDER', 'fake' if DEBUG else 'disabled')
+PAYMENT_PROVIDER = env('PAYMENT_PROVIDER', 'fake' if TESTING else 'disabled')
 SERVICE_FEE = 0.10
 # Видеосвязь: пока одна общая ссылка-заглушка, на этапе подключения Телемоста/Zoom здесь будет создание комнаты на урок.
 MEETING_URL = env('MEETING_URL', 'https://telemost.yandex.ru/')

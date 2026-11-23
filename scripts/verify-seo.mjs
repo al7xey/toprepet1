@@ -4,7 +4,6 @@ import { routes, titles, descriptions, canonicalForRoute } from './seo-routes.mj
 import privatePages from '../src/shared/config/private-seo-pages.json' with { type: 'json' };
 
 const fail = message => { throw new Error(`SEO: ${message}`); };
-const photos = JSON.parse(await readFile('src/shared/config/teacher-photos.json', 'utf8'));
 const seenTitles = new Set();
 const seenDescriptions = new Set();
 
@@ -21,7 +20,7 @@ for (const route of routes) {
   if (!/<h1(?:\s|>)/i.test(html) || !/<div id="root"[^>]*>[\s\S]{300,}<\/div>/.test(html)) fail(`${route}: prerender`);
   if (/<meta name="robots" content="[^"]*noindex/i.test(html)) fail(`${route}: noindex`);
   if ((html.match(/<meta name="robots"/g) || []).length !== 1 || !html.includes('max-image-preview:large')) fail(`${route}: robots/image preview`);
-  if (route === '/teachers' && (!html.includes('"@type": "CollectionPage"') || !html.includes('"@type": "ItemList"'))) fail(`${route}: directory schema`);
+  if (route === '/teachers' && !html.includes('"@type": "CollectionPage"')) fail(`${route}: directory schema`);
   if (['/teachers', '/for-repetitor'].includes(route) && !html.includes('"@type": "BreadcrumbList"')) fail(`${route}: breadcrumb schema`);
   for (const [key, value] of [['og:title', title], ['og:description', description], ['og:url', canonical]]) {
     if (!html.includes(`property="${key}" content="${value}"`)) fail(`${route}: ${key}`);
@@ -32,12 +31,6 @@ for (const route of routes) {
   if (!/<h1(?:\s|>)/i.test(main)) fail(`${route}: heading must be inside main, visible without JS`);
   for (const match of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
     try { JSON.parse(match[1]); } catch { fail(`${route}: invalid JSON-LD`); }
-  }
-  if (route.startsWith('/teachers/')) {
-    const photo = photos[route.split('/').at(-1)];
-    const image = new URL(photo.src, 'https://toprepet.ru').href;
-    if (!html.includes(`property="og:image" content="${image}"`) || !html.includes(`name="twitter:image" content="${image}"`)) fail(`${route}: profile social image`);
-    if (!html.includes('"@type": "ProfilePage"') || !html.includes(`"image": "${image}"`)) fail(`${route}: profile schema/image`);
   }
   seenTitles.add(title);
   seenDescriptions.add(description);
@@ -55,12 +48,6 @@ const lastmod = await readFile(resolve('dist/sitemap-lastmod.json'), 'utf8').the
 if (lastmod) {
   const dates = [...sitemap.matchAll(/<loc>([^<]+)<\/loc><lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)];
   if (dates.length !== urls.length || dates.some(([, url, date]) => lastmod[url]?.date !== date)) fail('sitemap lastmod');
-}
-for (const route of routes.filter(path => path.startsWith('/teachers/'))) {
-  const oldRoute = route.replace('/teachers/', '/teacher/');
-  const legacy = await readFile(resolve(`dist${oldRoute}/index.html`), 'utf8');
-  const canonical = canonicalForRoute(route);
-  if (!legacy.includes('noindex,follow') || !legacy.includes(`content="0;url=${canonical}"`) || !legacy.includes(`rel="canonical" href="${canonical}"`)) fail(`${oldRoute}: legacy redirect`);
 }
 const robots = await readFile(resolve('dist/robots.txt'), 'utf8');
 if (!robots.includes('User-agent: OAI-SearchBot') || !robots.includes('Sitemap: https://toprepet.ru/sitemap.xml')) fail('robots');
@@ -101,9 +88,7 @@ for (const [route, label] of Object.entries(privatePages).filter(([route]) => !r
 }
 const help = await readFile('dist/help/index.html', 'utf8');
 const catalog = await readFile('dist/teachers/index.html', 'utf8');
-const catalogSchema = [...catalog.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((match) => JSON.parse(match[1])).find((schema) => schema['@type'] === 'CollectionPage');
-const catalogCards = [...catalog.matchAll(/<a[^>]*class="tc s"[^>]*href="([^"]+)"[^>]*>/g)].map((match) => new URL(match[1], 'https://toprepet.ru').href);
-if (!catalogCards.length || JSON.stringify(catalogSchema?.mainEntity?.itemListElement.map((entry) => entry.item.url)) !== JSON.stringify(catalogCards)) fail('catalog schema must describe visible prerendered cards');
+if (/<a[^>]*href="[^"]*\/teachers\/[^"/]+/.test(catalog)) fail('static sample profiles in the catalog');
 if (!help.includes('"@type":"FAQPage"') || !help.includes('"acceptedAnswer"')) fail('help FAQ');
 const llms = await readFile('dist/llms.txt', 'utf8');
 for (const path of ['/teachers/', '/help/', '/legal/', '/blog/']) if (!llms.includes(`https://toprepet.ru${path}`)) fail('llms discovery');

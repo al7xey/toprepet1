@@ -13,7 +13,7 @@ export default function RequestDetailPage() {
   const request = useQuery(`request-${id}`, () => api.getRequest(id));
   const responses = useQuery(`responses-${id}`, () => api.listResponses(id));
   return (
-    <AppLayout view="request-detail" role="student" narrow>
+    <AppLayout role="student" narrow>
       <QueryView query={request} empty={() => null}>
         {(r) => <Detail request={r} responses={responses} onChange={request.setData} />}
       </QueryView>

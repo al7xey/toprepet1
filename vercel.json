@@ -1,6 +1,7 @@
 {
-  "buildCommand": "if [ \"$VERCEL_ENV\" = preview ] && [ -z \"$VITE_API_URL\" ]; then pnpm build:e2e; else pnpm build; fi",
+  "buildCommand": "pnpm build",
   "rewrites": [
+    { "source": "/teachers/:id", "destination": "/index.html" },
     { "source": "/(login|signup|auth|reset-password|verify-email|onboarding|me|tutor|admin|book|requests|help)(.*)", "destination": "/index.html" }
   ]
 }

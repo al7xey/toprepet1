@@ -8,7 +8,7 @@ WEB_PORT="${WEB_PORT:-4174}"
 DB="$(mktemp -d)/e2e.sqlite3"
 cd "$ROOT/backend"
 [ -f .venv/bin/activate ] && . .venv/bin/activate
-export DATABASE_URL="sqlite:///$DB" DEBUG=1 AUTH_THROTTLE=100000/min ALLOWED_ORIGINS="http://127.0.0.1:$WEB_PORT"
+export DATABASE_URL="sqlite:///$DB" DEBUG=1 PAYMENT_PROVIDER=fake CONTRACT_TESTS=1 AUTH_THROTTLE=100000/min ALLOWED_ORIGINS="http://127.0.0.1:$WEB_PORT"
 python manage.py migrate -v0
 python manage.py seed_demo >/dev/null
 python manage.py runserver "127.0.0.1:$API_PORT" --noreload >/tmp/e2e-api.log 2>&1 &
@@ -19,4 +19,4 @@ pnpm exec vite preview --outDir dist-real --host 127.0.0.1 --port "$WEB_PORT" --
 WEB=$!
 trap 'kill $API $WEB 2>/dev/null || true' EXIT
 for _ in $(seq 1 40); do curl -sf "http://127.0.0.1:$API_PORT/health" >/dev/null && curl -sf "http://127.0.0.1:$WEB_PORT/" >/dev/null && break; sleep 0.5; done
-E2E_API_URL="http://127.0.0.1:$API_PORT" E2E_BASE_URL="http://127.0.0.1:$WEB_PORT" pnpm exec playwright test e2e/real-backend.spec.ts --project=desktop
+E2E_API_URL="http://127.0.0.1:$API_PORT" E2E_BASE_URL="http://127.0.0.1:$WEB_PORT" pnpm exec playwright test e2e/real-backend.spec.ts --project=desktop --workers=1

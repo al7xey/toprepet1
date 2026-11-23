@@ -17,7 +17,7 @@ export default function LessonPage() {
   const { id = '' } = useParams();
   const lesson = useQuery(`lesson-${id}`, () => api.getLesson(id));
   return (
-    <AppLayout view="lesson-detail" role="student" narrow>
+    <AppLayout role="student" narrow>
       <QueryView query={lesson} empty={() => null}>
         {(l) => <LessonView lesson={l} onChange={lesson.setData} />}
       </QueryView>

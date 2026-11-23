@@ -25,7 +25,7 @@ export default function ProblemPage() {
     if (dispute) void navigate(`/me/disputes/${dispute.id}`);
   };
   return (
-    <AppLayout view="report" role="student" narrow>
+    <AppLayout role="student" narrow>
       <QueryView query={lesson} empty={() => null}>
         {(l) => (
           <>

@@ -26,7 +26,7 @@ export default function ReviewPage() {
     if (review) { toast('Спасибо! Отзыв отправлен на проверку'); void navigate(`/me/lessons/${id}`); }
   };
   return (
-    <AppLayout view="feedback" role="student" narrow>
+    <AppLayout role="student" narrow>
       <QueryView query={lesson} empty={() => null}>
         {(l) => (
           <>

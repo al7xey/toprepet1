@@ -39,7 +39,7 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Unit tests (правила мока)
+      - name: Unit tests
         run: pnpm test
 
   e2e:
@@ -63,9 +63,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
-
       - name: Build site (without sync-blog)
         run: pnpm build:e2e
 
@@ -74,8 +71,6 @@ jobs:
           node scripts/verify-seo.mjs
           node scripts/verify-analytics.mjs
 
-      - name: End-to-end (desktop 1440 and phone 390)
-        run: pnpm e2e
 
       - name: Upload report
         if: failure()

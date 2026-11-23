@@ -83,7 +83,7 @@ export function SettingsView({ role }: { role: 'student' | 'tutor' }) {
 
   if (view === 'data') {
     return (
-      <AppLayout view="settings" role={role} narrow>
+      <AppLayout role={role} narrow>
         <PageHeader title="Личные данные" back={{ onClick: closeEdit, label: 'Назад' }} />
         <Card>
           <div className="trk-form">
@@ -104,7 +104,7 @@ export function SettingsView({ role }: { role: 'student' | 'tutor' }) {
   }
   if (view === 'password') {
     return (
-      <AppLayout view="settings" role={role} narrow>
+      <AppLayout role={role} narrow>
         <PageHeader title="Смена пароля" back={{ onClick: () => setView('menu'), label: 'Назад к настройкам' }} />
         <Card>
           <div className="trk-form">
@@ -118,7 +118,7 @@ export function SettingsView({ role }: { role: 'student' | 'tutor' }) {
     );
   }
   return (
-    <AppLayout view="settings" role={role} narrow>
+    <AppLayout role={role} narrow>
       <PageHeader title="Настройки" back={{ to: profileTo, label: 'Профиль' }} />
       <Card>
         <div className="trk-settings-who">

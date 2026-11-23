@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { RequestResponse, RequestStatus, StudyRequest } from '../../api/types';
 import { ago, count, fromRub, rub, whenLabel } from '../../lib/format';
-import { Button, Card, Icon, Person, Rows, Status, StudentCard, Tags } from '../../ui';
+import { Button, Card, Icon, Person, Rows, Status, StudentCard } from '../../ui';
 
 export const REQUEST_STATUS: Record<RequestStatus, { tone: 'wait' | 'ok' | 'neutral'; icon: string; text: string }> = {
   open: { tone: 'wait', icon: 'clock', text: 'Ищем репетитора' },
@@ -27,13 +27,15 @@ export function RequestCard({ request, actions, showStatus = true }: { request: 
   const s = REQUEST_STATUS[request.status];
   return (
     <Card as="article" className="trk-request">
-      <header className="screen-request-heading"><h2>{request.subject}</h2><b>{budgetText(request)}</b></header>
-      <Tags items={[request.level, request.goal].filter(Boolean)} />
-      <p className="screen-request-description">{request.description}</p>
       <StudentCard name={request.studentName} photo={request.studentPhoto} sub={`${ago(request.createdAt)} · ${count(request.responsesCount, 'отклик', 'отклика', 'откликов')}`} />
       {showStatus && request.status !== 'open' && <div><Status tone={s.tone} icon={s.icon}>{s.text}</Status></div>}
-      <Rows rows={[
+      <Rows boxed rows={[
+        ['Предмет', request.subject],
+        ['Уровень', request.level],
+        ['Цель', request.goal],
         ['Удобное время', request.schedule.join(', ')],
+        ['Бюджет', budgetText(request)],
+        ['Что нужно', request.description, 'block'],
       ]} />
       {actions && <div className="trk-actions">{actions}</div>}
     </Card>

@@ -8,13 +8,13 @@ import { Card, EmptyState, PageHeader, Person, QueryView, Rows } from '../../ui'
 export default function TutorStudentsPage() {
   const students = useQuery('my-students', () => api.listMyStudents());
   return (
-    <AppLayout view="directory" role="tutor">
+    <AppLayout role="tutor">
       <PageHeader title="Ученики" back={{ to: '/tutor/account', label: 'Профиль' }} />
       <QueryView query={students} empty={(items) => (items.length ? null : <EmptyState icon="person-plus" title="Учеников пока нет" text="Когда кто-то запишется на урок или знакомство, он появится здесь." />)}>
         {(items) => (
           <div className="trk-list">
             {items.map((s) => (
-              <Card className="screen-person-card" key={s.id} pad="sm">
+              <Card key={s.id} pad="sm">
                 <Person name={s.name} sub={s.note} />
                 <Rows boxed rows={[['Следующий урок', s.nextLesson ? whenLabel(s.nextLesson) : 'Не назначен'], ['Всего уроков', String(s.lessonsCount)]]} />
               </Card>

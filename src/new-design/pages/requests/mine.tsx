@@ -12,7 +12,7 @@ export default function MyRequestsPage() {
   const [scope, setScope] = useState<Scope>('active');
   const requests = useQuery('my-requests', () => api.listMyRequests());
   return (
-    <AppLayout view="requests" role="student">
+    <AppLayout role="student">
       <PageHeader title="Мои заявки" back={{ to: '/me/account', label: 'Профиль' }} actions={<IconButton icon="plus" label="Новая заявка" to="/me/requests/new" className="trk-addbtn" />} />
       <Tabs<Scope> items={[{ value: 'active', label: 'Активные' }, { value: 'closed', label: 'Закрытые' }]} value={scope} onChange={setScope} />
       <QueryView

@@ -8,6 +8,10 @@ def health(_request):
     return JsonResponse({'ok': True})
 
 
+def features(_request):
+    return JsonResponse({'testPayments': settings.DEBUG and settings.PAYMENT_PROVIDER == 'fake'})
+
+
 def readiness(_request):
     from django.db import connection, DatabaseError
     try:
@@ -29,6 +33,7 @@ def email_token(request):
 
 urlpatterns = [
     path('health', health),
+    path('features', features),
     path('ready', readiness),
     path('', include('accounts.urls')),
     path('', include('tutors.urls')),

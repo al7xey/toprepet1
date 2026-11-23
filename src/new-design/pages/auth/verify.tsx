@@ -6,7 +6,7 @@ import { homeFor, useSession } from '../../api/session';
 import type { User } from '../../api/types';
 import { AuthLayout } from '../../layout/layouts';
 import { safeNext } from '../../lib/safeNext';
-import { Button, EmptyState, ErrorState, FormError, Note, PageHeader, TextField, useToast } from '../../ui';
+import { Button, EmptyState, ErrorState, FormError, PageHeader, TextField, useToast } from '../../ui';
 import { AuthCard } from './shared';
 
 const RESEND_SECONDS = 60;
@@ -53,12 +53,11 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <AuthLayout view="verification">
+    <AuthLayout>
       <PageHeader title="Проверьте почту" lead={<>Введите шестизначный код для <b>{user.email}</b>. Код действует 10 минут. Если письма нет, запросите новый код.</>} center />
       <AuthCard>
         <form className="trk-form" onSubmit={(event) => { event.preventDefault(); void submitCode(); }}>
           <TextField label="Код из письма" name="verificationCode" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, '').slice(0, 6)); confirm.reset(); }} inputMode="numeric" autoComplete="one-time-code" autoCapitalize="none" spellCheck={false} maxLength={12} placeholder="000000" />
-          {api.mode === 'mock' && <Note tone="plain">Демо-код — 123456. В этой версии письма не отправляются.</Note>}
           <Button type="submit" block disabled={code.length !== 6} loading={confirm.pending}>Подтвердить почту</Button>
           <FormError error={resend.error ?? confirm.error} />
           <Button variant="line" size="lg" block onClick={sendAgain} disabled={left > 0} loading={resend.pending}>{left > 0 ? `Запросить код · ${left} с` : 'Отправить код ещё раз'}</Button>
@@ -79,7 +78,7 @@ export function VerifyByTokenPage() {
 
   if (verified) return <Navigate to={afterVerify(verified)} replace />;
   return (
-    <AuthLayout view="verification">
+    <AuthLayout>
       <PageHeader title="Подтверждаем почту" center />
       <AuthCard>
         {!token || result.error ? (

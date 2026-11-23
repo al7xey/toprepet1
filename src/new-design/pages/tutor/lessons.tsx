@@ -60,7 +60,7 @@ export default function TutorLessonsPage() {
   const ended = (l: Lesson) => l.status === 'confirmed' && new Date(l.start).getTime() + l.durationMin * 60_000 < now;
 
   return (
-    <AppLayout view="lessons" role="tutor">
+    <AppLayout role="tutor">
       <PageHeader title="Уроки" actions={<IconButton icon="clock" label="Расписание" to="/tutor/schedule" />} />
       {profile.data?.status === 'draft' && (
         <Note tone="info" icon="edit" action={<Button size="s" to="/tutor/profile/edit">Заполнить анкету</Button>}>Анкета ещё не опубликована: ученики вас не видят. Это займёт около трёх минут.</Note>

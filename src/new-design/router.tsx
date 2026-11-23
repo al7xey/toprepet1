@@ -1,4 +1,3 @@
-import { StudioMotion } from './ui/studio-motion';
 import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { SessionProvider } from './api/session';
@@ -15,8 +14,6 @@ import './home.css';
 import './ui/kit.css';
 import { LiquidGlassEffects } from './ui/liquid-glass';
 import './ui/liquid-motion.css';
-import './ui/studio.css';
-import './ui/screens.css';
 
 const NotFoundPage = lazy(() => import('./pages/public/notfound'));
 
@@ -30,7 +27,6 @@ function ScrollToTop() {
 export function NewApp() {
   return (
     <SessionProvider>
-      <StudioMotion />
       <div className="tr">
         <LiquidGlassEffects />
         <ToastProvider>

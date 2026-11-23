@@ -8,13 +8,13 @@
   "scripts": {
     "dev": "vite",
     "dev:all": "pnpm dev",
-    "build": "node scripts/sync-blog.mjs && tsc --noEmit && node scripts/verify-analytics.mjs && vite build && vite build --ssr src/app/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs && node scripts/verify-seo.mjs",
+    "build": "tsc --noEmit && node scripts/verify-analytics.mjs && vite build && vite build --ssr src/app/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs && node scripts/verify-seo.mjs",
     "start": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "lint": "oxlint src vite.config.ts vitest.config.ts playwright.config.ts e2e",
     "format": "oxfmt",
     "e2e": "playwright test",
-    "build:e2e": "vite build --mode demo && vite build --mode demo --ssr src/app/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs",
+    "build:e2e": "vite build && vite build --ssr src/app/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs",
     "sync:blog": "node scripts/sync-blog.mjs"
   },
   "dependencies": {

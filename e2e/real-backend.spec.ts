@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { login } from './helpers';
 
 // These scenarios share a seeded database and change the same tutor profile.
-test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: 'default' });
 
 /**
  * Сквозной сценарий против настоящего Django: сайт собран с VITE_API_URL, база с демо-данными.
@@ -15,7 +15,7 @@ test('Django: лендинги показывают ошибку API вмест�
   const endpoint = (url: URL) => url.pathname === '/tutors';
   for (const path of ['/', '/for-repetitor']) {
     await page.route(endpoint, (route) => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'Подборка временно недоступна' }) }));
-    await page.goto(path);
+    await page.goto(path, { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('alert')).toContainText('Подборка временно недоступна');
     await expect(page.locator('a.tc')).toHaveCount(0);
     await page.unroute(endpoint);
@@ -211,4 +211,23 @@ test('Django: ошибка выхода видна и сессия остаёт�
   await page.goto('/me/payments');
   await expect(page).toHaveURL(/\/login\?next=/);
   expect(errors).toEqual([]);
+});
+
+test('Django: регистрация ученика и подтверждение почты через код', async ({ page }) => {
+  const email = `registration-${Date.now()}@example.test`;
+  await page.goto('/signup');
+  await page.getByLabel('Имя', { exact: true }).fill('Ученик');
+  await page.getByLabel('Почта', { exact: true }).fill(email);
+  await page.locator('input[name="password"]').fill('Student-local-test-2026!');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Создать аккаунт' }).click();
+  await expect(page).toHaveURL(/verify-email/);
+  const tokenUrl = new URL('/_test/email-token', process.env.E2E_API_URL);
+  tokenUrl.searchParams.set('email', email);
+  const token = (await (await page.request.get(tokenUrl.href)).json()).token;
+  await page.getByLabel('Код из письма').fill(token);
+  await page.getByRole('button', { name: 'Подтвердить почту' }).click();
+  await expect(page).not.toHaveURL(/verify-email/);
+  const me = await page.request.get(new URL('/auth/me', process.env.E2E_API_URL).href);
+  expect(await me.json()).toMatchObject({ email, emailVerified: true });
 });

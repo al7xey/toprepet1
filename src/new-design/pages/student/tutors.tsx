@@ -14,7 +14,7 @@ import { whenLabel } from '../../lib/format';
 export default function MyTutorsPage() {
   const tutors = useQuery('my-tutors', () => api.listMyTutors());
   return (
-    <AppLayout view="directory" role="student">
+    <AppLayout role="student">
       <PageHeader
         title="Мои репетиторы"
         back={{ to: '/me/account', label: 'Профиль' }}
@@ -35,7 +35,7 @@ export default function MyTutorsPage() {
         {(items) => (
           <div className="trk-list">
             {items.map((t) => (
-              <Card className="screen-person-card" key={t.tutorId}>
+              <Card key={t.tutorId}>
                 <Person name={t.name} photo={t.photo} sub={t.subject} />
                 <Rows
                   rows={[

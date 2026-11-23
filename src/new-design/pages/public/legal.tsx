@@ -8,10 +8,10 @@ import { NotFoundBody } from './notfound';
 export default function LegalPage() {
   const { document: slug } = useParams();
   const doc = slug ? LEGAL_DOCUMENTS.find((d) => d.slug === slug) : undefined;
-  if (slug && !doc) return <PublicLayout view="reading" tight><NotFoundBody /></PublicLayout>;
+  if (slug && !doc) return <PublicLayout tight><NotFoundBody /></PublicLayout>;
   if (!doc) {
     return (
-      <PublicLayout view="reading" tight>
+      <PublicLayout tight>
         <PageHeader title="Документы" lead="Правила работы сервиса, условия для репетиторов и информация об оплате." />
         <nav className="trk-legal-list" aria-label="Документы">
           {LEGAL_DOCUMENTS.map((d) => (
@@ -22,13 +22,13 @@ export default function LegalPage() {
     );
   }
   return (
-    <PublicLayout view="reading" tight>
+    <PublicLayout tight>
       <PageHeader title={doc.title} lead={doc.description} back={{ to: '/legal/', label: 'Все документы' }} />
-      <div className="trk-legal studio-reading">
+      <div className="trk-legal">
         <nav className="trk-legal-toc" aria-label="Содержание документа">
           <ol>{doc.sections.map((s) => <li key={s.id}><a href={`#${s.id}`}>{s.title}</a></li>)}</ol>
         </nav>
-        <article className="studio-reading-body">{doc.sections.map((s) => <section key={s.id} id={s.id}><h2 className="h3">{s.title}</h2>{s.content}</section>)}</article>
+        {doc.sections.map((s) => <section key={s.id} id={s.id}><h2 className="h3">{s.title}</h2>{s.content}</section>)}
       </div>
     </PublicLayout>
   );

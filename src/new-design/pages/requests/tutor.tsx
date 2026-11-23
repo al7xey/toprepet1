@@ -21,7 +21,7 @@ export default function TutorRequestsPage() {
   const published = profile.data?.status === 'published';
 
   return (
-    <AppLayout view="responses" role="tutor">
+    <AppLayout role="tutor">
       <PageHeader title="Заявки" />
       {profile.data && !published && <Note tone="info" icon="edit" action={<Button size="s" to="/tutor/profile/edit">Заполнить анкету</Button>}>Откликаться можно после публикации анкеты.</Note>}
       <Tabs<Scope> items={[{ value: 'feed', label: 'Новые заявки' }, { value: 'mine', label: 'Мои отклики', count: mine.data?.length }]} value={scope} onChange={setScope} />

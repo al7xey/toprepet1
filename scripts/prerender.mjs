@@ -35,7 +35,6 @@ function addRouteAssets(html, route) {
   const entry = route.startsWith('/blog/admin') ? 'src/blog/admin.tsx'
     : route.startsWith('/blog') ? 'src/new-design/pages/public/blog.tsx'
     : route === '/' ? 'src/pages/home/home-page.tsx'
-    : route.startsWith('/teachers/') ? 'src/pages/teacher/teacher-page.tsx'
     : route === '/teachers' ? 'src/pages/teachers/teachers-page.tsx'
     : route === '/for-repetitor' ? 'src/pages/for-tutors/for-tutors-page.tsx'
     : route === '/help' ? 'src/new-design/pages/public/help.tsx'
@@ -65,7 +64,7 @@ function addRouteAssets(html, route) {
   return html.replace('</head>', `${[...new Set(links)].join('\n')}\n</head>`);
 }
 
-const { render, teachers: teacherCatalog, CATALOG_PAGE_SIZE } = await import(
+const { render } = await import(
   pathToFileURL(serverEntryPath).href
 );
 
@@ -90,48 +89,7 @@ const breadcrumbNames = {
   '/teachers':
     'Преподаватели',
 
-  '/teachers/informatics':
-    'Алексей',
-
-  '/teachers/english':
-    'Анастасия',
-
-  '/teachers/russian':
-    'Артём',
-
-  '/teachers/chemistry-biology':
-    'Александра',
-
-  '/teachers/mathematics':
-    'Ерлан',
-
-  '/teachers/russian-literature':
-    'Анна',
-
-  '/teachers/physics-mathematics':
-    'Дарья',
-
-  '/teachers/english-elizaveta':
-    'Елизавета',
-
-  '/teachers/chemistry':
-    'Дмитрий',
-
-  '/teachers/history':
-    'Александра',
 };
-
-const teacherSchemas = Object.fromEntries(teacherCatalog.map(teacher => {
-  const route = `/teachers/${teacher.id}`;
-  const url = canonicalForRoute(route);
-  return [route, {
-    '@context': 'https://schema.org', '@type': 'ProfilePage',
-    '@id': `${url}#webpage`, url, name: titles[route],
-    description: descriptions[route], inLanguage: 'ru-RU',
-    mainEntity: { '@type': 'Person', name: teacher.name, jobTitle: teacher.role,
-      url, image: new URL(teacher.photo, 'https://toprepet.ru').href },
-  }];
-}));
 
 function updateMetaContent(html, attribute, key, value) {
   const tag = new RegExp(
@@ -174,17 +132,6 @@ function addPageMeta(html, route) {
     result = updateMetaContent(result, attribute, key, value);
   }
 
-  const teacher = teacherCatalog.find(item => route === `/teachers/${item.id}`);
-  if (teacher) {
-    const image = new URL(teacher.photo, 'https://toprepet.ru').href;
-    const alt = `${teacher.name} — ${teacher.role}`;
-    result = updateMetaContent(result, 'property', 'og:image', image);
-    result = updateMetaContent(result, 'name', 'twitter:image', image);
-    result = updateMetaContent(result, 'property', 'og:image:alt', alt);
-    result = updateMetaContent(result, 'name', 'twitter:image:alt', alt);
-    result = result.replace(/<meta property="og:image:(?:width|height)"[^>]*>/g, '');
-  }
-
   if (route === '/for-repetitor') {
     const image = 'https://toprepet.ru/images/for-repetitor-hero.png?v=20260929d';
     result = updateMetaContent(result, 'property', 'og:image', image);
@@ -209,21 +156,7 @@ function addPageSchema(html, route) {
     '@type': 'CollectionPage',
     name: titles[route],
     url: canonicalForRoute(route),
-    mainEntity: {
-      '@type': 'ItemList',
-      itemListElement: teacherCatalog.slice(0, CATALOG_PAGE_SIZE).map((teacher, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Person',
-          name: teacher.name,
-          jobTitle: teacher.role,
-          url: canonicalForRoute(`/teachers/${teacher.id}`),
-          image: new URL(teacher.photo, 'https://toprepet.ru').href,
-        },
-      })),
-    },
-  } : teacherSchemas[route] || (['/', '/help', '/for-repetitor'].includes(route) || route.startsWith('/legal') ? {
+  } : (['/', '/help', '/for-repetitor'].includes(route) || route.startsWith('/legal') ? {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     '@id': `${canonicalForRoute(route)}#webpage`,
@@ -467,13 +400,6 @@ for (const [from, to] of Object.entries(movedPages)) {
   await writeFile(path, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${destination}"><link rel="canonical" href="${canonical}"><title>Страница переехала — TopRepet</title></head><body><p>Страница переехала: <a href="${destination}">открыть новый адрес</a>.</p></body></html>`, 'utf8');
 }
 
-for (const route of routes.filter(path => path.startsWith('/teachers/'))) {
-  const oldRoute = route.replace('/teachers/', '/teacher/');
-  const destination = canonicalForRoute(route);
-  const oldPath = resolve('dist', oldRoute.slice(1), 'index.html');
-  await mkdir(dirname(oldPath), { recursive: true });
-  await writeFile(oldPath, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${destination}"><link rel="canonical" href="${destination}"><title>Анкета преподавателя переехала — TopRepet</title></head><body><p>Анкета переехала: <a href="${destination}">открыть новый адрес</a>.</p></body></html>`, 'utf8');
-}
 
 let notFoundHtml = addRouteAssets(template, '/this-page-does-not-exist')
   .replace(rootPlaceholder, `<div id="root">${await render('/this-page-does-not-exist')}</div>`)

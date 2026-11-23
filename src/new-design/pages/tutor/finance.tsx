@@ -3,7 +3,7 @@ import { api } from '../../api';
 import { useMutation, useQuery } from '../../api/hooks';
 import { AppLayout } from '../../layout/layouts';
 import { dateLong, rub } from '../../lib/format';
-import { Button, Card, EmptyState, FormError, PageHeader, QueryView, MetricCard, Section, Status, TextField, useToast } from '../../ui';
+import { Button, Card, EmptyState, FormError, PageHeader, QueryView, Rows, Section, Status, TextField, useToast } from '../../ui';
 
 const ENTRY: Record<'pending' | 'paid' | 'held', { tone: 'wait' | 'ok' | 'neutral'; text: string }> = {
   pending: { tone: 'wait', text: 'К выплате' },
@@ -15,12 +15,12 @@ const ENTRY: Record<'pending' | 'paid' | 'held', { tone: 'wait' | 'ok' | 'neutra
 export default function FinancePage() {
   const finance = useQuery('my-finance', () => api.getFinance());
   return (
-    <AppLayout view="finance" role="tutor" narrow>
+    <AppLayout role="tutor" narrow>
       <PageHeader title="Финансы" back={{ to: '/tutor/account', label: 'Профиль' }} />
       <QueryView query={finance}>
         {(f) => (
           <>
-            <div className="studio-metrics"><MetricCard label="К выплате" value={rub(f.available)} icon="wallet" /><MetricCard label="Ждёт урока" value={rub(f.pending)} icon="clock" /><MetricCard label="За этот месяц" value={rub(f.paidThisMonth)} icon="chart" /></div>
+            <Card pad="sm"><Rows boxed rows={[['К выплате', rub(f.available)], ['Ждёт урока', rub(f.pending)], ['Выплачено в этом месяце', rub(f.paidThisMonth)]]} /></Card>
             <Section title="Операции">
               {f.entries.length === 0 ? <EmptyState icon="wallet" title="Выплат пока нет" text="После первого проведённого урока здесь появятся начисления." /> : (
                 <div className="trk-navlist">

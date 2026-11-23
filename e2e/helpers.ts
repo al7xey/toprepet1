@@ -6,7 +6,7 @@ export const ACCOUNTS = {
   admin: 'admin@toprepet.ru',
 } as const;
 
-/** Вход под демо-аккаунтом мока (пароль у всех «demo»). */
+/** Вход под учётной записью из тестовой базы (пароль у всех «demo»). */
 export async function login(page: Page, role: keyof typeof ACCOUNTS | string) {
   const email = role in ACCOUNTS ? ACCOUNTS[role as keyof typeof ACCOUNTS] : role;
   await page.goto('/login');
@@ -16,16 +16,6 @@ export async function login(page: Page, role: keyof typeof ACCOUNTS | string) {
   await expect(page).not.toHaveURL(/\/login/);
 }
 
-/** Выход: сбрасываем сессию мока и открываем главную. */
-export async function logout(page: Page) {
-  await page.evaluate(() => {
-    const key = 'toprepet-mock-v3';
-    const state = JSON.parse(localStorage.getItem(key) ?? '{}');
-    state.sessionUserId = null;
-    localStorage.setItem(key, JSON.stringify(state));
-  });
-  await page.goto('/');
-}
 
 export const isPhone = (page: Page) => (page.viewportSize()?.width ?? 1440) < 600;
 

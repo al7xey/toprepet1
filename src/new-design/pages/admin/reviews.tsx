@@ -9,7 +9,7 @@ import { Button, Card, EmptyState, FormError, PageHeader, QueryView, Stars, useT
 export default function AdminReviewsPage() {
   const queue = useQuery('admin-reviews', () => api.adminReviewQueue());
   return (
-    <AppLayout view="moderation" role="admin">
+    <AppLayout role="admin">
       <PageHeader title="Отзывы на проверке" />
       <QueryView query={queue} empty={(items) => items.length === 0 ? <EmptyState icon="star" title="Очередь пуста" text="Новые отзывы появятся здесь после урока." /> : null}>
         {(items) => <div className="trk-list">{items.map((r) => <Item key={r.id} review={r} onDone={() => queue.setData((prev) => (prev ?? []).filter((x) => x.id !== r.id))} />)}</div>}

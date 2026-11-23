@@ -8,7 +8,7 @@ import { Card, EmptyState, PageHeader, QueryView, Status } from '../../ui';
 export default function AdminCancellationsPage() {
   const list = useQuery('admin-cancellations', () => api.adminCancellations());
   return (
-    <AppLayout view="ledger" role="admin">
+    <AppLayout role="admin">
       <PageHeader title="Отмены" />
       <QueryView query={list} empty={(items) => items.length === 0 ? <EmptyState icon="x" title="Отмен пока нет" /> : null}>
         {(items) => (

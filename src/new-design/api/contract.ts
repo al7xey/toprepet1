@@ -9,7 +9,7 @@ import type {
  * Рядом с методом указан REST-адрес, по которому его ждёт http-клиент.
  */
 export interface Api {
-  mode: 'mock' | 'http';
+  features(): Promise<{ testPayments: boolean }>;
 
   // Авторизация
   me(): Promise<User | null>; // GET /auth/me

@@ -12,7 +12,7 @@ export default function DocumentsPage() {
     api.adminDocuments(cursor),
   );
   return (
-    <AppLayout view="moderation" role="admin">
+    <AppLayout role="admin">
       <PageHeader title="Проверка документов" />
       <div className="trk-actions">
         {cursor && (

@@ -64,8 +64,8 @@ export function RequestWizard({ onDone, embedded }: { onDone: (id: string) => vo
 
   return (
     <div ref={wrap} className="trk-wizard">
-      {!embedded && <PageHeader title={step === 1 ? 'Какая помощь нужна' : 'Расскажите подробнее'} back={{ to: '/me/requests', label: 'Мои заявки' }} />}
       <WizardProgress step={step} total={2} />
+      {!embedded && <PageHeader title={step === 1 ? 'Какая помощь нужна' : 'Расскажите подробнее'} back={{ to: '/me/requests', label: 'Мои заявки' }} />}
       <div className="trk-account">
         {step === 1 ? (
           <>
@@ -129,5 +129,5 @@ export function RequestWizard({ onDone, embedded }: { onDone: (id: string) => vo
 
 export default function NewRequestPage() {
   const navigate = useNavigate();
-  return <AppLayout view="wizard" role="student"><RequestWizard onDone={(id) => void navigate(`/me/requests/${id}`, { replace: true })} /></AppLayout>;
+  return <AppLayout role="student"><RequestWizard onDone={(id) => void navigate(`/me/requests/${id}`, { replace: true })} /></AppLayout>;
 }

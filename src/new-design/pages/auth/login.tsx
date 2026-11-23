@@ -7,7 +7,7 @@ import { homeFor, useSession } from '../../api/session';
 import { AuthLayout } from '../../layout/layouts';
 import { safeNext } from '../../lib/safeNext';
 import { Button, Divider, FormError, PageHeader, PasswordField, TextField } from '../../ui';
-import { AuthCard, DemoHint, emailValid } from './shared';
+import { AuthCard, emailValid } from './shared';
 
 /** Вход: почта и пароль или Яндекс ID. После входа возвращает туда, откуда пришли (?next=). */
 export default function LoginPage() {
@@ -38,14 +38,9 @@ export default function LoginPage() {
     finish(await login.run(email.trim(), password));
   };
 
-  const quickLogin = async (demoEmail: string, demoPassword: string) => {
-    setErrors({});
-    finish(await login.run(demoEmail, demoPassword));
-  };
-
   const query = next ? `?next=${encodeURIComponent(next)}` : '';
   return (
-    <AuthLayout view="signin">
+    <AuthLayout>
       <PageHeader title="Вход" center />
       <AuthCard>
         <form className="trk-form" onSubmit={submit} noValidate>
@@ -56,7 +51,6 @@ export default function LoginPage() {
         </form>
         <Divider>или</Divider>
         <Button variant="line" size="lg" block icon="user" loading={yandex.pending} onClick={async () => finish(await yandex.run())}>Войти через Яндекс ID</Button>
-        <DemoHint pending={login.pending} onLogin={(e, p) => { void quickLogin(e, p); }} />
         <p className="muted trk-auth-foot">Нет аккаунта? <Link className="acc" to={`/signup${query}`}>Зарегистрироваться</Link></p>
       </AuthCard>
     </AuthLayout>

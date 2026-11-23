@@ -31,7 +31,7 @@ export default function DisputePage({ role }: { role: 'student' | 'tutor' }) {
   const lesson = useQuery(lessonId ? `lesson-${lessonId}` : null, () => api.getLesson(lessonId as string));
   const base = role === 'student' ? '/me' : '/tutor';
   return (
-    <AppLayout view="case" role={role} narrow>
+    <AppLayout role={role} narrow>
       <QueryView query={dispute} empty={() => null}>
         {(d) => (
           <>

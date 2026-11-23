@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { api, staticTutors, studentPriceOf } from '../../api';
+import { api, studentPriceOf } from '../../api';
 import { homeFor, useSession } from '../../api/session';
 import { useQuery } from '../../api/hooks';
 import { PublicLayout } from '../../layout/layouts';
@@ -32,10 +32,9 @@ export default function TutorsLandingPage() {
   const entryHref = user ? homeFor(user.role) : '/signup?role=tutor';
   const entryLabel = user?.role === 'tutor' ? 'Мой кабинет' : user ? 'Перейти в кабинет' : 'Создать анкету';
   const canReadRequests = user?.role === 'tutor' || user?.role === 'student';
-  const first = staticTutors().slice(0, 6);
-  const tutors = useQuery('tutors-landing', () => api.listTutors({ limit: 6 }).then((p) => p.items), first);
+  const tutors = useQuery('tutors-landing', () => api.listTutors({ limit: 6 }).then((p) => p.items));
   return (
-    <PublicLayout view="recruit">
+    <PublicLayout>
       <section className="trh-hero" aria-labelledby="hero-title">
         <div className="trh-hero-text">
           <h1 id="hero-title" className="hero-h trh-hero-h">
@@ -53,9 +52,9 @@ export default function TutorsLandingPage() {
         </div>
       </section>
 
-      <Section title="Как начать" className="screen-recruit-steps" reveal><Steps items={TUTOR_STEPS} revealOnScroll /></Section>
+      <Section title="Как начать" reveal><Steps items={TUTOR_STEPS} revealOnScroll /></Section>
 
-      <section id="pricing" className="trk-split trk-price screen-recruit-pricing" aria-labelledby="price-title">
+      <section id="pricing" className="trk-split trk-price" aria-labelledby="price-title">
         <div className="trh-sec" style={{ flex: '1 1 420px', minWidth: 0 }}>
           <h2 id="price-title" className="h2 trh-h2">Вы берёте столько, сколько напишете</h2>
           <p className="cap u-fs18">Назначьте цену занятия сами. Мы добавим 10% сервиса сверху: ученик заплатит чуть больше, а вы получите ровно свою цену.</p>

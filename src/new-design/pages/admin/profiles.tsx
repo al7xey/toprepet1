@@ -5,22 +5,18 @@ import { useMutation, useQuery } from '../../api/hooks';
 import type { AdminProfile, TutorDocument } from '../../api/types';
 import { AppLayout } from '../../layout/layouts';
 import { rub } from '../../lib/format';
-import { Avatar, Button, Card, EmptyState, FormError, Modal, PageHeader, QueryView, Rows, SearchInput, Tabs, Status, Tags, TextArea, useToast } from '../../ui';
+import { Avatar, Button, Card, EmptyState, FormError, Modal, PageHeader, QueryView, Rows, Status, Tags, TextArea, useToast } from '../../ui';
 
 /** Опубликованные и скрытые анкеты с действиями администратора. */
 export default function AdminProfilesPage() {
-  const [search, setSearch] = useState('');
-  const [scope, setScope] = useState<'all' | 'hidden'>('all');
   const queue = useQuery('admin-profiles', () => api.adminProfileQueue());
   const updateDocument = (next: TutorDocument) => queue.setData((prev) => (prev ?? []).map((item) => ({ ...item, documents: item.documents?.map((doc) => doc.id === next.id ? next : doc) })));
   return (
-    <AppLayout view="moderation" role="admin">
+    <AppLayout role="admin">
       <PageHeader title="Анкеты репетиторов" />
-      <div className="studio-filterbar"><Tabs items={[{ value: 'all', label: 'Все анкеты' }, { value: 'hidden', label: 'Скрытые' }]} value={scope} onChange={setScope} /><Button variant="line" size="s" onClick={queue.reload} icon="repeat">Обновить</Button></div>
-      <SearchInput label="Найти анкету" placeholder="Имя, предмет или почта" value={search} onChange={setSearch} />
-      {queue.data && queue.data.length > 0 && !queue.data.some((q) => (scope === 'all' || q.profile.status === 'hidden') && `${q.profile.name} ${q.email} ${q.profile.subjects.join(' ')}`.toLocaleLowerCase('ru-RU').includes(search.trim().toLocaleLowerCase('ru-RU'))) && <EmptyState icon="search" title="Анкеты не найдены" text="Измените запрос или выберите все анкеты." />}
+      <div className="trk-actions"><Button variant="line" onClick={queue.reload}>Обновить очередь</Button></div>
       <QueryView query={queue} empty={(items) => items.length === 0 ? <EmptyState icon="school" title="Очередь пуста" text="Опубликованные и скрытые анкеты появятся здесь." /> : null}>
-        {(items) => <div className="trk-list">{items.filter((q) => (scope === 'all' || q.profile.status === 'hidden') && `${q.profile.name} ${q.email} ${q.profile.subjects.join(' ')}`.toLocaleLowerCase('ru-RU').includes(search.trim().toLocaleLowerCase('ru-RU'))).map((q) => <Item key={q.tutorId} item={q} onDone={queue.reload} onDocumentChange={updateDocument} />)}</div>}
+        {(items) => <div className="trk-list">{items.map((q) => <Item key={q.tutorId} item={q} onDone={queue.reload} onDocumentChange={updateDocument} />)}</div>}
       </QueryView>
     </AppLayout>
   );

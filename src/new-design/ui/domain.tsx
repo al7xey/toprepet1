@@ -17,7 +17,7 @@ export function TutorCard({ tutor, priority }: { priority?: boolean; tutor: Pick
   const back = /^\/teachers\/?$/.test(pathname) ? pathname + search : undefined;
   return (
     <Link state={back ? { back } : undefined} className="tc s" to={`/teachers/${tutor.id}/`} aria-label={`${tutor.name}, ${tutor.cardSubjects}`} draggable={false}>
-      <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} />
+      {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
       <span className="pl">
         <b><span className="trh-tutor-name">{tutor.name}</span></b>
         <span>{tutor.cardSubjects}</span>
@@ -156,8 +156,8 @@ export function AddCardModal({ open, onClose, onAdded }: { open: boolean; onClos
     if (card) { setNumber(''); setExpiry(''); setCvc(''); onAdded(card); }
   };
   return (
-    <Modal open={open} onClose={onClose} title="Новая карта" footer={<><Button variant="fill" onClick={onClose}>Отмена</Button><Button onClick={save} loading={add.pending}>Сохранить карту</Button></>}>
-      {api.mode === 'mock' && <Note tone="plain" icon="lock">Не вводите настоящие данные карты. Для проверки используйте номер 4000 0000 0000 0002.</Note>}
+    <Modal open={open} onClose={onClose} title="Тестовая карта" footer={<><Button variant="fill" onClick={onClose}>Отмена</Button><Button onClick={save} loading={add.pending}>Сохранить карту</Button></>}>
+      <Note tone="plain">Используйте только тестовые данные. Номер карты для проверки: 4000 0000 0000 0002.</Note>
       <TextField label="Номер карты" inputMode="numeric" autoComplete="cc-number" placeholder="0000 0000 0000 0000" value={number} onChange={(e) => setNumber(e.target.value)} />
       <div className="trk-two">
         <TextField label="Срок" autoComplete="cc-exp" placeholder="ММ/ГГ" value={expiry} onChange={(e) => setExpiry(e.target.value)} />

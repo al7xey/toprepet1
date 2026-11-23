@@ -1,4 +1,4 @@
-"""Демо-данные: те же репетиторы, пользователи и ID, что в моке фронтенда (src/new-design/api/mock.ts)."""
+"""Фикстуры для автоматических проверок API с отдельной базой данных."""
 import json
 from datetime import datetime, timedelta, timezone as dt_timezone
 from pathlib import Path
@@ -41,8 +41,8 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **opts):
-        if not settings.DEBUG and not settings.TESTING:
-            raise CommandError('Демо-аккаунты разрешены только при DEBUG=1')
+        if not (settings.TESTING or (settings.DEBUG and settings.EXPOSE_TEST_ENDPOINTS)):
+            raise CommandError('Фикстуры доступны только в тестовом окружении')
         if User.objects.filter(email='olga@mail.ru').exists():
             if not opts['reset']:
                 self.stdout.write('Демо-данные уже есть (используйте --reset, чтобы пересоздать).')
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         tutors = []
         for item in json.loads(FIXTURE.read_text(encoding='utf8')):
             tutors.append(Tutor.objects.create(
-                id=item['id'], name=item['name'], photo=item['photo'], photo_srcset=item.get('photoSrcSet', ''), headline=item['headline'],
+                id=item['id'], name=item['name'], headline=item['headline'],
                 subjects=item['subjects'], card_subjects=item['cardSubjects'], help_topics=item['helpTopics'], experience=item['experience'],
                 intro=item['intro'], approach=item['approach'], achievements=item['achievements'], price=item['price'],
                 intro_minutes=item['introMinutes'], status='published', timezone=item['timezone'], week=DEFAULT_WEEK, sort_order=item['sortOrder'],

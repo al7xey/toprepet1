@@ -247,7 +247,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
               className="field"
               type="url"
               inputMode="url"
-
+              
               value={link}
               placeholder="https://example.ru"
               onChange={(event) => setLink(event.target.value)}
