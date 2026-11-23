@@ -125,7 +125,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
     event.preventDefault()
     let href = link.trim()
     if (!href) {
-      const range = linkRange.curren
+      const range = linkRange.current
       const chain = editor.chain().focus()
       if (range) chain.setTextSelection(range)
       chain.unsetLink().run()
@@ -140,7 +140,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
       setError('Введите корректный адрес сайта.')
       return
     }
-    const range = linkRange.curren
+    const range = linkRange.current
     const chain = editor.chain().focus()
     if (range) chain.setTextSelection(range)
     chain.setLink({ href }).run()
@@ -242,7 +242,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
         <form className="simple-editor-inline-panel" onSubmit={applyLink}>
           <label className="label" htmlFor="editor-link">Адрес ссылки</label>
           <div className="simple-editor-inline-row">
-            <inpu
+            <input
               id="editor-link"
               className="field"
               type="url"
@@ -263,7 +263,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
         <form className="simple-editor-image-form" onSubmit={uploadImage}>
           <div>
             <label className="label" htmlFor="editor-image-file">Изображение</label>
-            <inpu
+            <input
               id="editor-image-file"
               type="file"
               accept="image/*"
