@@ -460,12 +460,13 @@
 .tr .tg-day{display:grid;place-items:center;margin:14px 0 8px}
 .tr .tg-day span{font-size:13px;font-weight:600;color:var(--muted)}
 .tr .tg-sys{justify-self:center;margin:6px 0;color:var(--muted);font-size:14px;font-weight:600;text-align:center}
-.tr .tg-msg{position:relative;max-width:min(78%,560px);margin-top:8px;padding:8px 12px 6px 14px;border-radius:20px;font-size:16px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:flex-end;gap:2px 10px}
+.tr .tg-msg{position:relative;display:grid;grid-template-columns:minmax(0,1fr);justify-items:stretch;align-items:end;width:fit-content;max-width:min(78%,560px);margin-top:8px;padding:8px 12px 6px 14px;border-radius:20px;font-size:16px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap;gap:2px 10px}
 .tr .tg-msg.joined{margin-top:2px}
 .tr .tg-msg.in{justify-self:start;background:#fff;box-shadow:inset 0 0 0 1px var(--line);border-bottom-left-radius:6px}
 .tr .tg-msg.out{justify-self:end;background:#fdece3;border-bottom-right-radius:6px}
-.tr .tg-text{flex:1 1 auto;min-width:0}
-.tr .tg-msg small{display:inline-flex;align-items:center;gap:2px;font-size:12px;color:#6f6461;margin-left:auto}
+.tr .tg-text{display:block;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.tr .tg-photo,.tr .tg-card{grid-column:1;min-width:0}
+.tr .tg-msg small{display:inline-flex;align-items:center;justify-self:end;gap:2px;font-size:12px;color:#6f6461;margin-left:auto;white-space:nowrap}
 .tr .tg-msg small .i{width:13px;height:13px;color:var(--accent)}
 .tr .tg-compose{display:grid;gap:6px;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));background:transparent}
 .tr .tg-compose-row{display:flex;align-items:flex-end;gap:8px}
@@ -747,7 +748,7 @@ html{overflow-y:scroll}
 .tr .trk-navrow span{flex:1}
 .tr .trk-navrow .i{width:22px;height:22px;color:var(--accent)}
 .tr .trk-navrow > .i:last-child{width:18px;height:18px;color:var(--muted)}
-.tr .tg-list-title{display:flex;align-items:center;gap:12px;padding:16px}
+.tr .tg-list-title{display:flex;align-items:center;gap:12px;padding:0 0 16px}
 .tr .tg-list-title .tg-title{padding:0;margin:0}
 .tr .trk-request{gap:10px}
 .tr .trk-request-title{font-size:18px}

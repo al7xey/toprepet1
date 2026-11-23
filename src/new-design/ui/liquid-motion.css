@@ -53,6 +53,9 @@
 @keyframes motion-progress-in { from { transform: scaleX(.1); } to { transform: scaleX(1); } }
 @keyframes motion-profile-rise { from { opacity: .4; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes motion-message-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes motion-message-meta { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes motion-attach-nudge { 35% { transform: translateY(-2px) rotate(-6deg); } to { transform: none; } }
+@keyframes motion-dialog-select { from { box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 0 0 1px rgb(242 106 46 / 24%); } to { box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 0 0 1px rgb(242 106 46 / 10%); } }
 @keyframes motion-send-flight { 35% { transform: translate(2px, -2px) rotate(-8deg); } to { transform: none; } }
 @keyframes motion-toast-in { from { opacity: 0; transform: translateY(-8px) scale(.98); } 70% { opacity: 1; transform: translateY(1px); } to { opacity: 1; transform: none; } }
 @keyframes motion-badge-in { from { opacity: 0; scale: .5; } 70% { opacity: 1; scale: 1.14; } to { opacity: 1; scale: 1; } }
@@ -138,8 +141,15 @@
   .tr .tg-msg { animation: motion-message-in 420ms var(--lg-spring) both; }
   .tr .tg-fragment:nth-child(2) .tg-msg { animation-delay: 30ms; }
   .tr .tg-fragment:nth-child(3) .tg-msg { animation-delay: 60ms; }
+  .tr .tg-msg small { animation: motion-message-meta 320ms var(--lg-spring) 70ms both; }
+  .tr .tg-row.on { animation: motion-dialog-select 520ms var(--lg-spring) both; }
   .tr .tg-send:not(:disabled):hover .i { animation: motion-send-flight 340ms var(--lg-spring) both; }
-  .tr .tg-compose:focus-within { transition: background-color 220ms var(--motion-soft), box-shadow 220ms var(--motion-soft); }
+  .tr .tg-attach:not(:disabled):hover .i { animation: motion-attach-nudge 360ms var(--lg-spring) both; }
+  .tr .tg-compose-row { transition: background-color 280ms var(--motion-soft), box-shadow 320ms var(--lg-spring), border-color 260ms var(--motion-soft); }
+  .tr .tg-input { transition: color 200ms var(--motion-soft); }
+  .tr .tg-peer-avatar .avatar { transition: box-shadow 240ms var(--motion-soft), filter 240ms var(--motion-soft); }
+  .tr .tg-peer-avatar:hover .avatar, .tr .tg-peer-avatar:focus-visible .avatar { box-shadow: 0 0 0 3px rgb(242 106 46 / 16%); }
+  .tr .tg-row-text b, .tr .tg-row-text span { transition: color 200ms var(--motion-soft); }
   .tr .trk-toast { animation: motion-toast-in 420ms var(--lg-spring) both; }
   .tr .trk-badge, .tr .tab .dot, .tr .side .cnt { animation: motion-badge-in 360ms var(--lg-spring) both; }
   .tr .trk-skel { animation: motion-skeleton 1.7s ease-in-out infinite; }
@@ -155,10 +165,11 @@
   .tr .trh-menu-list a:hover { color: var(--accent); }
   .tr .tc:hover .trh-tutor-name, .tr .trk-blog-title a:hover { color: var(--accent); }
   .tr .trh-drop-menu button:hover { color: var(--accent); }
+  .tr .tg-row:hover .tg-row-text b { color: var(--accent); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tr :is(.btn, .trk-iconbtn, .chipf, .opt, .trk-slots .date, .trk-slots .slot, .trk-month-nav, .trk-month-day, .seg a, .trk-tabs button, .trk-modal, .trk-scrim, .trh-drop-menu, .trh-fpage, .trh-menu, .trh-menu-list a, .trk-toast, .tg-msg, .trh-pf-sheet, .trk-error, .trk-skel, .trk-rating-star .i, .trk-filepick .i, .trk-filepick-round .i),
+  .tr :is(.btn, .trk-iconbtn, .chipf, .opt, .trk-slots .date, .trk-slots .slot, .trk-month-nav, .trk-month-day, .seg a, .trk-tabs button, .trk-modal, .trk-scrim, .trh-drop-menu, .trh-fpage, .trh-menu, .trh-menu-list a, .trk-toast, .tg-msg, .tg-msg small, .tg-row.on, .trh-pf-sheet, .trk-error, .trk-skel, .trk-rating-star .i, .trk-filepick .i, .trk-filepick-round .i),
   .tr :is(.btn, .trk-iconbtn, .opt, .chipf, .trk-navrow, .hdr .trh-nav a, .trk-input-box, .search, .switch)::before,
   .tr :is(.btn, .trk-iconbtn, .opt, .chipf, .trk-navrow, .hdr .trh-nav a, .trk-input-box, .search, .switch)::after,
   .tr .faq details[open] > p, .tr .chk.on > i .i, .tr .trk-progress .prog i.on,
