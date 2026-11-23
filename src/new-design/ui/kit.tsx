@@ -306,6 +306,7 @@ export function onChoiceTabKey(event: KeyboardEvent<HTMLButtonElement>) {
 export function Tabs<T extends string>({ items, value, onChange, wide }: { items: { value: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; wide?: boolean }) {
   return (
     <div className={cx('seg trk-tabs', wide && 'wide')} role="tablist">
+      <span className="trk-tab-indicator" aria-hidden="true" />
       {items.map((item) => (
         <button key={item.value} type="button" role="tab" aria-selected={item.value === value} tabIndex={item.value === value ? 0 : -1} className={item.value === value ? 'on' : undefined} onKeyDown={onChoiceTabKey} onClick={() => onChange(item.value)}>
           {item.label}{item.count ? <span className="cnt2">{item.count}</span> : null}

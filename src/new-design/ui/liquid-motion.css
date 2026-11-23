@@ -48,3 +48,45 @@
   from { opacity: .55; transform: translateY(-8px); }
   to { opacity: 1; transform: none; }
 }
+
+/* Source https://designbookmark.com/motion-src/tab-pill/tabs.js
+   and https://designbookmark.com/motion-src/toggle-switch/switch.js.
+   The source spring engine writes the live edge/knob values. */
+.tr .trk-tabs { position: relative; }
+.tr .trk-tabs button.on { box-shadow: none; }
+.tr .trk-tab-indicator {
+  position: absolute;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background: var(--accent);
+  pointer-events: none;
+}
+.tr .switch::after {
+  left: 2px;
+  width: var(--motion-knob-width, 28px);
+  transform: translateX(var(--motion-knob-x, 0px));
+  transition: none;
+}
+.tr .switch.on::after { left: 2px; transform: translateX(var(--motion-knob-x, 20px)); }
+.tr .prog i { position: relative; overflow: hidden; }
+.tr .prog i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(var(--motion-fill, 0));
+  transform-origin: left;
+}
+.tr .prog i.on { animation: none; background: var(--fill-strong); }
+.tr .prog i.on::after { transform: scaleX(var(--motion-fill, 1)); }
+.tr :is(.trk-modal, .trh-drop-menu, .trh-menu, .trk-toast) { animation: none; transform-origin: top center; }
+.tr .trk-check > i .i { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tr *, .tr *::before, .tr *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
