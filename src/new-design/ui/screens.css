@@ -9,7 +9,7 @@
 .tr .screen-booking-choice .trk-slots { padding:20px; border:1px solid var(--surface-edge); border-radius:24px; }
 .tr .screen-receipt-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:32px; align-items:start; }
 .tr .screen-receipt.trk-narrow { max-width:none; }
-.tr .screen-receipt-facts { border-top:4px solid var(--accent); }
+.tr .screen-receipt-facts { border:1px solid var(--surface-edge); border-radius:24px; }
 .tr .screen-receipt-next .trh-steps li { padding-bottom:24px; }
 .tr .screen-person-card { display:grid; gap:20px; }
 .tr .screen-person-card .trk-person { padding-bottom:16px; border-bottom:1px solid var(--surface-edge); }
@@ -19,36 +19,36 @@
 .tr .screen-request-heading h2 { font-size:22px; margin:0; line-height:1.25; letter-spacing:-.02em; }
 .tr .screen-request-heading>b { font-size:17px; font-variant-numeric:tabular-nums; }
 .tr .screen-request-description { font-size:16px; line-height:1.6; max-width:65ch; white-space:pre-wrap; }
-.tr :is(.screen-requests,.screen-responses) .trk-request { border:0; border-bottom:1px solid var(--surface-edge); border-radius:0; padding:24px 0; }
+.tr :is(.screen-requests,.screen-responses) .trk-request { border:1px solid var(--surface-edge); border-radius:24px; padding:24px; }
 .tr :is(.screen-requests,.screen-responses) .trk-request .trk-student { background:none; padding:0; }
 .tr .screen-requests .trk-request .trk-actions { justify-content:flex-start; }
 .tr .screen-request-detail .trk-request { background:#f8f9fb; border:0; }
 .tr .screen-lesson-detail { max-width:820px; }
-.tr .screen-lesson-detail>.trk-card:first-of-type { border:0; padding:24px 0; border-block:1px solid var(--surface-edge); border-radius:0; }
+.tr .screen-lesson-detail>.trk-card:first-of-type { border:1px solid var(--surface-edge); padding:24px; border-radius:24px; }
 .tr .screen-lesson-detail .trk-total { padding-block:16px; }
 .tr .screen-lesson-detail>.trk-actions { justify-content:flex-start; }
-.tr .screen-settings .trk-navlist { border:0; border-block:1px solid var(--surface-edge); border-radius:0; }
-.tr .screen-settings .trk-navrow { padding-inline:0; }
+.tr .screen-settings .trk-navlist { border:1px solid var(--surface-edge); border-radius:24px; }
+.tr .screen-settings .trk-navrow { padding-inline:16px; }
 .tr .screen-settings>.btn { align-self:flex-start; width:auto; }
 .tr .screen-settings .trk-settings-who { padding-bottom:8px; }
 .tr .screen-calendar>.studio-tabs { position:sticky; top:100px; z-index:3; }
 .tr .screen-calendar .trk-week { display:grid; gap:12px; }
 .tr .screen-calendar .trk-hour { border-radius:16px; background:#f8f9fb; border:0; padding:12px; }
-.tr .screen-calendar .trk-actions { padding-top:16px; border-top:1px solid var(--surface-edge); }
+.tr .screen-calendar .trk-actions { padding-top:16px; }
 .tr .screen-documents>.trk-card:first-of-type { background:#f8f9fb; border:1px dashed #bdc4ce; }
 .tr .screen-documents .trk-docrow { align-items:start; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; }
 .tr .screen-profile-editor .trk-preview { display:grid; gap:28px; }
 .tr .screen-profile-editor .trk-preview>section { border-top:1px solid var(--surface-edge); padding-top:24px; }
 .tr .screen-profile-editor .trk-preview-photo { border-radius:24px; overflow:hidden; }
-.tr .screen-reviews .trk-reply { background:#f7f8fa; border:0; border-left:3px solid var(--accent); border-radius:0 16px 16px 0; padding:16px; }
+.tr .screen-reviews .trk-reply { background:#f7f8fa; border:0; border-radius:16px; padding:16px; }
 .tr .screen-reviews .trk-card { gap:20px; }
 .tr :is(.screen-feedback,.screen-report) .trk-card { padding:28px; }
 .tr :is(.screen-feedback,.screen-report) .trk-form { gap:24px; }
-.tr :is(.screen-case,.screen-cases) .trk-card { border-left:3px solid var(--surface-edge); border-radius:0 20px 20px 0; }
-.tr .screen-moderation .trk-card { border:0; border-bottom:1px solid var(--surface-edge); border-radius:0; padding:28px 0; }
+.tr :is(.screen-case,.screen-cases) .trk-card { border:1px solid var(--surface-edge); border-radius:24px; }
+.tr .screen-moderation .trk-card { border:1px solid var(--surface-edge); border-radius:24px; padding:24px; }
 .tr .screen-moderation .trk-admin-content { background:#f8f9fb; border-radius:16px; padding:16px; }
 .tr .screen-moderation .trk-actions { justify-content:flex-start; }
-.tr .screen-ledger .trk-card { border:0; border-bottom:1px solid var(--surface-edge); border-radius:0; padding-inline:0; }
+.tr .screen-ledger .trk-card { border:1px solid var(--surface-edge); border-radius:24px; }
 .tr .screen-ledger .trk-exrow { gap:16px; align-items:center; }
 .tr .screen-signin .studio-auth-card,.tr .screen-signup .studio-auth-card { max-width:560px; }
 .tr :is(.screen-recovery,.screen-verification) .studio-auth-story ul { display:none; }
@@ -63,11 +63,11 @@
 .tr .screen-wizard .trk-actions { justify-content:space-between; }
 .tr .screen-wizard .trk-actions>.btn:last-child { margin-inline-start:auto; }
 .tr .screen-editorial .trk-blog-grid { gap:28px; }
-.tr .screen-editorial .trk-blog-card { border:0; border-radius:0; }
+.tr .screen-editorial .trk-blog-card { border:0; border-radius:24px; }
 .tr .screen-editorial .trk-blog-body { padding:20px 0; }
 .tr .screen-editorial .trk-blog-media { border-radius:24px; }
 .tr .screen-support .faq { display:grid; gap:12px; }
-.tr .screen-support .faq details { border:1px solid var(--surface-edge); border-radius:20px; padding:20px; }
+.tr .screen-support .faq details { border:1px solid var(--surface-edge); border-radius:var(--radius-panel); padding:20px; }
 .tr .screen-support .faq details[open] { background:#f8f9fb; }
 .tr .screen-catalog .trh-tools { width:100%; max-width:none; }
 .tr .screen-catalog .trh-chips { padding-top:4px; }
@@ -109,19 +109,15 @@
 @keyframes screen-check-draw { from { stroke-dashoffset:28; } to { stroke-dashoffset:0; } }
 @media(prefers-reduced-motion:reduce) { .tr .screen-progress progress::-webkit-progress-value { transition:none; } }
 
-.tr .screen-subjects { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-.tr .screen-subjects a { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:64px; padding:18px; border:1px solid var(--surface-edge); border-radius:20px; font-size:15px; font-weight:650; text-decoration:none; }
-.tr .screen-subjects .i { width:18px; height:18px; }
 .tr .screen-recruit-steps .trh-steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; }
 .tr .screen-recruit-steps .trh-steps li::before { display:none; }
 .tr .screen-recruit-pricing { align-items:start; gap:48px; }
-.tr .screen-recruit-pricing .trk-calc { border-radius:28px; border:1px solid var(--surface-edge); background:#fff; padding:28px; box-shadow:none; }
-.tr .screen-account .trk-account-hero { border:0; padding:20px 0 28px; border-radius:0; border-bottom:1px solid var(--surface-edge); }
-.tr .screen-account .trk-navlist { border:0; border-radius:0; background:#fff; }
-.tr .screen-account .trk-navrow { min-height:64px; padding-inline:0; }
+.tr .screen-recruit-pricing .trk-calc { border-radius:var(--radius-panel); border:1px solid var(--surface-edge); background:#fff; padding:28px; box-shadow:none; }
+.tr .screen-account .trk-account-hero { border:1px solid var(--surface-edge); padding:16px; border-radius:24px; }
+.tr .screen-account .trk-navlist { border:1px solid var(--surface-edge); border-radius:24px; background:#fff; }
+.tr .screen-account .trk-navrow { min-height:64px; padding-inline:16px; }
 .tr .screen-account .trk-navrow>.i:first-child { width:24px; height:24px; }
-@media(hover:hover) { .tr .screen-subjects a:hover { color:#b94714; background:#fff7f2; } }
-@media(max-width:760px) { .tr .screen-subjects,.tr .screen-recruit-steps .trh-steps { grid-template-columns:1fr; } .tr .screen-subjects { grid-template-columns:repeat(2,minmax(0,1fr)); } .tr .screen-subjects a { font-size:14px; padding:14px; } }
+@media(max-width:760px) { .tr .screen-recruit-steps .trh-steps { grid-template-columns:1fr; } }
 
 .tr .studio-workspace-main .trk-pagehead.has-back .trk-pagehead-row { display:flex; align-items:center; gap:16px; }
 .tr .studio-workspace-main .trk-pagehead.has-back .trk-pagehead-text { justify-items:start; text-align:start; }
@@ -143,6 +139,19 @@
  .tr .screen-profile-editor .trk-preview-head { grid-column:2; align-self:center; }
  .tr .screen-profile-editor .trk-preview>section { grid-column:1/-1; }
 }
-@media(max-width:760px) { .tr .screen-wizard .trk-photo-big { width:120px; height:160px; border-radius:20px; } }
+@media(max-width:760px) { .tr .screen-wizard .trk-photo-big { width:120px; height:160px; border-radius:var(--radius-panel); } }
 
 .tr .studio-workspace-main .st { justify-self:start; width:fit-content; max-width:100%; }
+
+/* Shared geometry and separators: card corners follow one scale, while controls stay compact. */
+.tr .studio-workspace-main :is(.trk-card,.trk-navlist,.trk-rows.boxed,.trk-account-hero,.trk-request,.trk-lesson) { border-radius:var(--radius-panel); }
+.tr .studio-workspace-main :is(.trk-card,.trk-navlist,.trk-rows.boxed,.trk-account-hero,.trk-request,.trk-lesson) { border-color:var(--surface-edge); }
+.tr .studio-workspace-main :is(.trk-input-box,.trk-input,.trk-admin-content,.trk-reply,.trk-hour) { border-radius:var(--radius-nested); }
+.tr .studio-tabs { border-radius:var(--radius-panel); }
+.tr .studio-tab-pill,.tr .studio-tabs button { border-radius:var(--radius-control); }
+.tr .screen-receipt-actions { justify-content:flex-start; }
+@media(max-width:760px) {
+ .tr .trk-app { padding-bottom:calc(156px + env(safe-area-inset-bottom,0px)); }
+ .tr .studio-workspace-main .screen-receipt-actions { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+ .tr .studio-workspace-main .screen-receipt-actions .btn { width:100%; min-width:0; min-height:48px; justify-content:center; text-align:center; white-space:normal; }
+}

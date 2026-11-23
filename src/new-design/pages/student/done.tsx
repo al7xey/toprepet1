@@ -33,7 +33,7 @@ export default function BookDonePage() {
               ]} />
             </Section>
             </div>
-            <div className="trk-actions">
+            <div className="trk-actions screen-receipt-actions">
               <Button to="/me/lessons" size="lg">Мои уроки</Button>
               <Button to={`/me/lessons/${l.id}`} variant="line" size="lg">Открыть запись</Button>
               <Button to={`/me/chats/new?tutor=${id}`} variant="fill" size="lg" icon="chat">Написать репетитору</Button>
