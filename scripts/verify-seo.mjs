@@ -94,7 +94,7 @@ for (const [route, label] of Object.entries(privatePages).filter(([route]) => !r
 }
 const help = await readFile('dist/help/index.html', 'utf8');
 const catalog = await readFile('dist/teachers/index.html', 'utf8');
-if (/<a[^>]*href="[^"]*\/teachers\/[^"/]+/.test(catalog)) fail('static sample profiles in the catalog');
+if (!pagesPreview && /<a[^>]*href="[^"]*\/teachers\/[^"/]+/.test(catalog)) fail('static sample profiles in the catalog');
 if (!help.includes('"@type":"FAQPage"') || !help.includes('"acceptedAnswer"')) fail('help FAQ');
 const llms = await readFile('dist/llms.txt', 'utf8');
 for (const path of ['/teachers/', '/help/', '/legal/', '/blog/']) if (!llms.includes(`https://toprepet.ru${path}`)) fail('llms discovery');
