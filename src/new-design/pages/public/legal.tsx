@@ -24,11 +24,11 @@ export default function LegalPage() {
   return (
     <PublicLayout tight>
       <PageHeader title={doc.title} lead={doc.description} back={{ to: '/legal/', label: 'Все документы' }} />
-      <div className="trk-legal">
+      <div className="trk-legal studio-reading">
         <nav className="trk-legal-toc" aria-label="Содержание документа">
           <ol>{doc.sections.map((s) => <li key={s.id}><a href={`#${s.id}`}>{s.title}</a></li>)}</ol>
         </nav>
-        {doc.sections.map((s) => <section key={s.id} id={s.id}><h2 className="h3">{s.title}</h2>{s.content}</section>)}
+        <article className="studio-reading-body">{doc.sections.map((s) => <section key={s.id} id={s.id}><h2 className="h3">{s.title}</h2>{s.content}</section>)}</article>
       </div>
     </PublicLayout>
   );

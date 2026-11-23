@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../../api';
 import { useMutation, useQuery } from '../../api/hooks';
@@ -5,12 +6,13 @@ import { useSession } from '../../api/session';
 import type { Notification } from '../../api/types';
 import { AppLayout } from '../../layout/layouts';
 import { ago } from '../../lib/format';
-import { Card, EmptyState, FormError, Icon, IconButton, PageHeader, QueryView, UnreadDot, useToast } from '../../ui';
+import { Card, EmptyState, FormError, Icon, IconButton, PageHeader, QueryView, Tabs, UnreadDot, useToast } from '../../ui';
 
 const ICON: Record<Notification['kind'], string> = { lesson: 'book', request: 'circle-check', message: 'chat-bubble', payment: 'card', review: 'star', system: 'info' };
 
 /** Уведомления: уроки, заявки, сообщения, платежи, отзывы. Общая страница для ученика и репетитора. */
 export default function NotificationsPage() {
+  const [scope, setScope] = useState<'all' | 'unread'>('all');
   const { user } = useSession();
   const toast = useToast();
   const role = user?.role === 'tutor' ? 'tutor' : 'student';
@@ -35,11 +37,13 @@ export default function NotificationsPage() {
   return (
     <AppLayout role={role}>
       <PageHeader title="Уведомления" back={{ to: role === 'tutor' ? '/tutor/account' : '/me/account', label: 'Профиль' }} actions={unread ? <IconButton icon="checks" label="Прочитать все" disabled={readAll.pending} onClick={() => void markAll()} /> : undefined} />
+      <Tabs items={[{ value: 'all', label: 'Все' }, { value: 'unread', label: 'Непрочитанные' }]} value={scope} onChange={setScope} />
       <FormError error={readAll.error} />
       <QueryView query={list} empty={(items) => items.length === 0 ? <EmptyState icon="bell" title="Пока тихо" text="Здесь появятся ответы на заявки, подтверждения уроков и сообщения." /> : null}>
         {(items) => (
-          <div className="trk-list">
-            {[...items].sort((a, b) => b.at.localeCompare(a.at)).map((n) => {
+          <div className="trk-list studio-notifications">
+            {scope === 'unread' && !items.some((item) => !item.read) && <EmptyState icon="check" title="Всё прочитано" text="Новые уведомления появятся здесь." />}
+            {items.filter((item) => scope === 'all' || !item.read).sort((a, b) => b.at.localeCompare(a.at)).map((n) => {
               const body = (
                 <>
                   <span className="trk-note-ic"><Icon name={ICON[n.kind]} /></span>

@@ -1,3 +1,4 @@
+import { useSpringPill } from '../lib/useSpringPill';
 import { useEffect, useId, useRef, useState, type CSSProperties, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import type { Query } from '../api/hooks';
@@ -79,6 +80,8 @@ export function PageHeader({ title, lead, back, actions, center }: { title: Reac
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
   if (!back && from && /^\/(me|tutor)\/account(?:\?|$)/.test(from) && from !== location.pathname) back = { to: from, label: 'Профиль' };
+  const rootSection = /^\/(?:me\/(?:payments|requests)|tutor\/(?:finance|schedule|students|reviews|profile))\/?$/.test(location.pathname);
+  if (rootSection && !from && back?.to && back.to.endsWith('/account')) back = undefined;
   return (
     <header className={cx('trk-pagehead', center && 'center', back && 'has-back')}>
       <div className="trk-pagehead-row">
@@ -160,8 +163,8 @@ export function Note({ tone = 'info', icon, children, action }: { tone?: 'info' 
 
 export function EmptyState({ icon = 'inbox', title, text, actions }: { icon?: string; title: string; text?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="empty trk-empty">
-      <Icon name={icon} />
+    <div className="empty trk-empty studio-empty">
+      <span className="studio-empty-icon"><Icon name={icon} /></span>
       <b>{title}</b>
       {text && <span>{text}</span>}
       {actions && <div className="trk-empty-actions">{actions}</div>}
@@ -304,8 +307,10 @@ export function onChoiceTabKey(event: KeyboardEvent<HTMLButtonElement>) {
 
 /** Сегментный переключатель вкладок. */
 export function Tabs<T extends string>({ items, value, onChange, wide }: { items: { value: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; wide?: boolean }) {
+  const { host, pill } = useSpringPill(value);
   return (
-    <div className={cx('seg trk-tabs', wide && 'wide')} role="tablist">
+    <div ref={host} className={cx('seg trk-tabs studio-tabs', wide && 'wide')} role="tablist">
+      <span ref={pill} className="studio-tab-pill" aria-hidden="true" />
       {items.map((item) => (
         <button key={item.value} type="button" role="tab" aria-selected={item.value === value} tabIndex={item.value === value ? 0 : -1} className={item.value === value ? 'on' : undefined} onKeyDown={onChoiceTabKey} onClick={() => onChange(item.value)}>
           {item.label}{item.count ? <span className="cnt2">{item.count}</span> : null}
@@ -526,4 +531,8 @@ export function RatingInput({ value, onChange, label = 'Оценка', error }: 
 /** One search surface for catalogue and messaging. */
 export function SearchInput({ value, onChange, label, placeholder = 'Поиск', action }: { value: string; onChange: (value: string) => void; label: string; placeholder?: string; action?: ReactNode }) {
   return <label className="search trk-search"><Icon name="search" /><input className="trh-search-input" type="search" autoComplete="off" aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange(event.target.value)} />{action}</label>;
+}
+
+export function MetricCard({ label, value, hint, icon }: { label: string; value: ReactNode; hint?: string; icon: string }) {
+  return <div className="studio-metric"><span className="studio-metric-label"><Icon name={icon} />{label}</span><b>{value}</b>{hint && <small>{hint}</small>}</div>;
 }
