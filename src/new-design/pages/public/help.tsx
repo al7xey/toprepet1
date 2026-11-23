@@ -19,7 +19,7 @@ export default function HelpPage() {
   const [search, setSearch] = useState('');
   const filtered = FAQ.filter(([question, answer]) => `${question} ${answer}`.toLocaleLowerCase('ru-RU').includes(search.trim().toLocaleLowerCase('ru-RU')));
   return (
-    <PublicLayout tight>
+    <PublicLayout view="support" tight>
       <PageHeader title="Помощь" />
       <script type="application/ld+json">{JSON.stringify(FAQ_SCHEMA).replace(/</g, '\\u003c')}</script>
       <div className="studio-help-search"><SearchInput label="Поиск по помощи" placeholder="Запись, перенос или оплата" value={search} onChange={setSearch} /></div>

@@ -14,5 +14,5 @@ export function NotFoundBody({ title = 'Страница не найдена', t
 }
 
 export default function NotFoundPage() {
-  return <PublicLayout tight><NotFoundBody /></PublicLayout>;
+  return <PublicLayout view="result" tight><NotFoundBody /></PublicLayout>;
 }

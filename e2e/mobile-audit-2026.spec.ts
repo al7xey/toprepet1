@@ -57,6 +57,8 @@ test('неверный код не подтверждает почту, прав
   await expect(page.getByLabel('Код из письма', { exact: true })).toHaveValue('123456');
   await submit.click();
   await expect(page).toHaveURL(/\/onboarding/);
-  await page.getByRole('button', { name: 'Пропустить', exact: true }).click();
+  await page.getByRole('button', { name: 'Дальше', exact: true }).click();
+  await page.getByRole('button', { name: 'Дальше', exact: true }).click();
+  await page.getByRole('button', { name: 'Готово', exact: true }).click();
   await expect(page).toHaveURL(/\/me\/account$/);
 });

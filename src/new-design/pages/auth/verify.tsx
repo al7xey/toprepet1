@@ -53,7 +53,7 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout view="verification">
       <PageHeader title="Проверьте почту" lead={<>Введите шестизначный код для <b>{user.email}</b>. Код действует 10 минут. Если письма нет, запросите новый код.</>} center />
       <AuthCard>
         <form className="trk-form" onSubmit={(event) => { event.preventDefault(); void submitCode(); }}>
@@ -79,7 +79,7 @@ export function VerifyByTokenPage() {
 
   if (verified) return <Navigate to={afterVerify(verified)} replace />;
   return (
-    <AuthLayout>
+    <AuthLayout view="verification">
       <PageHeader title="Подтверждаем почту" center />
       <AuthCard>
         {!token || result.error ? (

@@ -12,7 +12,7 @@ export default function LessonsPage() {
   const [scope, setScope] = useState<Scope>('upcoming');
   const lessons = useQuery(`lessons-${scope}`, () => api.listLessons(scope));
   return (
-    <AppLayout role="student">
+    <AppLayout view="lessons" role="student">
       <PageHeader title="Мои уроки" />
       <Tabs<Scope> items={[{ value: 'upcoming', label: 'Предстоящие' }, { value: 'past', label: 'Прошедшие' }]} value={scope} onChange={setScope} />
       <SearchInput label="Найти занятие" placeholder="Предмет или преподаватель" value={search} onChange={setSearch} />

@@ -48,7 +48,7 @@ export default function DocumentsPage() {
     ),
   );
   return (
-    <AppLayout role="tutor">
+    <AppLayout view="documents" role="tutor">
       <PageHeader
         title="Документы"
         back={{ to: '/tutor/profile', label: 'Анкета' }}

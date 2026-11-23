@@ -17,7 +17,7 @@ const KIND: Record<PaymentKind, { tone: Tone; text: string; sign: string }> = {
 export default function PaymentsPage() {
   const [tab, setTab] = useState<'history' | 'cards'>('history');
   return (
-    <AppLayout role="student">
+    <AppLayout view="ledger" role="student">
       <PageHeader title="Платежи" back={{ to: '/me/account', label: 'Профиль' }} />
       <Tabs items={[{ value: 'history', label: 'История' }, { value: 'cards', label: 'Карты' }]} value={tab} onChange={setTab} />
       {tab === 'history' ? <History /> : <Cards />}

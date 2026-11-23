@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { api, staticTutors } from '../../api';
 import { useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
@@ -14,7 +15,7 @@ export default function HomePage() {
   const tutors = useQuery('home-tutors', () => api.listTutors({ limit: 6 }).then((p) => p.items), first);
 
   return (
-    <PublicLayout>
+    <PublicLayout view="landing">
       <div className="p-home-layout">
       <section className="trh-hero p-home-hero" aria-labelledby="hero-title">
         <div className="trh-hero-text">
@@ -32,6 +33,8 @@ export default function HomePage() {
           <img src={publicAssetPath('/images/hero-slide-3-1200.webp')} srcSet={publicAssetSrcSet('/images/hero-slide-3-640.webp 640w, /images/hero-slide-3-1200.webp 1200w')} sizes="(min-width:1440px) 640px, (min-width:761px) 46vw, calc(100vw - 32px)" alt="Ученица занимается за ноутбуком" width={1200} height={900} fetchPriority="high" />
         </div>
       </section>
+
+      <nav className="screen-subjects" aria-label="Быстрый выбор предмета">{['Математика', 'Английский язык', 'Русский язык', 'Информатика'].map((subject) => <Link key={subject} to={`/teachers?subject=${encodeURIComponent(subject)}`}>{subject}<Icon name="right" /></Link>)}</nav>
 
       <Section title="Как всё устроено" id="how" className="p-home-process">
         <Steps items={HOW_STEPS} revealOnScroll />

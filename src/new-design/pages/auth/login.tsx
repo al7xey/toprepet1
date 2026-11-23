@@ -45,7 +45,7 @@ export default function LoginPage() {
 
   const query = next ? `?next=${encodeURIComponent(next)}` : '';
   return (
-    <AuthLayout>
+    <AuthLayout view="signin">
       <PageHeader title="Вход" center />
       <AuthCard>
         <form className="trk-form" onSubmit={submit} noValidate>

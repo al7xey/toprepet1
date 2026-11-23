@@ -12,7 +12,7 @@ export default function BookPage() {
   const initial = useMemo(() => staticTutors().find((t) => t.id === id), [id]);
   const tutor = useQuery(`tutor-${id}`, () => api.getTutor(id), initial);
   return (
-    <AppLayout role="student" narrow>
+    <AppLayout view="booking" role="student" narrow>
       <QueryView query={tutor} empty={() => null}>
         {(t) => <BookForm key={id} tutor={t} />}
       </QueryView>
@@ -66,6 +66,7 @@ function BookForm({ tutor }: { tutor: Tutor }) {
   return (
     <>
       <PageHeader title={kind === 'intro' ? 'Запись на знакомство' : 'Запись на урок'} back={{ to: `/teachers/${tutor.id}/`, label: 'К анкете' }} lead={`${tutor.name} · ${tutor.cardSubjects}`} />
+      <div className="screen-booking-grid"><div className="screen-booking-choice">
       {kind === 'regular' && durations.length > 1 && <SelectField label="Длительность занятия" value={regularDuration} onChange={(e) => { setRegularDuration(Number(e.target.value)); setStart(null); }} options={durations.map((d) => ({ value: String(d), label: minutes(d) }))} />}
       <Section title="Когда">
         <Card>
@@ -77,6 +78,7 @@ function BookForm({ tutor }: { tutor: Tutor }) {
       </Section>
       {tutor.subjects.length > 1 && <SelectField label="Предмет" value={subject} onChange={(e) => setSubject(e.target.value)} options={tutor.subjects} />}
 
+      </div><aside className="screen-booking-summary">
       <Section title="Итог">
         <Card className="trk-summary">
           <Rows boxed rows={[
@@ -108,6 +110,7 @@ function BookForm({ tutor }: { tutor: Tutor }) {
           <Button size="lg" block onClick={submit} disabled={Boolean(requestId && (!response || responses.loading))} loading={book.pending}>{kind === 'intro' ? 'Записаться на знакомство' : 'Записаться'}</Button>
         </Card>
       </Section>
+      </aside></div>
       <AddCardModal open={cardOpen} onClose={() => setCardOpen(false)} onAdded={(c) => { setCardId(c.id); cards.reload(); setCardOpen(false); }} />
     </>
   );

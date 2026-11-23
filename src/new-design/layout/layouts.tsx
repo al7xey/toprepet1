@@ -246,7 +246,7 @@ function SessionActions({ block }: { block?: boolean }) {
 }
 
 /** Публичные страницы: стеклянная шапка с мобильной панелью меню, контент и подвал. */
-export function PublicLayout({ children, tight, bareMobile, narrow, hideSignIn }: { children: ReactNode; tight?: boolean; bareMobile?: boolean; narrow?: boolean; hideSignIn?: boolean }) {
+export function PublicLayout({ children, tight, bareMobile, narrow, hideSignIn, view }: { view?: string; children: ReactNode; tight?: boolean; bareMobile?: boolean; narrow?: boolean; hideSignIn?: boolean }) {
   const { pathname } = useLocation();
   const { user } = useSession();
   // меню закрывается само при переходе: открытым оно считается только на той странице, где его открыли
@@ -286,10 +286,10 @@ export function PublicLayout({ children, tight, bareMobile, narrow, hideSignIn }
     };
   }, [menu]);
   // вошедшие ученик и репетитор остаются в своей оболочке: «Найти репетитора» не выбрасывает на экран до входа
-  if (user && user.role !== 'admin' && /^\/(teachers|help|requests)(\/|$)/.test(pathname)) return <AppLayout role={user.role}>{children}</AppLayout>;
+  if (user && user.role !== 'admin' && /^\/(teachers|help|requests)(\/|$)/.test(pathname)) return <AppLayout role={user.role} view={view}>{children}</AppLayout>;
   return (
     <>
-      <div className={cx('wash trh-page studio-public', tight && 'trh-tight', bareMobile && 'trh-bare')}>
+      <div className={cx('wash trh-page studio-public', view && `screen-${view}`, tight && 'trh-tight', bareMobile && 'trh-bare')}>
         <div ref={headerSlot} className="trh-public-nav-slot">
         <div className="trh-public-nav">
           {menu && <div className="trh-menu-scrim" aria-hidden="true" onClick={() => setMenu(false)} />}
@@ -319,9 +319,9 @@ export function PublicLayout({ children, tight, bareMobile, narrow, hideSignIn }
 }
 
 /** Вход, регистрация, восстановление: публичная шапка и узкая колонка по центру. */
-export function AuthLayout({ children }: { children: ReactNode }) {
+export function AuthLayout({ children, view }: { children: ReactNode; view?: string }) {
   // на экранах входа и регистрации кнопка «Войти» в шапке не нужна
-  return <PublicLayout tight hideSignIn><div className="studio-auth"><aside className="studio-auth-story"><span className="studio-auth-symbol"><Icon name="book" size={36} /></span><h2>Следующий шаг —<br />к вашим целям</h2><p>Репетиторы, занятия и общение в одном месте.</p><ul><li><Icon name="search" />Найдите своего преподавателя</li><li><Icon name="cal" />Выберите удобное время</li><li><Icon name="chat" />Обсуждайте вопросы в чате</li></ul></aside><div className="studio-auth-form">{children}</div></div></PublicLayout>;
+  return <PublicLayout view={view} tight hideSignIn><div className="studio-auth"><aside className="studio-auth-story"><span className="studio-auth-symbol"><Icon name="book" size={36} /></span><h2>Следующий шаг —<br />к вашим целям</h2><p>Репетиторы, занятия и общение в одном месте.</p><ul><li><Icon name="search" />Найдите своего преподавателя</li><li><Icon name="cal" />Выберите удобное время</li><li><Icon name="chat" />Обсуждайте вопросы в чате</li></ul></aside><div className="studio-auth-form">{children}</div></div></PublicLayout>;
 }
 
 interface NavItem { label: string; to: string; icon: string; badge?: number; /** Другие адреса, которые подсвечивают этот пункт. */ also?: string[] }
@@ -369,7 +369,7 @@ const NAV: Record<Role, { top: NavItem[]; tabs: NavItem[] }> = {
  * Кабинет ученика, репетитора или администратора.
  * Компьютер: стеклянная шапка с разделами и значками. Телефон: без закреплённой шапки, снизу стеклянная панель вкладок.
  */
-export function AppLayout({ role, children, narrow, chat }: { role: Role; children: ReactNode; narrow?: boolean; chat?: 'list' | 'thread' }) {
+export function AppLayout({ role, children, narrow, chat, view }: { view?: string; role: Role; children: ReactNode; narrow?: boolean; chat?: 'list' | 'thread' }) {
   const { pathname } = useLocation();
   const { user, logout } = useSession();
   const exit = useMutation(() => logout());
@@ -400,7 +400,7 @@ export function AppLayout({ role, children, narrow, chat }: { role: Role; childr
           {role !== 'admin' && <><NavLink to={`${counters.prefix}/chats`}><Icon name="chat" /><span>Сообщения</span></NavLink><NavLink to={accountTo}><Icon name="user" /><span>Профиль</span></NavLink></>}</nav>
           <Link className="studio-help-link" to="/help"><Icon name="help" />Помощь</Link>
         </aside>
-      <main data-scene={pathname.split('/').filter(Boolean).slice(0, 2).join('-')} id="main" tabIndex={-1} className={cx('trh-main studio-workspace-main', narrow && 'trk-narrow')}>
+      <main data-scene={pathname.split('/').filter(Boolean).slice(0, 2).join('-')} id="main" tabIndex={-1} className={cx('trh-main studio-workspace-main', view && `screen-${view}`, narrow && 'trk-narrow')}>
         {role === 'admin' && <div className="trk-admin-tools"><details className="trh-drop"><summary className="chipf" aria-label="Меню администратора"><Icon name="settings" />Администратор</summary><div className="trh-drop-menu right"><Button size="s" variant="line" loading={exit.pending} onClick={() => { void exit.run(); }}>Выйти</Button></div></details></div>}
         <FormError error={exit.error} />
         {children}

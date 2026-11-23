@@ -23,7 +23,11 @@ test('заявка ученика → отклик репетитора → за
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Ваша цена за урок, ₽').fill('1700');
   await dialog.getByLabel('Сообщение ученику').fill('Здравствуйте! Подготовлю к ОГЭ по шагам, начнём с диагностики.');
-  // несколько окошек подряд: выбранные подсвечиваются все
+  // В конце дня может остаться одно окно: найдём день с двумя доступными слотами.
+  await expect(dialog.locator('.slot:not([disabled])').first()).toBeVisible();
+  const days = dialog.getByRole('tab');
+  for (let day = 0; day < await days.count() && await dialog.locator('.slot:not([disabled])').count() < 2; day++) await days.nth(day).click();
+  // Несколько окошек подряд: выбранные подсвечиваются все.
   await dialog.locator('.slot:not([disabled])').nth(0).click();
   await dialog.locator('.slot:not([disabled])').nth(1).click();
   await expect(dialog.locator('.slot.sel')).toHaveCount(2);

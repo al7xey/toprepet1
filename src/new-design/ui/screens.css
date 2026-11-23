@@ -1,0 +1,148 @@
+/* Page compositions. Mobile header and .tc tutor cards are deliberately outside this layer. */
+.tr .screen-booking.trk-narrow { max-width:none; }
+.tr .screen-booking-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,.85fr); gap:24px; align-items:start; }
+.tr .screen-booking-choice { display:grid; gap:24px; min-width:0; }
+.tr .screen-booking-summary { position:sticky; top:104px; min-width:0; }
+.tr .screen-booking-summary .trk-summary { padding:24px; background:#fff; }
+.tr .screen-booking-summary .trk-summary .trk-total { padding-block:16px; border-block:1px solid var(--surface-edge); }
+.tr .screen-booking-choice .trk-card { border:0; padding:0; }
+.tr .screen-booking-choice .trk-slots { padding:20px; border:1px solid var(--surface-edge); border-radius:24px; }
+.tr .screen-receipt-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:32px; align-items:start; }
+.tr .screen-receipt.trk-narrow { max-width:none; }
+.tr .screen-receipt-facts { border-top:4px solid var(--accent); }
+.tr .screen-receipt-next .trh-steps li { padding-bottom:24px; }
+.tr .screen-person-card { display:grid; gap:20px; }
+.tr .screen-person-card .trk-person { padding-bottom:16px; border-bottom:1px solid var(--surface-edge); }
+.tr .screen-directory .trk-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.tr .screen-directory .screen-person-card .trk-rows { font-size:14px; }
+.tr .screen-request-heading { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px 16px; }
+.tr .screen-request-heading h2 { font-size:22px; margin:0; line-height:1.25; letter-spacing:-.02em; }
+.tr .screen-request-heading>b { font-size:17px; font-variant-numeric:tabular-nums; }
+.tr .screen-request-description { font-size:16px; line-height:1.6; max-width:65ch; white-space:pre-wrap; }
+.tr :is(.screen-requests,.screen-responses) .trk-request { border:0; border-bottom:1px solid var(--surface-edge); border-radius:0; padding:24px 0; }
+.tr :is(.screen-requests,.screen-responses) .trk-request .trk-student { background:none; padding:0; }
+.tr .screen-requests .trk-request .trk-actions { justify-content:flex-start; }
+.tr .screen-request-detail .trk-request { background:#f8f9fb; border:0; }
+.tr .screen-lesson-detail { max-width:820px; }
+.tr .screen-lesson-detail>.trk-card:first-of-type { border:0; padding:24px 0; border-block:1px solid var(--surface-edge); border-radius:0; }
+.tr .screen-lesson-detail .trk-total { padding-block:16px; }
+.tr .screen-lesson-detail>.trk-actions { justify-content:flex-start; }
+.tr .screen-settings .trk-navlist { border:0; border-block:1px solid var(--surface-edge); border-radius:0; }
+.tr .screen-settings .trk-navrow { padding-inline:0; }
+.tr .screen-settings>.btn { align-self:flex-start; width:auto; }
+.tr .screen-settings .trk-settings-who { padding-bottom:8px; }
+.tr .screen-calendar>.studio-tabs { position:sticky; top:100px; z-index:3; }
+.tr .screen-calendar .trk-week { display:grid; gap:12px; }
+.tr .screen-calendar .trk-hour { border-radius:16px; background:#f8f9fb; border:0; padding:12px; }
+.tr .screen-calendar .trk-actions { padding-top:16px; border-top:1px solid var(--surface-edge); }
+.tr .screen-documents>.trk-card:first-of-type { background:#f8f9fb; border:1px dashed #bdc4ce; }
+.tr .screen-documents .trk-docrow { align-items:start; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; }
+.tr .screen-profile-editor .trk-preview { display:grid; gap:28px; }
+.tr .screen-profile-editor .trk-preview>section { border-top:1px solid var(--surface-edge); padding-top:24px; }
+.tr .screen-profile-editor .trk-preview-photo { border-radius:24px; overflow:hidden; }
+.tr .screen-reviews .trk-reply { background:#f7f8fa; border:0; border-left:3px solid var(--accent); border-radius:0 16px 16px 0; padding:16px; }
+.tr .screen-reviews .trk-card { gap:20px; }
+.tr :is(.screen-feedback,.screen-report) .trk-card { padding:28px; }
+.tr :is(.screen-feedback,.screen-report) .trk-form { gap:24px; }
+.tr :is(.screen-case,.screen-cases) .trk-card { border-left:3px solid var(--surface-edge); border-radius:0 20px 20px 0; }
+.tr .screen-moderation .trk-card { border:0; border-bottom:1px solid var(--surface-edge); border-radius:0; padding:28px 0; }
+.tr .screen-moderation .trk-admin-content { background:#f8f9fb; border-radius:16px; padding:16px; }
+.tr .screen-moderation .trk-actions { justify-content:flex-start; }
+.tr .screen-ledger .trk-card { border:0; border-bottom:1px solid var(--surface-edge); border-radius:0; padding-inline:0; }
+.tr .screen-ledger .trk-exrow { gap:16px; align-items:center; }
+.tr .screen-signin .studio-auth-card,.tr .screen-signup .studio-auth-card { max-width:560px; }
+.tr :is(.screen-recovery,.screen-verification) .studio-auth-story ul { display:none; }
+.tr :is(.screen-recovery,.screen-verification) .studio-auth { align-items:center; }
+.tr .screen-onboarding .studio-auth-story { display:none; }
+.tr .screen-onboarding .studio-auth { grid-template-columns:minmax(0,680px); justify-content:center; }
+.tr .screen-onboarding .trk-actions { display:flex; justify-content:space-between; }
+.tr .screen-onboarding .trk-actions>.btn:last-child { margin-inline-start:auto; }
+.tr .screen-wizard .trk-account { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.tr .screen-wizard .trk-account>.trk-card:first-child { grid-column:1/-1; }
+.tr .screen-wizard .trk-account-wide { grid-column:1/-1; }
+.tr .screen-wizard .trk-actions { justify-content:space-between; }
+.tr .screen-wizard .trk-actions>.btn:last-child { margin-inline-start:auto; }
+.tr .screen-editorial .trk-blog-grid { gap:28px; }
+.tr .screen-editorial .trk-blog-card { border:0; border-radius:0; }
+.tr .screen-editorial .trk-blog-body { padding:20px 0; }
+.tr .screen-editorial .trk-blog-media { border-radius:24px; }
+.tr .screen-support .faq { display:grid; gap:12px; }
+.tr .screen-support .faq details { border:1px solid var(--surface-edge); border-radius:20px; padding:20px; }
+.tr .screen-support .faq details[open] { background:#f8f9fb; }
+.tr .screen-catalog .trh-tools { width:100%; max-width:none; }
+.tr .screen-catalog .trh-chips { padding-top:4px; }
+@media(min-width:761px) {
+ .tr .screen-profile .trh-pf-top { display:grid; grid-template-columns:260px minmax(0,1fr); gap:32px; }
+ .tr .screen-profile .trh-pf-photo { height:360px; border-radius:24px; overflow:hidden; }
+ .tr .screen-profile .trh-pf-sheet { padding:16px 0; }
+ .tr .screen-profile .trh-pf-main>.trh-sec { max-width:76ch; }
+ .tr .screen-profile .trh-pf-booking { padding:24px; border:1px solid var(--surface-edge); border-radius:24px; }
+}
+@media(max-width:1100px) { .tr .screen-booking-grid { grid-template-columns:1fr; } .tr .screen-booking-summary { position:static; } }
+@media(max-width:760px) {
+ .tr .screen-receipt-grid,.tr .screen-directory .trk-list,.tr .screen-wizard .trk-account { grid-template-columns:1fr; }
+ .tr .screen-wizard .trk-account>* { grid-column:1; }
+ .tr .screen-calendar>.studio-tabs { position:static; }
+ .tr :is(.screen-feedback,.screen-report) .trk-card { padding:20px; }
+ .tr .screen-booking-summary .trk-summary { padding:20px; }
+ .tr .screen-booking-choice .trk-slots { padding:16px; }
+ .tr .screen-request-heading h2 { font-size:20px; }
+}
+
+/* Step Progress — adapted from https://designbookmark.com/motion#db-step-progress */
+.tr .screen-progress { display:grid; gap:12px; width:100%; }
+.tr .screen-progress-head { display:flex; justify-content:space-between; gap:12px; font-size:13px; color:var(--text-secondary); }
+.tr .screen-progress progress { width:100%; height:4px; border:0; border-radius:8px; overflow:hidden; appearance:none; }
+.tr .screen-progress progress::-webkit-progress-bar { background:#edf0f3; }
+.tr .screen-progress progress::-webkit-progress-value { background:var(--accent); transition:width 480ms cubic-bezier(.22,.8,.25,1); }
+.tr .screen-progress progress::-moz-progress-bar { background:var(--accent); }
+.tr .screen-progress-stages { display:flex; justify-content:space-between; gap:8px; margin:0; padding:0; list-style:none; }
+.tr .screen-progress-stages li>span { display:grid; place-items:center; width:32px; height:32px; border:1px solid var(--surface-edge); border-radius:50%; font-size:13px; font-weight:700; background:#fff; }
+.tr .screen-progress-stages li.on>span { background:#fff0e8; color:#b94714; border-color:#f5c3a9; }
+.tr .screen-progress-stages li[aria-current]>span { box-shadow:0 0 0 3px #fff0e8; border-color:var(--accent); }
+.tr .screen-progress-stages .i { width:16px; height:16px; }
+@media(prefers-reduced-motion:no-preference) {
+ .tr .screen-progress-stages li[aria-current]>span { animation:screen-step-pop 420ms cubic-bezier(.22,.8,.25,1) both; }
+ .tr .chk.on .i-check path { stroke-dasharray:28; animation:screen-check-draw 280ms ease-out both; }
+}
+@keyframes screen-step-pop { from { transform:scale(.85); } 70% { transform:scale(1.05); } to { transform:scale(1); } }
+@keyframes screen-check-draw { from { stroke-dashoffset:28; } to { stroke-dashoffset:0; } }
+@media(prefers-reduced-motion:reduce) { .tr .screen-progress progress::-webkit-progress-value { transition:none; } }
+
+.tr .screen-subjects { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.tr .screen-subjects a { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:64px; padding:18px; border:1px solid var(--surface-edge); border-radius:20px; font-size:15px; font-weight:650; text-decoration:none; }
+.tr .screen-subjects .i { width:18px; height:18px; }
+.tr .screen-recruit-steps .trh-steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; }
+.tr .screen-recruit-steps .trh-steps li::before { display:none; }
+.tr .screen-recruit-pricing { align-items:start; gap:48px; }
+.tr .screen-recruit-pricing .trk-calc { border-radius:28px; border:1px solid var(--surface-edge); background:#fff; padding:28px; box-shadow:none; }
+.tr .screen-account .trk-account-hero { border:0; padding:20px 0 28px; border-radius:0; border-bottom:1px solid var(--surface-edge); }
+.tr .screen-account .trk-navlist { border:0; border-radius:0; background:#fff; }
+.tr .screen-account .trk-navrow { min-height:64px; padding-inline:0; }
+.tr .screen-account .trk-navrow>.i:first-child { width:24px; height:24px; }
+@media(hover:hover) { .tr .screen-subjects a:hover { color:#b94714; background:#fff7f2; } }
+@media(max-width:760px) { .tr .screen-subjects,.tr .screen-recruit-steps .trh-steps { grid-template-columns:1fr; } .tr .screen-subjects { grid-template-columns:repeat(2,minmax(0,1fr)); } .tr .screen-subjects a { font-size:14px; padding:14px; } }
+
+.tr .studio-workspace-main .trk-pagehead.has-back .trk-pagehead-row { display:flex; align-items:center; gap:16px; }
+.tr .studio-workspace-main .trk-pagehead.has-back .trk-pagehead-text { justify-items:start; text-align:start; }
+.tr .studio-workspace-main .trk-pagehead.has-back .trk-pagehead-text h1 { justify-content:flex-start; }
+.tr .studio-workspace-main .trk-pagehead.has-back .trk-pagehead-actions { margin-inline-start:auto; }
+.tr .screen-wizard .trk-wizard { display:grid; gap:24px; }
+
+.tr .screen-wizard .trk-photo-wrap { display:flex; gap:20px; align-items:flex-end; }
+.tr .screen-wizard .trk-photo-big { width:180px; height:240px; flex:none; overflow:hidden; border-radius:24px; }
+.tr .screen-wizard .trk-photo-big img { width:100%; height:100%; object-fit:cover; }
+.tr .screen-profile-share-desktop { display:none; }
+@media(min-width:761px) {
+ .tr .screen-profile .trh-pf-backwrap { display:flex; gap:12px; align-items:center; }
+ .tr .screen-profile .screen-profile-share-desktop { display:grid; }
+ .tr .screen-profile .trh-pf-photo .trh-pf-share { display:none; }
+ .tr .screen-profile-editor .trk-preview { grid-template-columns:200px minmax(0,1fr); }
+ .tr .screen-profile-editor .trk-preview-photo { width:200px; height:267px; grid-column:1; }
+ .tr .screen-profile-editor .trk-preview-photo img { width:100%; height:100%; object-fit:cover; }
+ .tr .screen-profile-editor .trk-preview-head { grid-column:2; align-self:center; }
+ .tr .screen-profile-editor .trk-preview>section { grid-column:1/-1; }
+}
+@media(max-width:760px) { .tr .screen-wizard .trk-photo-big { width:120px; height:160px; border-radius:20px; } }
+
+.tr .studio-workspace-main .st { justify-self:start; width:fit-content; max-width:100%; }

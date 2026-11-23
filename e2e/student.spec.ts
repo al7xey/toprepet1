@@ -49,6 +49,7 @@ test.describe('ученик', () => {
     await expect(page.locator('.tg-thread').getByText('Хочу заниматься английским перед экзаменом.')).toBeVisible();
     // своё сообщение удаляется по долгому нажатию (на компьютере правой кнопкой) после подтверждения
     await page.locator('.tg-msg.out').last().click({ button: 'right' });
+    await page.getByRole('dialog', { name: 'Сообщение', exact: true }).getByRole('button', { name: 'Удалить', exact: true }).click();
     await page.getByRole('dialog', { name: 'Удалить сообщение?' }).getByRole('button', { name: 'Удалить' }).click();
     await expect(page.locator('.tg-thread').getByText('Хочу заниматься английским перед экзаменом.')).toHaveCount(0);
   });

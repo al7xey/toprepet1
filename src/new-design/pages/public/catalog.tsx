@@ -64,7 +64,7 @@ export default function CatalogPage() {
   const reset = () => { setSearchReset((value) => value + 1); setFilter({ sort: filter.sort }); };
 
   return (
-    <PublicLayout tight>
+    <PublicLayout view="catalog" tight>
       <CatalogMetadata tutors={visibleItems} />
       <PageHeader title="Топ репеты" />
 

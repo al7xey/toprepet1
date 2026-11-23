@@ -46,7 +46,7 @@ export function Messenger({ role }: { role: Side }) {
   const list = chats.data ?? [];
   const visibleList = list.filter((chat) => `${chat.peerName} ${chat.lastMessage}`.toLocaleLowerCase('ru-RU').includes(search.trim().toLocaleLowerCase('ru-RU')));
   return (
-    <AppLayout role={role} chat={id ? 'thread' : 'list'}>
+    <AppLayout view="messenger" role={role} chat={id ? 'thread' : 'list'}>
       <div className={`tg${id ? ' open' : ''}`}>
         <aside className="tg-list" aria-label="Диалоги">
           <div className="tg-list-title"><PageHeader title="Сообщения" back={!id && profileBack ? { to: profileBack, label: 'Профиль' } : undefined} /></div>

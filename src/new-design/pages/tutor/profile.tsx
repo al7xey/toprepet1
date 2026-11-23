@@ -25,7 +25,7 @@ export default function TutorProfilePage() {
   const profile = useQuery('my-profile', () => api.getMyProfile());
   const documents = useQuery('my-documents', () => api.listDocuments());
   return (
-    <AppLayout role="tutor" narrow>
+    <AppLayout view="profile-editor" role="tutor" narrow>
       <QueryView query={profile}>
         {(p) => (
           <>

@@ -35,12 +35,11 @@ export default function OnboardingPage() {
 
   const titles = ['Для кого занятия?', 'Какие предметы нужны?', 'Какая цель?'];
   const next = () => (step < 3 ? setStep(step + 1) : finish(false));
-  const ready = step === 1 ? forWhom !== null : step === 2 ? picked.length > 0 : goal !== null;
 
   return (
-    <AuthLayout>
-      <WizardProgress step={step} total={3} />
+    <AuthLayout view="onboarding">
       <PageHeader title={titles[step - 1]} center />
+      <WizardProgress step={step} total={3} />
       <AuthCard>
         <div className="trk-form">
           {step === 1 && <ChoiceCards value={forWhom} onChange={setForWhom} label="Для кого занятия" options={FOR_WHOM.map((v) => ({ value: v, title: v, icon: v === 'Для себя' ? 'user' : 'school' }))} />}
@@ -49,8 +48,7 @@ export default function OnboardingPage() {
           <FormError error={save.error} />
           <div className="trk-actions">
             {step > 1 && <Button variant="fill" onClick={() => setStep(step - 1)}>Назад</Button>}
-            <Button onClick={next} disabled={!ready} loading={save.pending && step === 3}>{step < 3 ? 'Дальше' : 'Готово'}</Button>
-            <Button variant="line" onClick={() => finish(true)} loading={save.pending && step < 3}>Пропустить</Button>
+            <Button onClick={next} loading={save.pending && step === 3}>{step < 3 ? 'Дальше' : 'Готово'}</Button>
           </div>
         </div>
       </AuthCard>

@@ -20,10 +20,10 @@ export default function ProfilePage() {
   const tutorQuery = useQuery(`tutor-${id}`, () => api.getTutor(id), initial);
   const tutor = tutorQuery.data;
   if (tutorQuery.status === 404 || (!tutor && !tutorQuery.loading && !tutorQuery.error)) {
-    return <PublicLayout tight><TutorMetadata tutor={null} /><NotFoundBody title="Анкета не найдена" text="Возможно, ссылка устарела или анкета снята с публикации." action={<Button to="/teachers" size="lg">К преподавателям</Button>} /></PublicLayout>;
+    return <PublicLayout view="profile" tight><TutorMetadata tutor={null} /><NotFoundBody title="Анкета не найдена" text="Возможно, ссылка устарела или анкета снята с публикации." action={<Button to="/teachers" size="lg">К преподавателям</Button>} /></PublicLayout>;
   }
-  if (tutorQuery.error) return <PublicLayout tight><PageHeader title="Анкета преподавателя" /><ErrorState text={tutorQuery.error} onRetry={tutorQuery.reload} /></PublicLayout>;
-  if (!tutor) return <PublicLayout tight><PageHeader title="Анкета преподавателя" /><LoadingList rows={3} /></PublicLayout>;
+  if (tutorQuery.error) return <PublicLayout view="profile" tight><PageHeader title="Анкета преподавателя" /><ErrorState text={tutorQuery.error} onRetry={tutorQuery.reload} /></PublicLayout>;
+  if (!tutor) return <PublicLayout view="profile" tight><PageHeader title="Анкета преподавателя" /><LoadingList rows={3} /></PublicLayout>;
   return <Profile key={id} tutor={tutor} />;
 }
 
@@ -78,9 +78,9 @@ function Profile({ tutor }: { tutor: Tutor }) {
   );
 
   return (
-    <PublicLayout tight bareMobile>
+    <PublicLayout view="profile" tight bareMobile>
       <TutorMetadata tutor={tutor} />
-      <div className="trh-pf-backwrap"><BackLink to={fromChat ?? '/teachers'}>{fromChat && /^\/(me|tutor)\/chats/.test(fromChat) ? 'К сообщениям' : 'Все преподаватели'}</BackLink></div>
+      <div className="trh-pf-backwrap"><BackLink to={fromChat ?? '/teachers'}>{fromChat && /^\/(me|tutor)\/chats/.test(fromChat) ? 'К сообщениям' : 'Все преподаватели'}</BackLink><IconButton icon="share" label="Поделиться" onClick={share} className="screen-profile-share-desktop" /></div>
       <div className="trh-pf">
         <div className="trh-pf-main">
           <section className="trh-pf-top" aria-labelledby="tutor-name">

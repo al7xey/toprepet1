@@ -12,12 +12,12 @@ export default function BookDonePage() {
   const lessonId = params.get('lesson') ?? '';
   const lesson = useQuery(lessonId ? `lesson-${lessonId}` : null, () => api.getLesson(lessonId));
   return (
-    <AppLayout role="student" narrow>
+    <AppLayout view="receipt" role="student" narrow>
       <QueryView query={lesson} empty={() => null}>
         {(l) => (
           <>
             <PageHeader title="Запись отправлена" lead={<>Мы передали запись репетитору <b>{l.tutorName}</b>.</>} actions={<Status tone="wait" icon="clock">Ждёт подтверждения</Status>} />
-            <Card>
+            <div className="screen-receipt-grid"><Card className="screen-receipt-facts">
               <Rows rows={[
                 ['Когда', whenLabel(l.start)],
                 ['Предмет', l.kind === 'intro' ? 'Бесплатное знакомство' : l.subject],
@@ -25,13 +25,14 @@ export default function BookDonePage() {
                 ['Стоимость', l.price ? rub(l.price) : 'Бесплатно'],
               ]} />
             </Card>
-            <Section title="Что дальше">
+            <Section title="Что дальше" className="screen-receipt-next">
               <Steps items={[
                 { title: 'Запись отправлена', text: l.payment === 'hold' ? 'Деньги заморожены на карте, пока репетитор не ответит.' : 'Знакомство бесплатное, оплата не нужна.', state: 'done' },
                 { title: 'Репетитор подтверждает', text: l.confirmBy ? `Ответ ожидается до ${whenLabel(l.confirmBy)}. Если репетитор не ответит, запись отменится, а деньги вернутся.` : 'Мы сообщим, как только репетитор ответит.', state: 'current' },
                 { title: 'Ссылка на урок', text: 'Она появится в карточке урока за 10 минут до начала.', state: 'todo' },
               ]} />
             </Section>
+            </div>
             <div className="trk-actions">
               <Button to="/me/lessons" size="lg">Мои уроки</Button>
               <Button to={`/me/lessons/${l.id}`} variant="line" size="lg">Открыть запись</Button>

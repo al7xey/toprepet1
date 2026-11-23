@@ -49,7 +49,7 @@ export function AccountView({ role }: { role: 'student' | 'tutor' }) {
   const settingsTo = role === 'tutor' ? '/tutor/account/settings' : '/me/account/settings';
 
   return (
-    <AppLayout role={role}>
+    <AppLayout view="account" role={role}>
       <PageHeader title="Профиль" actions={<IconButton icon="settings" label="Настройки" to={settingsTo} />} />
       <div className="trk-account">
         <Card pad="sm" className="trk-account-hero">

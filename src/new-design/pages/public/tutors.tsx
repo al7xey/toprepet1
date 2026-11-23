@@ -35,7 +35,7 @@ export default function TutorsLandingPage() {
   const first = staticTutors().slice(0, 6);
   const tutors = useQuery('tutors-landing', () => api.listTutors({ limit: 6 }).then((p) => p.items), first);
   return (
-    <PublicLayout>
+    <PublicLayout view="recruit">
       <section className="trh-hero" aria-labelledby="hero-title">
         <div className="trh-hero-text">
           <h1 id="hero-title" className="hero-h trh-hero-h">
@@ -53,9 +53,9 @@ export default function TutorsLandingPage() {
         </div>
       </section>
 
-      <Section title="Как начать" reveal><Steps items={TUTOR_STEPS} revealOnScroll /></Section>
+      <Section title="Как начать" className="screen-recruit-steps" reveal><Steps items={TUTOR_STEPS} revealOnScroll /></Section>
 
-      <section id="pricing" className="trk-split trk-price" aria-labelledby="price-title">
+      <section id="pricing" className="trk-split trk-price screen-recruit-pricing" aria-labelledby="price-title">
         <div className="trh-sec" style={{ flex: '1 1 420px', minWidth: 0 }}>
           <h2 id="price-title" className="h2 trh-h2">Вы берёте столько, сколько напишете</h2>
           <p className="cap u-fs18">Назначьте цену занятия сами. Мы добавим 10% сервиса сверху: ученик заплатит чуть больше, а вы получите ровно свою цену.</p>

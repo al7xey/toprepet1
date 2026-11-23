@@ -19,7 +19,7 @@ export default function SchedulePage() {
   const week = useQuery('my-week', () => api.getWeek());
   const exceptions = useQuery('my-exceptions', () => api.listExceptions());
   return (
-    <AppLayout role="tutor">
+    <AppLayout view="calendar" role="tutor">
       <PageHeader title="Расписание" lead={<span className="sm trk-tz"><Icon name="globe" />Москва · МСК (UTC+3)</span>} back={{ to: '/tutor/account', label: 'Профиль' }} />
       <Tabs<Mode> items={[{ value: 'bookings', label: 'Записи' }, { value: 'week', label: 'Неделя' }, { value: 'dates', label: 'Даты' }]} value={mode} onChange={setMode} />
       <QueryView query={week}>

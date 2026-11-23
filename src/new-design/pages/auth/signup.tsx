@@ -47,7 +47,7 @@ export default function SignupPage() {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout view="signup">
       <PageHeader title="Регистрация" center />
       <AuthCard>
         <form className="trk-form" onSubmit={submit} noValidate>

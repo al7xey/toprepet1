@@ -18,7 +18,7 @@ export default function RequestsFeedPage() {
     ? <Button size="s" to="/tutor/requests">Откликнуться</Button>
     : !user ? <Button size="s" to={`/login?next=${encodeURIComponent('/tutor/requests')}`}>Войти и откликнуться</Button> : null;
   return (
-    <PublicLayout tight>
+    <PublicLayout view="requests" tight>
       <PageHeader title="Заявки учеников" />
       <div><Dropdown label="Предмет" icon="book" value={subject} allLabel="Все предметы" options={SUBJECTS.map((s) => ({ value: s, label: s }))} onChange={setSubject} /></div>
       <QueryView query={feed} loading={<LoadingList rows={3} height={200} />} empty={(list) => (list.length ? null : <EmptyState icon="list" title="Заявок по этому предмету нет" text="Загляните позже или выберите другой предмет." />)}>

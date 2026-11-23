@@ -21,7 +21,7 @@ export default function AdminDisputesPage() {
   const list = useQuery('admin-disputes', () => api.adminDisputes());
   const count = list.data?.filter(OPEN).length ?? 0;
   return (
-    <AppLayout role="admin">
+    <AppLayout view="cases" role="admin">
       <PageHeader title="Споры" />
       <Tabs items={[{ value: 'open', label: 'Открытые', count }, { value: 'done', label: 'Решённые' }]} value={tab} onChange={setTab} />
       <QueryView query={list} empty={() => null}>

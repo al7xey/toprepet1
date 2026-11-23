@@ -8,10 +8,10 @@ import { NotFoundBody } from './notfound';
 export default function LegalPage() {
   const { document: slug } = useParams();
   const doc = slug ? LEGAL_DOCUMENTS.find((d) => d.slug === slug) : undefined;
-  if (slug && !doc) return <PublicLayout tight><NotFoundBody /></PublicLayout>;
+  if (slug && !doc) return <PublicLayout view="reading" tight><NotFoundBody /></PublicLayout>;
   if (!doc) {
     return (
-      <PublicLayout tight>
+      <PublicLayout view="reading" tight>
         <PageHeader title="Документы" lead="Правила работы сервиса, условия для репетиторов и информация об оплате." />
         <nav className="trk-legal-list" aria-label="Документы">
           {LEGAL_DOCUMENTS.map((d) => (
@@ -22,7 +22,7 @@ export default function LegalPage() {
     );
   }
   return (
-    <PublicLayout tight>
+    <PublicLayout view="reading" tight>
       <PageHeader title={doc.title} lead={doc.description} back={{ to: '/legal/', label: 'Все документы' }} />
       <div className="trk-legal studio-reading">
         <nav className="trk-legal-toc" aria-label="Содержание документа">

@@ -15,7 +15,7 @@ const ENTRY: Record<'pending' | 'paid' | 'held', { tone: 'wait' | 'ok' | 'neutra
 export default function FinancePage() {
   const finance = useQuery('my-finance', () => api.getFinance());
   return (
-    <AppLayout role="tutor" narrow>
+    <AppLayout view="finance" role="tutor" narrow>
       <PageHeader title="Финансы" back={{ to: '/tutor/account', label: 'Профиль' }} />
       <QueryView query={finance}>
         {(f) => (

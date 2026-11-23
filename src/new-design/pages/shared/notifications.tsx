@@ -35,7 +35,7 @@ export default function NotificationsPage() {
     });
   };
   return (
-    <AppLayout role={role}>
+    <AppLayout view="notifications" role={role}>
       <PageHeader title="Уведомления" back={{ to: role === 'tutor' ? '/tutor/account' : '/me/account', label: 'Профиль' }} actions={unread ? <IconButton icon="checks" label="Прочитать все" disabled={readAll.pending} onClick={() => void markAll()} /> : undefined} />
       <Tabs items={[{ value: 'all', label: 'Все' }, { value: 'unread', label: 'Непрочитанные' }]} value={scope} onChange={setScope} />
       <FormError error={readAll.error} />

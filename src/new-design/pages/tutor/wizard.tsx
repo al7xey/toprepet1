@@ -20,7 +20,7 @@ export default function WizardPage() {
   const profile = useQuery('my-profile', () => api.getMyProfile());
   const week = useQuery('my-week', () => api.getWeek());
   return (
-    <AppLayout role="tutor" narrow>
+    <AppLayout view="wizard" role="tutor" narrow>
       <QueryView query={profile}>
         {(p) => (
           <QueryView query={week}>
@@ -89,8 +89,8 @@ function Wizard({ initial, initialWeek }: { initial: TutorProfileDraft; initialW
 
   return (
     <>
-      <WizardProgress step={step} total={STEPS.length} label={`Шаг ${step} из ${STEPS.length} · ${STEPS[step - 1]}`} />
       <PageHeader title={STEPS[step - 1]} back={{ to: returnTo, label: "Выйти из редактирования" }} />
+      <WizardProgress step={step} total={STEPS.length} label="Ваша анкета" />
       <Card>
         <div className="trk-form">
           {step === 1 && (

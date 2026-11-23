@@ -323,10 +323,10 @@ export function Tabs<T extends string>({ items, value, onChange, wide }: { items
 /** Прогресс многошагового мастера. */
 export function WizardProgress({ step, total, label }: { step: number; total: number; label?: string }) {
   return (
-    <div className="trk-progress">
-      <progress className="trk-sr" aria-label={label ?? 'Заполнение формы'} value={step} max={total} aria-valuetext={`Шаг ${step} из ${total}`} />
-      {label && <span className="mini">{label}</span>}
-      <div className="prog" aria-hidden="true">{Array.from({ length: total }, (_, i) => <i key={i} className={i < step ? 'on' : undefined} />)}</div>
+    <div className="trk-progress screen-progress">
+      <div className="screen-progress-head"><span>{label ?? 'Заполнение'}</span><b>Шаг {step} из {total}</b></div>
+      <progress aria-label={label ?? 'Заполнение формы'} value={step} max={total} aria-valuetext={`Шаг ${step} из ${total}`} />
+      <ol className="screen-progress-stages" aria-label="Этапы">{Array.from({ length: total }, (_, i) => <li key={i} aria-current={i === step - 1 ? 'step' : undefined} className={i < step ? 'on' : ''}><span>{i < step - 1 ? <Icon name="check" /> : i + 1}</span></li>)}</ol>
     </div>
   );
 }

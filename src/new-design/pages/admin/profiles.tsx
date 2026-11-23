@@ -14,7 +14,7 @@ export default function AdminProfilesPage() {
   const queue = useQuery('admin-profiles', () => api.adminProfileQueue());
   const updateDocument = (next: TutorDocument) => queue.setData((prev) => (prev ?? []).map((item) => ({ ...item, documents: item.documents?.map((doc) => doc.id === next.id ? next : doc) })));
   return (
-    <AppLayout role="admin">
+    <AppLayout view="moderation" role="admin">
       <PageHeader title="Анкеты репетиторов" />
       <div className="studio-filterbar"><Tabs items={[{ value: 'all', label: 'Все анкеты' }, { value: 'hidden', label: 'Скрытые' }]} value={scope} onChange={setScope} /><Button variant="line" size="s" onClick={queue.reload} icon="repeat">Обновить</Button></div>
       <SearchInput label="Найти анкету" placeholder="Имя, предмет или почта" value={search} onChange={setSearch} />
