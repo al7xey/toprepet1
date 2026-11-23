@@ -49,6 +49,67 @@
   to { opacity: 1; transform: none; }
 }
 
+/* DesignBookmark-inspired motion applied to actual product controls.
+   Keep the page geometry fixed: motion lives on opacity, color, borders and
+   small inner details. Source studies are listed in docs/motion-sources.md. */
+@media (prefers-reduced-motion: no-preference) {
+  .tr [data-motion-visible] { animation: lg-section-arrive 560ms var(--lg-spring) both; }
+  .tr [data-motion="card-reveal"][data-motion-visible],
+  .tr [data-motion="profile-card"][data-motion-visible] { animation-name: lg-card-arrive; }
+  .tr [data-motion="stat-card"][data-motion-visible] > * { animation: lg-stat-arrive 520ms var(--lg-spring) both; }
+  .tr [data-motion="stat-card"][data-motion-visible] > *:nth-child(2) { animation-delay: 70ms; }
+  .tr [data-motion="stat-card"][data-motion-visible] > *:nth-child(3) { animation-delay: 140ms; }
+  .tr [data-motion="stat-card"][data-motion-visible] > *:nth-child(4) { animation-delay: 210ms; }
+  .tr .tc.s img { transform: translate(var(--motion-photo-x, 0px), var(--motion-photo-y, 0px)) scale(1.015); transition: transform 420ms var(--lg-spring); }
+  .tr [data-motion="profile-card"]:hover img { transform: translate(var(--motion-photo-x, 0px), var(--motion-photo-y, 0px)) scale(1.035); }
+  .tr [data-motion="streaming-reply"] { animation: lg-message-arrive 420ms cubic-bezier(.2,.85,.25,1) both; transform-origin: bottom left; }
+  .tr [data-motion="streaming-reply"].out { transform-origin: bottom right; }
+  .tr [data-motion="prompt-box"] { transition: border-color 240ms var(--lg-spring), box-shadow 280ms var(--lg-spring), background-color 280ms var(--lg-spring); }
+  .tr [data-motion="prompt-box"]:focus-within { box-shadow: 0 0 0 3px rgb(249 104 43 / 10%), inset 0 1px 0 var(--lg-edge); }
+  .tr [data-motion="expand-card"] > summary .i { transition: transform 320ms var(--lg-spring), color 220ms ease; }
+  .tr [data-motion="expand-card"][open] > summary .i { transform: rotate(45deg); color: var(--accent); }
+  .tr [data-motion="expand-card"] > p { animation: lg-faq-open 320ms var(--lg-spring) both; }
+  .tr [data-motion="dynamic-menu"] .i { transition: transform 280ms var(--lg-spring); }
+  .tr [data-motion="dynamic-menu"][aria-expanded="true"] .i { transform: rotate(90deg); }
+  .tr [data-motion="roll-links"] { transition: color 180ms ease; }
+  .tr [data-motion="roll-links"]:hover,
+  .tr [data-motion="roll-links"]:focus-visible { color: var(--accent); }
+  .tr [data-motion="icon-response"]:hover .i { animation: lg-icon-arrive 320ms var(--lg-spring) both; }
+  .tr [data-motion="spring-input"]:focus-within { animation: lg-focus-arrive 360ms var(--lg-spring) both; }
+  .tr .trk-field.has-error .trk-input-box { animation: lg-field-error 360ms ease-out both; }
+  .tr [data-motion="otp-code"]:focus { letter-spacing: .24em; transition: letter-spacing 260ms var(--lg-spring); }
+  .tr [data-motion="file-drop"] { transition: border-color 240ms ease, color 240ms ease, background-color 240ms ease; }
+  .tr [data-motion="file-drop"]:hover { border-color: var(--accent); color: var(--accent); background-color: #fffaf7; }
+  .tr [data-motion="star-rating"] .trk-rating-star { transition: color 180ms ease; }
+  .tr [data-motion="star-rating"] .trk-rating-star:hover ~ .trk-rating-star { color: var(--muted); }
+  .tr [data-motion="star-rating"] .trk-rating-star:has(input:checked) .i { animation: lg-star-burst 380ms cubic-bezier(.2,.85,.25,1) both; }
+  .tr [data-motion="pagination-dots"] { animation: lg-calendar-arrive 360ms var(--lg-spring) both; }
+  .tr [data-motion="number-stepper"]:focus-visible,
+  .tr [data-motion="range-slider"]:focus-visible,
+  .tr [data-motion="option-chip"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tr [data-motion="number-stepper"], .tr [data-motion="range-slider"], .tr [data-motion="option-chip"] { outline: var(--motion-selection-rim, 0px) solid rgb(249 104 43 / 32%); outline-offset: -2px; }
+  .tr .trk-toast[data-motion="loading-success"] { animation: lg-toast-arrive 480ms var(--lg-spring) both; }
+  .tr [data-unread]:not([data-unread="0"])::after { animation: lg-badge-arrive 460ms cubic-bezier(.2,1.5,.35,1) both; }
+  .tr .trh-menu { transform-origin: top right; }
+  .tr .trh-menu-list > * { animation: lg-menu-row 360ms var(--lg-spring) both; }
+  .tr .trh-menu-list > *:nth-child(2) { animation-delay: 35ms; }
+  .tr .trh-menu-list > *:nth-child(3) { animation-delay: 70ms; }
+  .tr .trh-menu-list > *:nth-child(4) { animation-delay: 105ms; }
+}
+
+@keyframes lg-card-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes lg-stat-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes lg-message-arrive { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes lg-faq-open { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes lg-icon-arrive { 50% { transform: translateY(-1px); } }
+@keyframes lg-focus-arrive { from { filter: saturate(.9); } to { filter: saturate(1); } }
+@keyframes lg-field-error { 25%, 75% { transform: translateX(-2px); } 50% { transform: translateX(2px); } }
+@keyframes lg-star-burst { 45% { transform: scale(1.16); } }
+@keyframes lg-calendar-arrive { from { opacity: .7; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes lg-toast-arrive { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes lg-badge-arrive { from { opacity: .5; scale: .65; } to { opacity: 1; scale: 1; } }
+@keyframes lg-menu-row { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+
 /* Source https://designbookmark.com/motion-src/tab-pill/tabs.js
    and https://designbookmark.com/motion-src/toggle-switch/switch.js.
    The source spring engine writes the live edge/knob values. */

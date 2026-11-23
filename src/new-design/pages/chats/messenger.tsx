@@ -230,7 +230,7 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
               {m.kind === 'event'
                 ? <div className="tg-sys">{m.text}</div>
                 : (
-                  <div className={`tg-msg ${mine ? 'out' : 'in'}${joined ? ' joined' : ''}`} {...(mine ? holdProps(m) : {})}>
+                  <div className={`tg-msg ${mine ? 'out' : 'in'}${joined ? ' joined' : ''}`} data-motion="streaming-reply" {...(mine ? holdProps(m) : {})}>
                     {m.imageUrl && <img className="tg-photo" src={m.imageUrl} crossOrigin="use-credentials" alt="Фото в сообщении" loading="lazy" />}
                     {m.card ? (
                       <div className="tg-card">
@@ -249,7 +249,7 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
       {conversation.blocked ? <p className="tg-blocked">Диалог заблокирован: писать в него нельзя.</p> : (
         <form className="tg-compose" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
           {(send.error || sendPhoto.error) && <FormError error={send.error ?? sendPhoto.error} />}
-          <div className="tg-compose-row">
+          <div className="tg-compose-row" data-motion="prompt-box">
             <input ref={fileInput} type="file" accept="image/*" className="trk-sr" tabIndex={-1} aria-hidden="true" onChange={(e) => void pickPhoto(e.target.files?.[0])} />
             <IconButton className="tg-attach" icon="attach" label="Прикрепить фото" disabled={sendPhoto.pending} onClick={() => fileInput.current?.click()} />
             <textarea ref={input} rows={1} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey}

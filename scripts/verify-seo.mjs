@@ -4,6 +4,9 @@ import { routes, titles, descriptions, canonicalForRoute } from './seo-routes.mj
 import privatePages from '../src/shared/config/private-seo-pages.json' with { type: 'json' };
 
 const fail = message => { throw new Error(`SEO: ${message}`); };
+const assetBase = (process.env.VITE_BASE_PATH || '/').replace(/^\/+|\/+$/g, '');
+const pagesPreview = Boolean(assetBase);
+const previewUrl = route => `https://al7xey.github.io/${assetBase}/${route.replace(/^\/+|\/+$/g, '')}${route === '/' ? '' : '/'}`;
 const seenTitles = new Set();
 const seenDescriptions = new Set();
 
@@ -18,11 +21,11 @@ for (const route of routes) {
   if (description !== descriptions[route] || !description || seenDescriptions.has(description)) fail(`${route}: description`);
   if (canonicals.length !== 1 || canonicals[0][1] !== canonical) fail(`${route}: canonical`);
   if (!/<h1(?:\s|>)/i.test(html) || !/<div id="root"[^>]*>[\s\S]{300,}<\/div>/.test(html)) fail(`${route}: prerender`);
-  if (/<meta name="robots" content="[^"]*noindex/i.test(html)) fail(`${route}: noindex`);
+  if (pagesPreview !== /<meta name="robots" content="[^"]*noindex/i.test(html)) fail(`${route}: robots indexability`);
   if ((html.match(/<meta name="robots"/g) || []).length !== 1 || !html.includes('max-image-preview:large')) fail(`${route}: robots/image preview`);
   if (route === '/teachers' && !html.includes('"@type": "CollectionPage"')) fail(`${route}: directory schema`);
   if (['/teachers', '/for-repetitor'].includes(route) && !html.includes('"@type": "BreadcrumbList"')) fail(`${route}: breadcrumb schema`);
-  for (const [key, value] of [['og:title', title], ['og:description', description], ['og:url', canonical]]) {
+  for (const [key, value] of [['og:title', title], ['og:description', description], ['og:url', pagesPreview ? previewUrl(route) : canonical]]) {
     if (!html.includes(`property="${key}" content="${value}"`)) fail(`${route}: ${key}`);
   }
   if ((html.match(/<h1(?:\s|>)/gi) || []).length !== 1) fail(`${route}: exactly one h1`);
@@ -58,7 +61,7 @@ console.log(`SEO проверка пройдена: ${routes.length} стран�
 for (const url of blogUrls) {
   const path = new URL(url).pathname;
   const html = await readFile(resolve(`dist${path}index.html`), 'utf8');
-  if (!html.includes(`rel="canonical" href="${url}"`) || /name="robots" content="[^"]*noindex/.test(html)) fail(`${path}: blog canonical/robots`);
+  if (!html.includes(`rel="canonical" href="${url}"`) || (pagesPreview !== /name="robots" content="[^"]*noindex/.test(html))) fail(`${path}: blog canonical/robots`);
   if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`${path}: blog heading`);
   if (html.includes('<!--$?-->') || html.includes('id="S:0"')) fail(`${path}: hidden blog content`);
   if ((html.match(/<meta name="robots"/g) || []).length !== 1 || !html.includes('max-image-preview:large')) fail(`${path}: blog robots/image preview`);
@@ -71,7 +74,10 @@ if (!robots.includes('Clean-param:') || /Disallow:\s*\/(?:\s|$)/m.test(robots)) 
 for (const [from, to] of [['/lessons', '/teachers'], ['/contact', '/help'], ['/free-intro', '/teachers']]) {
   const html = await readFile(resolve(`dist${from}/index.html`), 'utf8');
   const destination = canonicalForRoute(to);
-  const redirect = from === '/free-intro' ? `${destination}?intro=1` : destination;
+  const previewDestination = previewUrl(to);
+  const redirect = pagesPreview
+    ? `${previewDestination}${from === '/free-intro' ? '?intro=1' : ''}`
+    : from === '/free-intro' ? `${destination}?intro=1` : destination;
   if (!html.includes('noindex,follow') || !html.includes(`content="0;url=${redirect}"`) || !html.includes(`rel="canonical" href="${destination}"`)) fail(`${from}: moved page redirect`);
   if (urls.some(url => url.endsWith(`${from}/`))) fail(`${from}: moved page in sitemap`);
 }

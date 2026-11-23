@@ -101,7 +101,7 @@ export function Modal({ open, onClose, title, children, footer, width = 520 }: {
   return createPortal(
     <div className="tr trk-modal-root" ref={root}>
       <div className="trk-scrim" onClick={onClose} aria-hidden="true" />
-      <dialog open tabIndex={-1} className="trk-modal surf-strong" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} ref={box} style={{ maxWidth: width }}>
+      <dialog open tabIndex={-1} className="trk-modal surf-strong" data-motion="morph-island" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} ref={box} style={{ maxWidth: width }}>
         <div className="grab trk-grab" aria-hidden="true" />
         <div className="trk-modal-head">
           <h2 className="trk-cardtitle">{title}</h2>
@@ -144,7 +144,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div className="trk-toasts" aria-live="polite">
         {items.map((t) => (
-          <div key={t.id} className={`toast surf trk-toast ${t.tone}`}>
+          <div key={t.id} className={`toast surf trk-toast ${t.tone}`} data-motion="loading-success">
             <Icon name={t.tone === 'bad' ? 'alert' : t.tone === 'info' ? 'info' : 'check'} />
             <span>{t.text}</span>
           </div>

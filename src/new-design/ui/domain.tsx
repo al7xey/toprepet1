@@ -16,7 +16,7 @@ export function TutorCard({ tutor, priority }: { priority?: boolean; tutor: Pick
   const { pathname, search } = useLocation();
   const back = pathname + search;
   return (
-    <Link state={{ back }} className="tc s" to={`/teachers/${tutor.id}/`} aria-label={`${tutor.name}, ${tutor.cardSubjects}`} draggable={false}>
+    <Link state={{ back }} className="tc s" data-motion="profile-card" to={`/teachers/${tutor.id}/`} aria-label={`${tutor.name}, ${tutor.cardSubjects}`} draggable={false}>
       {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
       <span className="pl">
         <b><span className="trh-tutor-name">{tutor.name}</span></b>
@@ -115,12 +115,12 @@ export function SlotPicker({ slots, value, values, onChange, days = 7, loading, 
   if (!byDay.length) return <p className="muted">Свободного времени на ближайшие дни нет. Напишите репетитору или загляните позже.</p>;
 
   return (
-    <div className="trk-slots">
+    <div className="trk-slots" data-motion="jelly-slider">
       <div className="dates trh-dates" role="tablist" aria-label="День">
         {byDay.map(([key, items]) => {
           const date = new Date(items[0].start);
           return (
-            <button key={key} type="button" role="tab" aria-selected={key === current} tabIndex={key === current ? 0 : -1} className={`date${key === current ? ' sel' : ''}`} onKeyDown={onChoiceTabKey} onClick={() => setDay(key)}>
+            <button key={key} type="button" role="tab" aria-selected={key === current} tabIndex={key === current ? 0 : -1} data-motion="number-stepper" className={`date${key === current ? ' sel' : ''}`} onKeyDown={onChoiceTabKey} onClick={() => setDay(key)}>
               <small>{date.toLocaleDateString('ru-RU', { weekday: 'short' }).replace('.', '')}</small><b>{date.getDate()}</b>
             </button>
           );
@@ -128,7 +128,7 @@ export function SlotPicker({ slots, value, values, onChange, days = 7, loading, 
       </div>
       <div key={current} className="slots trh-slots" aria-label={list[0] ? dayLabel(list[0].start) : undefined}>
         {list.map((s) => (
-          <button key={s.start} type="button" className={`slot${(values ? values.includes(s.start) : s.start === value) ? ' sel' : ''}`} aria-pressed={values ? values.includes(s.start) : s.start === value} onClick={() => onChange(s.start)}>
+          <button key={s.start} type="button" data-motion="range-slider" className={`slot${(values ? values.includes(s.start) : s.start === value) ? ' sel' : ''}`} aria-pressed={values ? values.includes(s.start) : s.start === value} onClick={() => onChange(s.start)}>
             {timeLabel(s.start)}
           </button>
         ))}
@@ -141,8 +141,8 @@ export function SlotPicker({ slots, value, values, onChange, days = 7, loading, 
 /* ---------- Сообщения ---------- */
 
 export function Bubble({ mine, system, text, at }: { mine?: boolean; system?: boolean; text: string; at?: string }) {
-  if (system) return <div className="bubble b-sys">{text}</div>;
-  return <div className={`bubble ${mine ? 'b-out' : 'b-in'}`}>{text}{at && <small>{timeLabel(at)}</small>}</div>;
+  if (system) return <div className="bubble b-sys" data-motion="streaming-reply">{text}</div>;
+  return <div className={`bubble ${mine ? 'b-out' : 'b-in'}`} data-motion="streaming-reply">{text}{at && <small>{timeLabel(at)}</small>}</div>;
 }
 
 /** Добавление карты. В демо-режиме поля ввода; с настоящим бэкендом здесь встанет виджет платёжного провайдера (номер карты не должен попадать на наш сервер). */

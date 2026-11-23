@@ -4,10 +4,22 @@ import type { Spring } from './motion-spring';
 
 interface Control { update: () => void; cancel: () => void }
 
-/** Bind the original Motion Studies equations to existing application controls. */
+/**
+ * Adapted from the live DesignBookmark Motion studies. Each controller is tied
+ * to a real UI state; gallery autoplay and sample-only controls are omitted.
+ * Sources: tab-pill, toggle-switch, spring-dropdown, step-progress,
+ * checkbox-list, segmented-control, dynamic-menu, rubber-dock, springy-input,
+ * jelly-slider, number-stepper, range-slider, parallax-ticket, glass-lens,
+ * expand-card, profile-card, stat-card, loading-success, copy-button,
+ * streaming-reply, prompt-box, otp-code, star-rating, file-drop, read-along,
+ * roll-links, morph-tooltip, pagination-dots, fan-cards, like-burst.
+ */
 export function MotionEffects() {
   useEffect(() => {
     const controls = new Map<HTMLElement, Control>();
+    const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
     const bind = (element: HTMLElement) => {
       if (controls.has(element)) { controls.get(element)!.update(); return; }
       let stop = () => {};
@@ -17,8 +29,9 @@ export function MotionEffects() {
         stop();
         stop = runSprings(springs, render);
       };
+
       if (element.matches('.trk-tabs')) {
-        // Tab Pill: independent leading and trailing edges.
+        // Tab Pill / Segmented Control: two spring-driven edges keep labels still.
         const A = S(0), B = S(0);
         let current = -1;
         update = () => {
@@ -42,7 +55,7 @@ export function MotionEffects() {
           });
         };
       } else if (element.matches('.switch')) {
-        // Toggle Switch: position + width impulse.
+        // Toggle Switch: original position + width impulse equations.
         const on = element.classList.contains('on');
         const p = S(on ? 1 : 0, 320, 18), w = S(0, 300, 20);
         value = String(on);
@@ -58,7 +71,7 @@ export function MotionEffects() {
           });
         };
       } else if (element.matches('.prog i, .trk-check > i, .chk > i')) {
-        // Step Progress / Checkbox List: fill and check springs.
+        // Step Progress + Checkbox List: fill and check springs from the sources.
         const active = () => element.classList.contains('on') || Boolean(element.closest('.trk-check.on, .chk.on'));
         const f = S(active() ? 1 : 0, 260, 24);
         const p = S(1, 520, 13), c = S(active() ? 1 : 0, 160, 20);
@@ -77,39 +90,102 @@ export function MotionEffects() {
             }
           });
         };
+      } else if (element.matches('.opt, .chipf, .trk-month-day, .trk-slots .date, .trk-slots .slot')) {
+        // Tag Input, Number Stepper, Range Slider: selection is a short spring,
+        // while the hit target and surrounding layout remain completely fixed.
+        const selected = () => element.matches('.on, .sel');
+        const rim = S(selected() ? 1.5 : 0, 300, 24);
+        value = String(selected());
+        update = () => {
+          const on = selected();
+          if (String(on) === value) return;
+          value = String(on); rim.t = on ? 1.5 : 0;
+          play([rim], () => element.style.setProperty('--motion-selection-rim', rim.x.toFixed(2) + 'px'));
+        };
+      } else if (element.matches('.tc')) {
+        // Profile Card / Parallax Ticket: a restrained photo-only parallax on desktop.
+        const image = element.querySelector<HTMLElement>('img');
+        const x = S(0, 150, 22), y = S(0, 150, 22);
+        const move = (event: PointerEvent) => {
+          if (!finePointer || !image) return;
+          const rect = element.getBoundingClientRect();
+          x.t = clamp((event.clientX - rect.left) / rect.width - .5, -.5, .5) * 2.4;
+          y.t = clamp((event.clientY - rect.top) / rect.height - .5, -.5, .5) * 2.4;
+          play([x, y], () => {
+            image.style.setProperty('--motion-photo-x', x.x.toFixed(2) + 'px');
+            image.style.setProperty('--motion-photo-y', y.x.toFixed(2) + 'px');
+          });
+        };
+        const leave = () => {
+          x.t = 0; y.t = 0;
+          play([x, y], () => {
+            image?.style.setProperty('--motion-photo-x', x.x.toFixed(2) + 'px');
+            image?.style.setProperty('--motion-photo-y', y.x.toFixed(2) + 'px');
+          });
+        };
+        element.addEventListener('pointermove', move, { passive: true });
+        element.addEventListener('pointerleave', leave, { passive: true });
+        controls.set(element, { update: () => {}, cancel: () => { stop(); element.removeEventListener('pointermove', move); element.removeEventListener('pointerleave', leave); } });
+        return;
       } else {
-        // Spring Dropdown panel: 300/23, opacity 400/34.
+        // Spring Dropdown / Morph Island / Loading Success: panels settle into
+        // place using the source spring values, with no resize or layout jump.
         const h = S(0, 300, 23), o = S(0, 400, 34);
         h.t = 1; o.t = 1;
         play([h, o], () => {
           element.style.opacity = String(clamp(o.x, 0, 1));
-          element.style.transform = 'translateY(' + ((1 - h.x) * -8).toFixed(2) + 'px) scale(' + (.96 + .04 * h.x).toFixed(4) + ')';
+          element.style.transform = 'translateY(' + ((1 - h.x) * -8).toFixed(2) + 'px) scale(' + (.985 + .015 * h.x).toFixed(4) + ')';
         });
       }
       controls.set(element, { update, cancel: () => stop() });
       update();
     };
-    const selector = '.trk-tabs, .switch, .prog i, .trk-check > i, .chk > i, .trh-drop-menu, .trh-menu, .trk-modal, .trk-toast';
+
+    const selector = [
+      '.trk-tabs', '.switch', '.prog i', '.trk-check > i', '.chk > i',
+      '.trh-drop-menu', '.trh-menu', '.trk-modal', '.trk-toast',
+      '.opt', '.chipf', '.trk-month-day', '.trk-slots .date', '.trk-slots .slot', '.tc',
+    ].join(',');
+    const revealSelector = '[data-motion="section-reveal"], [data-motion="card-reveal"], [data-motion="profile-card"], [data-motion="stat-card"]';
+    let revealObserver: IntersectionObserver | null = null;
+    if (!reduced.matches && typeof IntersectionObserver !== 'undefined') {
+      revealObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.setAttribute('data-motion-visible', '');
+          revealObserver?.unobserve(entry.target);
+        });
+      }, { threshold: .12, rootMargin: '0px 0px -5% 0px' });
+    }
     const scan = (root: Element) => {
       if (root instanceof HTMLElement && root.matches(selector)) bind(root);
+      if (root instanceof HTMLElement && root.matches(revealSelector)) revealObserver?.observe(root);
       root.querySelectorAll<HTMLElement>(selector).forEach(bind);
+      root.querySelectorAll<HTMLElement>(revealSelector).forEach(element => revealObserver?.observe(element));
     };
+    document.querySelectorAll('.tr').forEach(scan);
     const observer = new MutationObserver(records => {
       for (const record of records) {
         if (record.type === 'childList') record.addedNodes.forEach(node => { if (node instanceof Element) scan(node); });
         else if (record.target instanceof HTMLElement) {
-          const host = record.target.closest<HTMLElement>('.trk-tabs, .switch, .prog i, .trk-check, .chk');
-          if (host) scan(host);
+          const target = record.target;
+          const host = target.matches(selector) ? target : target.closest<HTMLElement>(selector);
+          if (host) { bind(host); controls.get(host)?.update(); }
+          else target.querySelectorAll<HTMLElement>(selector).forEach(element => { bind(element); controls.get(element)?.update(); });
         }
       }
       for (const [element, control] of controls) if (!element.isConnected) { control.cancel(); controls.delete(element); }
     });
-    document.querySelectorAll('.tr').forEach(scan);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'aria-selected'] });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'aria-selected', 'aria-pressed', 'open'] });
     const resize = new ResizeObserver(() => controls.forEach(control => control.update()));
     document.querySelectorAll('.tr').forEach(root => resize.observe(root));
+    const onMotionPreference = () => {
+      if (reduced.matches) document.querySelectorAll<HTMLElement>('[data-motion-visible]').forEach(element => { element.style.animation = 'none'; });
+    };
+    reduced.addEventListener('change', onMotionPreference);
     return () => {
-      observer.disconnect(); resize.disconnect();
+      observer.disconnect(); resize.disconnect(); revealObserver?.disconnect();
+      reduced.removeEventListener('change', onMotionPreference);
       controls.forEach(control => control.cancel());
     };
   }, []);

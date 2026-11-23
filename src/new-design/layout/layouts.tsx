@@ -299,7 +299,7 @@ export function PublicLayout({ children, tight, bareMobile, narrow, hideSignIn }
               {PUBLIC_NAV.map(([label, to]) => <NavLink key={to} to={to} className={({ isActive }) => (isActive ? 'cur' : undefined)}>{label}</NavLink>)}
             </nav>
             {!hideSignIn && <span className="fr trh-actions"><SessionActions /></span>}
-            <button ref={menuButton} type="button" className="btn btn-icon trh-burger" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls={menu ? 'public-menu' : undefined} onClick={() => setMenu(!menu)}><Icon name={menu ? 'x' : 'menu'} /></button>
+            <button ref={menuButton} type="button" className="btn btn-icon trh-burger" data-motion="dynamic-menu" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls={menu ? 'public-menu' : undefined} onClick={() => setMenu(!menu)}><Icon name={menu ? 'x' : 'menu'} /></button>
           </header>
           {menu && (
             <div id="public-menu" ref={menuPanel} className="trh-menu">

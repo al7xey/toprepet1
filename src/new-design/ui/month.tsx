@@ -24,7 +24,7 @@ export function MonthCalendar({ value, onChange, markOf }: { value: string | nul
   const shift = (delta: number) => setMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1));
 
   return (
-    <div className="trk-month">
+    <div className="trk-month" data-motion="pagination-dots" key={`${month.getFullYear()}-${month.getMonth()}`}>
       <div className="trk-month-head">
         <IconButton className="trk-month-nav" icon="left" label="Предыдущий месяц" disabled={!canGoBack} onClick={() => shift(-1)} />
         <b className="trk-month-title">{title}</b>
