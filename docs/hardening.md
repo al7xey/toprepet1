@@ -21,7 +21,7 @@
 - Удалены неиспользуемые UI, RSC/Vinext/Cloudflare/Drizzle/Sites-зависимости, обновлены Vite/oxfmt/oxlint, закреплён исправленный source-map-js. Рабочий TipTap/Supabase редактор сохранён.
 - Oxlint сохраняет проверки hooks; эвристики React Compiler purity/immutability выключены: проект не использует React Compiler, а эти правила отмечают корректные локальные переменные эффектов.
 - Публикация Pages зависит от Quality и Backend reusable workflows, затем проверяет именно публикуемый dist. Публикационная ветка остаётся main.
-- Прямые Python requirements закреплены. Без DEBUG=1 Django требует SECRET_KEY; fake payments не включаются по умолчанию вне разработки. Теперь фронтенд использует только серверный API.
+- Прямые Python requirements закреплены. Без DEBUG=1 Django требует SECRET_KEY; fake payments не включаются по умолчанию вне разработки. Frontend требует явного выбора demo/API; demo предупреждает об отсутствии настоящих операций.
 
 ## Миграции
 
@@ -32,7 +32,7 @@
 ## Проверки
 
 - `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test`
-- `pnpm build`, `pnpm e2e`
+- `VITE_API_MODE=demo pnpm build`, `pnpm e2e`
 - Из backend: `python -m pytest`, `DEBUG=1 python manage.py makemigrations --check --dry-run`
 - `bash backend/scripts/contract.sh`, `bash backend/scripts/e2e.sh`
 - `pnpm audit --json`

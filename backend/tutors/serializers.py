@@ -11,7 +11,7 @@ _TIME = re.compile(r'^(?:(?:[01]\d|2[0-3]):[0-5]\d|24:00)$')
 def tutor_json(t) -> dict:
     return {
         'id': t.id, 'name': t.name, 'photo': t.photo, **({'photoSrcSet': t.photo_srcset} if t.photo_srcset else {}), 'headline': t.headline,
-        'subjects': t.subjects, 'levels': t.levels, 'cardSubjects': t.card_subjects or ' / '.join(t.subjects), 'helpTopics': t.help_topics or t.subjects,
+        'subjects': t.subjects, 'cardSubjects': t.card_subjects or ' / '.join(t.subjects), 'helpTopics': t.help_topics or t.subjects,
         'experience': t.experience, 'intro': t.intro, 'approach': t.approach, 'achievements': t.achievements,
         'price': t.price, 'studentPrice': t.student_price, 'introMinutes': t.intro_minutes,
         'rating': float(t.rating) if t.rating is not None else None, 'reviewsCount': t.reviews_count, 'status': t.status, 'timezone': t.timezone,

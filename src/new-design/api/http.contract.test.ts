@@ -3,7 +3,7 @@ import { createHttpApi } from './http';
 import { defineScenarios } from './scenarios';
 
 /**
- * Сценарии реального HTTP API. Включается переменной CONTRACT_API_URL
+ * Те же сценарии, что у мока, но против настоящего сервера. Включается переменной CONTRACT_API_URL
  * (см. docs/backend.md: сервер запускается с CONTRACT_TESTS=1 на чистой базе с seed_demo).
  */
 const base = process.env.CONTRACT_API_URL?.replace(/\/$/, '');
@@ -34,7 +34,7 @@ async function tokenFor(http: typeof fetch, email: string, kind: 'verify' | 'res
 }
 
 describe.skipIf(!base)('сервер (CONTRACT_API_URL)', () => {
-  defineScenarios('правила HTTP API', () => {
+  defineScenarios('правила сервера совпадают с моком', () => {
     const http = cookieFetch();
     return {
       api: createHttpApi(base as string, http),

@@ -1,23 +1,23 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { api, LESSON_MINUTES, type Tutor } from '../../api';
+import { api, LESSON_MINUTES, staticTutors, type Tutor } from '../../api';
 import { trackGoal } from '../../../shared/lib/analytics';
 import { TutorMetadata } from '../../../app/tutor-metadata';
 import { useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
 import { PublicLayout } from '../../layout/layouts';
-import { safeNext } from '../../lib/safeNext';
 import { minutes, rub } from '../../lib/format';
-import { Button, ErrorState, Icon, IconButton, LoadingList, Note, PageHeader, Section, SelectField, SlotPicker, Status, Tags, useToast } from '../../ui';
+import { BackLink, Button, ErrorState, Icon, IconButton, LoadingList, Note, PageHeader, Section, SelectField, SlotPicker, Status, Tags } from '../../ui';
 import { NotFoundBody } from './notfound';
 import './profile.css';
 import { achievementIcon } from '../../ui/icon';
 
 
-/** Анкета репетитора и запись на занятие. */
+/** Анкета репетитора: данные, календарь записи, цены, отзывы. Карточка записи справа (на телефоне — панель снизу). */
 export default function ProfilePage() {
   const { id = '' } = useParams();
-  const tutorQuery = useQuery(`tutor-${id}`, () => api.getTutor(id));
+  const initial = useMemo(() => staticTutors().find((t) => t.id === id), [id]);
+  const tutorQuery = useQuery(`tutor-${id}`, () => api.getTutor(id), initial);
   const tutor = tutorQuery.data;
   if (tutorQuery.status === 404 || (!tutor && !tutorQuery.loading && !tutorQuery.error)) {
     return <PublicLayout tight><TutorMetadata tutor={null} /><NotFoundBody title="Анкета не найдена" text="Возможно, ссылка устарела или анкета снята с публикации." action={<Button to="/teachers" size="lg">К преподавателям</Button>} /></PublicLayout>;
@@ -29,7 +29,6 @@ export default function ProfilePage() {
 
 function Profile({ tutor }: { tutor: Tutor }) {
   const navigate = useNavigate();
-  const toast = useToast();
   const { user } = useSession();
   const lessonMinutes = tutor.durations?.includes(LESSON_MINUTES) ? LESSON_MINUTES : tutor.durations?.[0] ?? LESSON_MINUTES;
   const lessonPrice = Math.round(tutor.studentPrice * lessonMinutes / 60);
@@ -52,21 +51,13 @@ function Profile({ tutor }: { tutor: Tutor }) {
   });
   const isTutorAccount = user?.role === 'tutor' || user?.role === 'admin';
   const location = useLocation();
-  const backTo = safeNext((location.state as { back?: string } | null)?.back, '/teachers');
-  const backLabel = /^\/(me|tutor)\/chats\//.test(backTo) ? 'К сообщениям' : 'Назад';
-  const achievements = tutor.achievements.filter((item) => item.title.trim() || item.text.trim());
-  const share = async () => {
+  const fromChat = (location.state as { back?: string } | null)?.back;
+  // назад — по истории, если она есть; иначе к каталогу
+  const close = () => { if (location.key !== 'default') void navigate(-1); else void navigate('/teachers'); };
+  const share = () => {
     const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: tutor.name, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast('Ссылка скопирована');
-      }
-    } catch (error) {
-      if (!(error instanceof DOMException) || error.name !== 'AbortError') toast('Ссылку можно скопировать из адресной строки');
-    }
+    if (navigator.share) void navigator.share({ title: tutor.name, url }).catch(() => undefined);
+    else void navigator.clipboard?.writeText(url).catch(() => undefined);
   };
 
   const bookHref = `/book/${tutor.id}?kind=${kind}&subject=${encodeURIComponent(kind === 'intro' ? tutor.subjects[0] ?? '' : subject)}${start ? `&start=${encodeURIComponent(start)}` : ''}`;
@@ -89,50 +80,56 @@ function Profile({ tutor }: { tutor: Tutor }) {
   return (
     <PublicLayout tight bareMobile>
       <TutorMetadata tutor={tutor} />
+      <div className="trh-pf-backwrap"><BackLink to={fromChat ?? '/teachers'}>{fromChat && /^\/(me|tutor)\/chats/.test(fromChat) ? 'К сообщениям' : 'Все преподаватели'}</BackLink></div>
       <div className="trh-pf">
         <div className="trh-pf-main">
           <section className="trh-pf-top" aria-labelledby="tutor-name">
-            <div className="trh-pf-controls">
-              <IconButton icon="back" label={backLabel} to={backTo} className="trk-back" />
-              <IconButton icon="share" label="Поделиться анкетой" onClick={share} />
-            </div>
             <div className="trh-pf-photo">
-              {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 300px, 100vw" alt={`Фото: ${tutor.name}`} fetchPriority="high" decoding="async" /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
+              <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 300px, 100vw" alt={`Фото: ${tutor.name}`} fetchPriority="high" decoding="async" />
+              <IconButton icon="back" label="Назад" onClick={close} className="trh-pf-back" />
+              <IconButton icon="share" label="Поделиться" onClick={share} className="trh-pf-share" />
             </div>
             <div className="trh-pf-sheet">
               <div className="trh-sec">
                 <h1 className="trh-h1" id="tutor-name">{tutor.name}</h1>
-                {tutor.headline && <p className="muted trh-pf-role">{tutor.headline}</p>}
-                {(tutor.documentsVerified || tutor.introMinutes > 0) && <div className="fr fw u-gap8">
+                <p className="muted trh-pf-role">{tutor.headline}</p>
+                <div className="fr fw u-gap8">
                   {tutor.documentsVerified && <Status tone="ok" icon="shield">Документы проверены</Status>}
                   {tutor.introMinutes > 0 && <span className="trh-pf-intro-tag"><Icon name="gift" />Бесплатное знакомство</span>}
-                </div>}
+                </div>
               </div>
-              {tutor.intro && <p className="trh-pf-intro">{tutor.intro}</p>}
+              <p className="trh-pf-intro">{tutor.intro}</p>
             </div>
           </section>
 
-          {achievements.length > 0 && (
-            <>
-              <hr className="rule" />
-              <Section title="Образование и достижения">
-                <ul className="ach">
-                  {achievements.map((item) => (
-                    <li key={item.title}>
-                      <span className="trh-pf-ach-icon"><Icon name={achievementIcon(item.title)} /></span>
-                      <div>{item.title.trim() && <b>{item.title}</b>}{item.text.trim() && <span className="d">{item.text}</span>}</div>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-            </>
-          )}
+          <hr className="rule" />
+          <Section title="Образование и достижения">
+            <ul className="ach">
+              {tutor.achievements.filter((item) => item.title.trim() || item.text.trim()).map((item) => (
+                <li key={item.title}>
+                  <span className="trh-pf-ach-icon"><Icon name={achievementIcon(item.title)} /></span>
+                  <div>{item.title.trim() && <b>{item.title}</b>}{item.text.trim() && <span className="d">{item.text}</span>}</div>
+                </li>
+              ))}
+            </ul>
+          </Section>
 
-          {tutor.experience && <><hr className="rule" /><Section title="Опыт"><p className="cap trh-pf-text">{tutor.experience}</p></Section></>}
+          <hr className="rule" />
+          <Section title="Опыт"><div><Tags items={[tutor.experience]} /></div></Section>
 
-          {tutor.helpTopics.length > 0 && <><hr className="rule" /><Section title="С чем поможет"><Tags items={tutor.helpTopics} /></Section></>}
+          <hr className="rule" />
+          <Section title="С чем поможет"><div><Tags items={tutor.helpTopics} /></div></Section>
 
-          {tutor.approach && <><hr className="rule" /><Section title="Как проходят занятия"><p className="cap trh-pf-text">{tutor.approach}</p></Section></>}
+          <hr className="rule" />
+          <Section title="Как проходят занятия"><p className="cap trh-pf-text">{tutor.approach}</p></Section>
+
+          <hr className="rule" />
+          <Section title="Цены">
+            <div>
+              {tutor.introMinutes > 0 && <div className="rowline"><span><b>Знакомство</b><br /><span className="muted">{minutes(tutor.introMinutes)}, один раз</span></span><b className="u-ok">бесплатно</b></div>}
+              <div className="rowline"><span><b>Занятие</b><br /><span className="muted">{minutes(lessonMinutes)}</span></span><b className="tn">{rub(lessonPrice)}</b></div>
+            </div>
+          </Section>
 
           <hr className="rule" />
           <div className="trh-pf-scheduling">
@@ -144,7 +141,6 @@ function Profile({ tutor }: { tutor: Tutor }) {
             </div>
             {booking}
           </div>
-          {tutor.photo.startsWith("/images/pilot/") && <small className="muted trh-portrait-credit">Портрет вымышленного персонажа · <a href="https://ambravo.github.io/sigils-people/">Ariel Bravo Ayala, sigils people</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></small>}
         </div>
       </div>
 

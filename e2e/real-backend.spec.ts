@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { login } from './helpers';
 
 // These scenarios share a seeded database and change the same tutor profile.
-test.describe.configure({ mode: 'default' });
+test.describe.configure({ mode: 'serial' });
 
 /**
  * Сквозной сценарий против настоящего Django: сайт собран с VITE_API_URL, база с демо-данными.
@@ -15,7 +15,7 @@ test('Django: лендинги показывают ошибку API вмест�
   const endpoint = (url: URL) => url.pathname === '/tutors';
   for (const path of ['/', '/for-repetitor']) {
     await page.route(endpoint, (route) => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'Подборка временно недоступна' }) }));
-    await page.goto(path, { waitUntil: 'domcontentloaded' });
+    await page.goto(path);
     await expect(page.getByRole('alert')).toContainText('Подборка временно недоступна');
     await expect(page.locator('a.tc')).toHaveCount(0);
     await page.unroute(endpoint);
@@ -90,18 +90,7 @@ test('Django: вход → запись → подтверждение репе�
 
 test('Django: приватное фото чата загружается с cookie и недоступно гостю', async ({ page, request }) => {
   await login(page, 'student');
-  await page.setViewportSize({ width: 1024, height: 600 });
-  await page.getByRole('link', { name: 'Сообщения', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Сообщения', exact: true })).toBeVisible();
-  const dialogs = page.getByRole('navigation', { name: 'Диалоги' });
-  await dialogs.locator('a[href="/me/chats/c-1"]').click();
-  await expect(dialogs).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'К списку сообщений' })).toBeVisible();
-  const composer = page.locator('.tg-compose');
-  await expect(composer).toBeVisible();
-  const bounds = await composer.boundingBox();
-  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(600);
-  expect(bounds!.width).toBeGreaterThan(800);
+  await page.goto('/me/chats/c-1');
   const png = await page.evaluate(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 8; canvas.height = 8;
@@ -117,8 +106,6 @@ test('Django: приватное фото чата загружается с coo
   expect(url).toMatch(/\/conversations\/c-1\/messages\/.+\/image$/);
   const denied = await request.get(url!);
   expect(denied.status()).toBe(401);
-  await page.getByRole('link', { name: 'К списку сообщений' }).click();
-  await expect(dialogs).toBeVisible();
 });
 
 
@@ -224,84 +211,4 @@ test('Django: ошибка выхода видна и сессия остаёт�
   await page.goto('/me/payments');
   await expect(page).toHaveURL(/\/login\?next=/);
   expect(errors).toEqual([]);
-});
-
-test('Django: разделы верхнего меню и переход из профиля', async ({ page }) => {
-  await login(page, 'student');
-  const header = page.locator('.trk-app-hdr');
-  const payments = header.getByRole('link', { name: 'Платежи', exact: true });
-  const main = page.getByRole('main');
-  await payments.click();
-  await expect(main.getByRole('heading', { name: 'Платежи', exact: true })).toBeVisible();
-  const back = main.getByRole('link', { name: 'Профиль', exact: true });
-  await expect(back).toHaveCount(0);
-  await header.getByRole('link', { name: 'Заявки', exact: true }).click();
-  await expect(main.getByRole('heading', { name: 'Мои заявки' })).toBeVisible();
-  await expect(back).toHaveCount(0);
-
-  await header.getByRole('link', { name: 'Профиль', exact: true }).click();
-  const sections = main.getByRole('navigation', { name: 'Разделы профиля' });
-  await sections.getByRole('link', { name: 'Платежи', exact: true }).click();
-  await expect(back).toHaveAttribute('href', '/me/account');
-  await back.click();
-  await expect(main.getByRole('heading', { name: 'Профиль', exact: true })).toBeVisible();
-  await sections.getByRole('link', { name: 'Платежи', exact: true }).click();
-  await payments.click();
-  await expect(back).toHaveCount(0);
-});
-
-test('Django: регистрация ученика и подтверждение почты через код', async ({ page }) => {
-  const email = `registration-${Date.now()}@example.test`;
-  await page.goto('/signup');
-  await page.getByLabel('Имя', { exact: true }).fill('Ученик');
-  await page.getByLabel('Почта', { exact: true }).fill(email);
-  await page.locator('input[name="password"]').fill('Student-local-test-2026!');
-  await page.getByText(/Принимаю/).click();
-  await page.getByRole('button', { name: 'Создать аккаунт' }).click();
-  await expect(page).toHaveURL(/verify-email/);
-  const tokenUrl = new URL('/_test/email-token', process.env.E2E_API_URL);
-  tokenUrl.searchParams.set('email', email);
-  const token = (await (await page.request.get(tokenUrl.href)).json()).token;
-  await page.getByLabel('Код из письма').fill(token);
-  await page.getByRole('button', { name: 'Подтвердить почту' }).click();
-  await expect(page).not.toHaveURL(/verify-email/);
-  const me = await page.request.get(new URL('/auth/me', process.env.E2E_API_URL).href);
-  expect(await me.json()).toMatchObject({ email, emailVerified: true });
-
-  const next = page.getByRole('button', { name: 'Дальше', exact: true });
-  await expect(page.getByRole('heading', { name: 'Для кого занятия?' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Пропустить' })).toHaveCount(0);
-  await next.click();
-  await expect(page.getByRole('heading', { name: 'Какие предметы нужны?' })).toBeVisible();
-  await next.click();
-  await page.getByRole('button', { name: 'Готово', exact: true }).click();
-  await expect(page).toHaveURL(/\/teachers$/);
-
-  await page.setViewportSize({ width: 1070, height: 813 });
-  const card = page.locator('a.tc').first();
-  await expect(card).toBeVisible();
-  const caption = await card.evaluate((element) => {
-    const panel = element.querySelector<HTMLElement>('.pl')!;
-    return {
-      cardRadius: getComputedStyle(element).borderRadius,
-      panelRadius: getComputedStyle(panel).borderRadius,
-      height: panel.offsetHeight,
-      width: panel.offsetWidth,
-      availableWidth: element.clientWidth,
-      leftInset: panel.offsetLeft,
-      rightInset: element.clientWidth - panel.offsetLeft - panel.offsetWidth,
-    };
-  });
-  expect(caption.panelRadius).toBe(caption.cardRadius);
-  expect(caption.height).toBeLessThan(100);
-  expect(caption.leftInset).toBeGreaterThan(0);
-  expect(caption.leftInset).toBe(caption.rightInset);
-  expect(caption.width).toBe(caption.availableWidth - 2 * caption.leftInset);
-
-  const sections = page.getByRole('navigation', { name: 'Разделы кабинета' });
-  const nav = await sections.getByRole('link', { name: 'Мои уроки' }).boundingBox();
-  const avatar = await page.getByRole('link', { name: 'Профиль', exact: true }).boundingBox();
-  expect(Math.abs(nav!.y + nav!.height / 2 - avatar!.y - avatar!.height / 2)).toBeLessThan(2);
-  await sections.getByRole('link', { name: 'Мои уроки' }).click();
-  await expect(page.getByRole('heading', { name: 'Мои уроки', exact: true })).toBeVisible();
 });

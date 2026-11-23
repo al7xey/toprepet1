@@ -4,9 +4,7 @@ import { routes, titles, descriptions, canonicalForRoute } from './seo-routes.mj
 import privatePages from '../src/shared/config/private-seo-pages.json' with { type: 'json' };
 
 const fail = message => { throw new Error(`SEO: ${message}`); };
-const assetBase = (process.env.VITE_BASE_PATH || '/').replace(/^\/+|\/+$/g, '');
-const pagesPreview = Boolean(assetBase);
-const previewUrl = route => `https://al7xey.github.io/${assetBase}/${route.replace(/^\/+|\/+$/g, '')}${route === '/' ? '' : '/'}`;
+const photos = JSON.parse(await readFile('src/shared/config/teacher-photos.json', 'utf8'));
 const seenTitles = new Set();
 const seenDescriptions = new Set();
 
@@ -21,11 +19,11 @@ for (const route of routes) {
   if (description !== descriptions[route] || !description || seenDescriptions.has(description)) fail(`${route}: description`);
   if (canonicals.length !== 1 || canonicals[0][1] !== canonical) fail(`${route}: canonical`);
   if (!/<h1(?:\s|>)/i.test(html) || !/<div id="root"[^>]*>[\s\S]{300,}<\/div>/.test(html)) fail(`${route}: prerender`);
-  if (pagesPreview !== /<meta name="robots" content="[^"]*noindex/i.test(html)) fail(`${route}: robots indexability`);
+  if (/<meta name="robots" content="[^"]*noindex/i.test(html)) fail(`${route}: noindex`);
   if ((html.match(/<meta name="robots"/g) || []).length !== 1 || !html.includes('max-image-preview:large')) fail(`${route}: robots/image preview`);
-  if (route === '/teachers' && !html.includes('"@type": "CollectionPage"')) fail(`${route}: directory schema`);
+  if (route === '/teachers' && (!html.includes('"@type": "CollectionPage"') || !html.includes('"@type": "ItemList"'))) fail(`${route}: directory schema`);
   if (['/teachers', '/for-repetitor'].includes(route) && !html.includes('"@type": "BreadcrumbList"')) fail(`${route}: breadcrumb schema`);
-  for (const [key, value] of [['og:title', title], ['og:description', description], ['og:url', pagesPreview ? previewUrl(route) : canonical]]) {
+  for (const [key, value] of [['og:title', title], ['og:description', description], ['og:url', canonical]]) {
     if (!html.includes(`property="${key}" content="${value}"`)) fail(`${route}: ${key}`);
   }
   if ((html.match(/<h1(?:\s|>)/gi) || []).length !== 1) fail(`${route}: exactly one h1`);
@@ -34,6 +32,12 @@ for (const route of routes) {
   if (!/<h1(?:\s|>)/i.test(main)) fail(`${route}: heading must be inside main, visible without JS`);
   for (const match of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
     try { JSON.parse(match[1]); } catch { fail(`${route}: invalid JSON-LD`); }
+  }
+  if (route.startsWith('/teachers/')) {
+    const photo = photos[route.split('/').at(-1)];
+    const image = new URL(photo.src, 'https://toprepet.ru').href;
+    if (!html.includes(`property="og:image" content="${image}"`) || !html.includes(`name="twitter:image" content="${image}"`)) fail(`${route}: profile social image`);
+    if (!html.includes('"@type": "ProfilePage"') || !html.includes(`"image": "${image}"`)) fail(`${route}: profile schema/image`);
   }
   seenTitles.add(title);
   seenDescriptions.add(description);
@@ -52,6 +56,12 @@ if (lastmod) {
   const dates = [...sitemap.matchAll(/<loc>([^<]+)<\/loc><lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)];
   if (dates.length !== urls.length || dates.some(([, url, date]) => lastmod[url]?.date !== date)) fail('sitemap lastmod');
 }
+for (const route of routes.filter(path => path.startsWith('/teachers/'))) {
+  const oldRoute = route.replace('/teachers/', '/teacher/');
+  const legacy = await readFile(resolve(`dist${oldRoute}/index.html`), 'utf8');
+  const canonical = canonicalForRoute(route);
+  if (!legacy.includes('noindex,follow') || !legacy.includes(`content="0;url=${canonical}"`) || !legacy.includes(`rel="canonical" href="${canonical}"`)) fail(`${oldRoute}: legacy redirect`);
+}
 const robots = await readFile(resolve('dist/robots.txt'), 'utf8');
 if (!robots.includes('User-agent: OAI-SearchBot') || !robots.includes('Sitemap: https://toprepet.ru/sitemap.xml')) fail('robots');
 const notFound = await readFile(resolve('dist/404.html'), 'utf8');
@@ -61,7 +71,7 @@ console.log(`SEO проверка пройдена: ${routes.length} стран�
 for (const url of blogUrls) {
   const path = new URL(url).pathname;
   const html = await readFile(resolve(`dist${path}index.html`), 'utf8');
-  if (!html.includes(`rel="canonical" href="${url}"`) || (pagesPreview !== /name="robots" content="[^"]*noindex/.test(html))) fail(`${path}: blog canonical/robots`);
+  if (!html.includes(`rel="canonical" href="${url}"`) || /name="robots" content="[^"]*noindex/.test(html)) fail(`${path}: blog canonical/robots`);
   if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`${path}: blog heading`);
   if (html.includes('<!--$?-->') || html.includes('id="S:0"')) fail(`${path}: hidden blog content`);
   if ((html.match(/<meta name="robots"/g) || []).length !== 1 || !html.includes('max-image-preview:large')) fail(`${path}: blog robots/image preview`);
@@ -74,10 +84,7 @@ if (!robots.includes('Clean-param:') || /Disallow:\s*\/(?:\s|$)/m.test(robots)) 
 for (const [from, to] of [['/lessons', '/teachers'], ['/contact', '/help'], ['/free-intro', '/teachers']]) {
   const html = await readFile(resolve(`dist${from}/index.html`), 'utf8');
   const destination = canonicalForRoute(to);
-  const previewDestination = previewUrl(to);
-  const redirect = pagesPreview
-    ? `${previewDestination}${from === '/free-intro' ? '?intro=1' : ''}`
-    : from === '/free-intro' ? `${destination}?intro=1` : destination;
+  const redirect = from === '/free-intro' ? `${destination}?intro=1` : destination;
   if (!html.includes('noindex,follow') || !html.includes(`content="0;url=${redirect}"`) || !html.includes(`rel="canonical" href="${destination}"`)) fail(`${from}: moved page redirect`);
   if (urls.some(url => url.endsWith(`${from}/`))) fail(`${from}: moved page in sitemap`);
 }
@@ -94,7 +101,9 @@ for (const [route, label] of Object.entries(privatePages).filter(([route]) => !r
 }
 const help = await readFile('dist/help/index.html', 'utf8');
 const catalog = await readFile('dist/teachers/index.html', 'utf8');
-if (!pagesPreview && /<a[^>]*href="[^"]*\/teachers\/[^"/]+/.test(catalog)) fail('static sample profiles in the catalog');
+const catalogSchema = [...catalog.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((match) => JSON.parse(match[1])).find((schema) => schema['@type'] === 'CollectionPage');
+const catalogCards = [...catalog.matchAll(/<a[^>]*class="tc s"[^>]*href="([^"]+)"[^>]*>/g)].map((match) => new URL(match[1], 'https://toprepet.ru').href);
+if (!catalogCards.length || JSON.stringify(catalogSchema?.mainEntity?.itemListElement.map((entry) => entry.item.url)) !== JSON.stringify(catalogCards)) fail('catalog schema must describe visible prerendered cards');
 if (!help.includes('"@type":"FAQPage"') || !help.includes('"acceptedAnswer"')) fail('help FAQ');
 const llms = await readFile('dist/llms.txt', 'utf8');
 for (const path of ['/teachers/', '/help/', '/legal/', '/blog/']) if (!llms.includes(`https://toprepet.ru${path}`)) fail('llms discovery');

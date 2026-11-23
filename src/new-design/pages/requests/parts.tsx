@@ -28,7 +28,6 @@ export function RequestCard({ request, actions, showStatus = true }: { request: 
   return (
     <Card as="article" className="trk-request">
       <StudentCard name={request.studentName} photo={request.studentPhoto} sub={`${ago(request.createdAt)} · ${count(request.responsesCount, 'отклик', 'отклика', 'откликов')}`} />
-      {request.urgent && request.status === 'open' && <div><Status tone="wait" icon="clock">Срочная заявка</Status></div>}
       {showStatus && request.status !== 'open' && <div><Status tone={s.tone} icon={s.icon}>{s.text}</Status></div>}
       <Rows boxed rows={[
         ['Предмет', request.subject],

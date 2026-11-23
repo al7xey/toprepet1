@@ -1,4 +1,4 @@
-import { api } from '../../api';
+import { api, staticTutors } from '../../api';
 import { useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
 import { PublicLayout } from '../../layout/layouts';
@@ -10,8 +10,8 @@ import './home-visual.css';
 
 export default function HomePage() {
   const { user } = useSession();
-  const features = useQuery('features', () => api.features());
-  const tutors = useQuery('home-tutors', () => api.listTutors({ limit: 6 }).then((p) => p.items));
+  const first = staticTutors().slice(0, 6);
+  const tutors = useQuery('home-tutors', () => api.listTutors({ limit: 6 }).then((p) => p.items), first);
 
   return (
     <PublicLayout>
@@ -55,9 +55,9 @@ export default function HomePage() {
         <Button to="/teachers?intro=1" size="lg" block>Бесплатное знакомство</Button>
       </Section>
 
-      {features.data && !features.data.pilotMode && <Section className="p-home-trust" title="100% гарантия возврата средств">
+      <Section className="p-home-trust" title="100% гарантия возврата средств">
           <p className="cap">Если оплаченное занятие не состоялось, вернём деньги полностью. Оплата списывается после подтверждения записи, а репетитор получает её после занятия. В спорной ситуации поможет поддержка.</p>
-      </Section>}
+      </Section>
 
       <Section title="Вы репетитор? Найдём для вас учеников" className="trh-recruit" reveal>
         <Button to="/for-repetitor/" size="lg" block>Стать топ-репетом</Button>

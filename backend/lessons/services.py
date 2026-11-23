@@ -70,7 +70,7 @@ def create_booking(user, data: dict, idempotency_key: str = '') -> Lesson:
     if not user.is_active:
         raise forbidden()
     if idempotency_key:
-        existing = Lesson.objects.filter(student=user, idempotency_key=idempotency_key).select_related('tutor', 'student').first()
+        existing = Lesson.objects.filter(student=user, idempotency_key=idempotency_key, booking_fingerprint=fingerprint).select_related('tutor', 'student').first()
         if existing:
             if existing.booking_fingerprint and existing.booking_fingerprint != fingerprint:
                 raise ApiError('Этот ключ записи уже использован для другого запроса', 409, 'idempotency_conflict')
@@ -106,20 +106,16 @@ def create_booking(user, data: dict, idempotency_key: str = '') -> Lesson:
         price = round_half_up(response.price * duration / 60)
         tutor_price = round_half_up(response.tutor_price * duration / 60)
     card = None
-    demo = settings.PILOT_MODE
-    if price and not demo:
+    if price:
         cards = user.cards.all()
         card = cards.filter(id=data['cardId']).first() if data.get('cardId') else (cards.filter(primary=True).first() or cards.first())
         if card is None:
             raise ApiError('Добавьте карту, чтобы записаться', 402, 'card_required')
     now = timezone.now()
-    lesson = Lesson(kind=data['kind'], tutor=tutor, student=user, subject=data['subject'], topic=data.get('topic', ''), start=start, duration_min=duration, status='confirmed' if demo else 'pending', is_demo=demo,
-                    price=price, tutor_price=tutor_price, confirm_by=None if demo else min(start - 2 * HOUR, now + DAY), idempotency_key=idempotency_key, booking_fingerprint=fingerprint)
+    lesson = Lesson(kind=data['kind'], tutor=tutor, student=user, subject=data['subject'], topic=data.get('topic', ''), start=start, duration_min=duration, status='pending',
+                    price=price, tutor_price=tutor_price, confirm_by=min(start - 2 * HOUR, now + DAY), idempotency_key=idempotency_key, booking_fingerprint=fingerprint)
     lesson.save()
-    if demo:
-        lesson.meeting_url = meeting_url(lesson)
-    else:
-        money.hold(lesson, card)
+    money.hold(lesson, card)
     lesson.save()
     if data.get('requestId'):
         request = StudyRequest.objects.filter(id=data['requestId'], student=user, status='open').first()
@@ -134,12 +130,7 @@ def create_booking(user, data: dict, idempotency_key: str = '') -> Lesson:
             direct_message(tutor, user, user, f'Выбрала ваш отклик на заявку «{request.subject}» и записалась на урок.')
     get_or_create_conversation(tutor, user)
     system_message(tutor, user, f'{user.name} записалась на {"бесплатное знакомство" if intro else "урок"}')
-    if demo:
-        system_message(tutor, user, 'Запись подтверждена автоматически. Оплата не требуется.')
-        notify(tutor.user, 'lesson', 'Новая подтверждённая запись', user.name, f'/tutor/lessons/{lesson.id}')
-        notify(user, 'lesson', 'Запись подтверждена', 'Это тестовая запись. Оплата не требуется.', f'/me/lessons/{lesson.id}')
-    else:
-        notify(tutor.user, 'lesson', 'Новая запись', f'{user.name} записалась. Подтвердите запись.', f'/tutor/lessons/{lesson.id}')
+    notify(tutor.user, 'lesson', 'Новая запись', f'{user.name} записалась. Подтвердите запись.', f'/tutor/lessons/{lesson.id}')
     return lesson
 
 
@@ -230,26 +221,6 @@ def answer_move(user, lesson_id: str, accept: bool) -> Lesson:
     return lesson
 
 
-def meeting_url(lesson) -> str:
-    if settings.MEETING_ROOM_BASE_URL:
-        from secrets import token_urlsafe
-        return f'{settings.MEETING_ROOM_BASE_URL}/toprepet-{token_urlsafe(18)}'
-    return '' if lesson.is_demo else settings.MEETING_URL
-
-
-@transaction.atomic
-def set_meeting_url(user, lesson_id: str, url: str) -> Lesson:
-    lesson = get_lesson(user, lesson_id, lock=True)
-    if not _is_tutor_of(user, lesson):
-        raise forbidden('Ссылку может изменить репетитор')
-    if lesson.status != 'confirmed' or lesson.end <= timezone.now():
-        raise ApiError('Ссылку можно изменить до завершения подтверждённого урока')
-    lesson.meeting_url = url
-    lesson.save(update_fields=['meeting_url'])
-    notify(lesson.student, 'lesson', 'Ссылка на урок обновлена', '', f'/me/lessons/{lesson.id}')
-    return lesson
-
-
 @transaction.atomic
 def confirm(user, lesson_id: str) -> Lesson:
     lesson = get_lesson(user, lesson_id, lock=True)
@@ -261,7 +232,7 @@ def confirm(user, lesson_id: str) -> Lesson:
         raise ApiError('Срок подтверждения записи истёк', 409, 'confirmation_expired')
     money.capture(lesson)
     lesson.status = 'confirmed'
-    lesson.meeting_url = meeting_url(lesson)
+    lesson.meeting_url = settings.MEETING_URL
     lesson.save()
     system_message(lesson.tutor, lesson.student, f'{lesson.tutor.name} подтвердила {"знакомство" if lesson.kind == "intro" else "урок"}')
     notify(lesson.student, 'lesson', 'Запись подтверждена', f'{lesson.tutor.name} подтвердила запись', f'/me/lessons/{lesson.id}')
@@ -365,10 +336,7 @@ def resolve_dispute(admin, dispute_id: str, outcome: str) -> Dispute:
     if dispute.status.startswith('resolved'):
         raise ApiError('Спор уже решён')
     lesson = dispute.lesson
-    if lesson.is_demo:
-        dispute.status = 'resolved_refund' if outcome == 'refund' else 'resolved_paid'
-        dispute.resolution = 'Обращение по тестовой записи рассмотрено. Оплата не проводилась.'
-    elif outcome == 'refund':
+    if outcome == 'refund':
         dispute.status, dispute.resolution = 'resolved_refund', 'Деньги вернули ученику'
         money.refund(lesson)
     else:

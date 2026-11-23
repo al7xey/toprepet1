@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ApiError, type Api } from './contract';
-import { studentPriceOf } from './pricing';
+import { studentPriceOf } from './mock';
 import type { Slot, Tutor } from './types';
 
 const HOUR = 3_600_000;

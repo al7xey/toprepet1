@@ -55,6 +55,3 @@ __pycache__/
 *.tsbuildinfo
 
 /backend/private-media/
-
-/.pytest_cache/
-/backend/.pytest_cache/

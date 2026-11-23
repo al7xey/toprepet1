@@ -17,8 +17,6 @@
 .tr .logo-mark{display:inline-block;width:34px;height:34px;flex-shrink:0;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><rect width='36' height='36' rx='12' fill='%23f26a2e'/><path d='M17 9v14a4 4 0 0 0 4 4h3M11 15h13' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>") center/contain no-repeat}
 .tr .logo{display:inline-flex;align-items:center;gap:10px;font-weight:750;font-size:25px;letter-spacing:-0.045em;line-height:1}
 
-.tr { --tr-card-radius: 28px; }
-
 /* Surfaces: white with a hairline ring */
 .tr .surf{background:rgb(255 255 255 / 66%);box-shadow:inset 0 0 0 1px rgb(255 255 255 / 55%), 0 0 0 1px rgb(32 40 56 / 7%)}
 .tr .surf-photo{background:rgb(255 249 244 / 72%);box-shadow:inset 0 0 0 1px rgb(255 255 255 / 45%)}
@@ -42,7 +40,7 @@
 /* icons: extra */
 
 /* surfaces by role: hairline for cards and choices, tinted fill for statements, ring for what floats */
-.tr .card{border:1px solid var(--line);border-radius:var(--tr-card-radius);background:#fff;padding:24px;min-width:0}
+.tr .card{border:1px solid var(--line);border-radius:32px;background:#fff;padding:24px;min-width:0}
 .tr .panel{background:#fff;border-radius:40px;padding:32px;min-width:0}
 .tr .tag{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:650;font-size:16px}
 .tr .sec-h{display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -278,6 +276,7 @@
 
 /* ===== v2: rounder marketplace components ===== */
 
+.tr .card{border-radius:36px}
 .tr .panel{border-radius:44px}
 .tr .lesson{border-radius:36px}
 .tr .note{border-radius:26px}
@@ -308,19 +307,9 @@
 .tr .lead.m{font-size:16px}
 
 /* teacher card: photo, name and rating, subject, price */
-.tr .tc{position:relative;display:block;aspect-ratio:4/5;border-radius:var(--tr-card-radius);overflow:hidden;background:var(--surface)}
+.tr .tc{position:relative;display:block;aspect-ratio:4/5;border-radius:36px;overflow:hidden;background:var(--surface)}
 .tr .tc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
-.tr .tc .pl {
-  --caption-inset: 8px;
-  position: absolute;
-  inset: auto var(--caption-inset) var(--caption-inset);
-  border-radius: var(--tr-card-radius);
-  padding: 10px 14px;
-  display: grid;
-  gap: 2px;
-  background: #fff;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 50%);
-}
+.tr .tc .pl{position:absolute;left:8px;right:8px;bottom:8px;border-radius:26px;padding:9px 14px 10px;display:grid;gap:0;background:#fff;box-shadow:inset 0 0 0 1px rgb(255 255 255 / 50%)}
 .tr .tc .pl b{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px;line-height:1.3;font-weight:700}
 .tr .tc .pl span{font-size:13px;color:#5b5256;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
 .tr .tc.s .pl b{font-size:15px}
@@ -453,7 +442,7 @@
 .tr :focus-visible{outline:3px solid rgb(242 106 46 / 45%);outline-offset:3px;border-radius:12px}
 
 /* surfaces */
-.tr .card{border:0;background:#fff;box-shadow:0 0 0 1px rgb(240 226 216 / 85%);transition:transform .4s var(--spring),box-shadow .4s var(--ease)}
+.tr .card{border:0;border-radius:40px;background:#fff;box-shadow:0 0 0 1px rgb(240 226 216 / 85%);transition:transform .4s var(--spring),box-shadow .4s var(--ease)}
 .tr .panel{border-radius:48px;background:#fdece3;box-shadow:inset 0 0 0 1px rgb(255 255 255 / 70%)}
 .tr .lesson{border:0;border-radius:40px;background:#fff;box-shadow:0 0 0 1px rgb(240 226 216 / 85%)}
 .tr .sum{border-radius:48px}
@@ -538,9 +527,10 @@
 .tr .typing i:nth-child(2){animation-delay:.15s}.tr .typing i:nth-child(3){animation-delay:.3s}
 
 /* teacher card */
-.tr .tc{box-shadow:0 0 0 1px rgb(242 106 46 / 14%);transition:transform .5s var(--spring),box-shadow .4s}
+.tr .tc{border-radius:40px;box-shadow:0 0 0 1px rgb(242 106 46 / 14%);transition:transform .5s var(--spring),box-shadow .4s}
 .tr .tc img{transition:transform .8s var(--spring)}
 
+.tr .tc .pl{border-radius:28px}
 .tr .tcg>*{animation:tr-rise .7s var(--spring) both}
 .tr .tcg>:nth-child(1){animation-delay:0.21s}.tr .tcg>:nth-child(2){animation-delay:0.27s}.tr .tcg>:nth-child(3){animation-delay:0.33s}.tr .tcg>:nth-child(4){animation-delay:0.39s}.tr .tcg>:nth-child(5){animation-delay:0.45s}.tr .tcg>:nth-child(6){animation-delay:0.51s}.tr .tcg>:nth-child(7){animation-delay:0.57s}.tr .tcg>:nth-child(8){animation-delay:0.63s}.tr .tcg>:nth-child(9){animation-delay:0.69s}.tr .tcg>:nth-child(10){animation-delay:0.75s}.tr .tcg>:nth-child(11){animation-delay:0.81s}.tr .tcg>:nth-child(12){animation-delay:0.87s}
 
@@ -580,6 +570,7 @@
 .tr .tcg.one{grid-template-columns:1fr;gap:16px}
 .tr .tcg.one .tc{aspect-ratio:5/6}
 .tr .tcg.c3 .tc{aspect-ratio:4/5}
+.tr .tc .pl{left:12px;right:12px;bottom:12px;padding:12px 18px 13px}
 .tr .tc .pl b{font-size:19px}
 .tr .tc .pl span{font-size:14px}
 .tr .fmt2{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:28px;background:#fff;box-shadow:inset 0 0 0 1px rgb(240 226 216 / 90%);transition:transform .35s var(--spring),box-shadow .3s}
@@ -590,7 +581,8 @@
 
 /* v3.3: two-up tutor cards on phones, editorial blog */
 .tr .tcg.two{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.tr .tcg.two .tc{aspect-ratio:3/4}
+.tr .tcg.two .tc{aspect-ratio:3/4;border-radius:32px}
+.tr .tcg.two .tc .pl{left:8px;right:8px;bottom:8px;padding:8px 12px 9px;border-radius:22px}
 .tr .tcg.two .tc .pl b{font-size:15px;gap:6px}
 .tr .tcg.two .tc .pl b .rt{font-size:12.5px}
 .tr .tcg.two .tc .pl span{font-size:12px}
@@ -665,6 +657,7 @@
 .tr .tcg.row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:4px 16px 12px;scrollbar-width:none}
 .tr .tcg.row::-webkit-scrollbar{display:none}
 .tr .tcg.row>.tc{flex:0 0 236px;aspect-ratio:3/4;scroll-snap-align:start;animation:none}
+.tr .tcg.row .tc .pl{left:10px;right:10px;bottom:10px;padding:10px 14px 11px}
 .tr .tcg.row .tc .pl b{font-size:17px}
 .tr .tcg.row .tc .pl span{font-size:13px}
 .tr .tcg.row{scroll-padding-left:16px}

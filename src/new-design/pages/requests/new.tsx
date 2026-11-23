@@ -4,7 +4,7 @@ import { subjects as allSubjects } from '../../../entities/lesson';
 import { api } from '../../api';
 import { useMutation } from '../../api/hooks';
 import { AppLayout } from '../../layout/layouts';
-import { Button, Card, CardTitle, FormError, OptionChips, PageHeader, PriceRange, Switch, TextArea, TextField, WizardProgress, useToast } from '../../ui';
+import { Button, Card, CardTitle, FormError, OptionChips, PageHeader, PriceRange, TextArea, TextField, WizardProgress, useToast } from '../../ui';
 
 const OTHER = 'Другой предмет';
 const SUBJECTS = allSubjects.filter((s) => s !== OTHER);
@@ -20,7 +20,6 @@ export function RequestWizard({ onDone, embedded }: { onDone: (id: string) => vo
   const [picked, setPicked] = useState<string[]>([]);
   const [custom, setCustom] = useState('');
   const [level, setLevel] = useState<string | null>(null);
-  const [urgent, setUrgent] = useState(false);
   const [goal, setGoal] = useState<string | null>(null);
   const [budget, setBudget] = useState<[number, number]>([0, BUDGET_LIMIT]);
   const wrap = useRef<HTMLDivElement>(null);
@@ -52,7 +51,7 @@ export function RequestWizard({ onDone, embedded }: { onDone: (id: string) => vo
     const budgetMax = budget[1] < BUDGET_LIMIT ? budget[1] : null;
     const created = await create.run({
       subjects: picked.filter((s) => s !== OTHER), customSubject: hasOther ? custom.trim() : '',
-      goal: goal ?? '', level: level ?? '', urgent, budgetMin, budgetMax, schedule, description: description.trim(),
+      goal: goal ?? '', level: level ?? '', budgetMin, budgetMax, schedule, description: description.trim(),
     });
     if (created) { toast('Заявка опубликована'); onDone(created.id); }
   };
@@ -90,7 +89,6 @@ export function RequestWizard({ onDone, embedded }: { onDone: (id: string) => vo
                 <CardTitle>Цель</CardTitle>
                 <OptionChips options={GOALS} value={goal} onChange={setGoal} />
                 {errors.goal && <span className="trk-error">{errors.goal}</span>}
-                <Switch title="Нужна помощь сегодня" text="Заявка поднимется в ленте репетиторов и будет открыта сутки." checked={urgent} onChange={setUrgent} />
               </div>
             </Card>
           </>
@@ -121,7 +119,7 @@ export function RequestWizard({ onDone, embedded }: { onDone: (id: string) => vo
         )}
       </div>
       <FormError error={create.error} />
-      <div className="trk-actions trk-step-actions">
+      <div className="trk-actions">
         {step === 2 && <Button variant="fill" size="lg" onClick={() => setStep(1)}>Назад</Button>}
         <Button size="lg" onClick={next} loading={create.pending}>{step === 1 ? 'Дальше' : 'Опубликовать заявку'}</Button>
       </div>

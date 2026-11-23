@@ -133,8 +133,7 @@ class SignupView(Throttled):
         if user.role == 'tutor':
             from tutors.services import create_draft_profile
             create_draft_profile(user)
-        if not settings.PILOT_MODE:
-            send_verification(user, EmailToken.issue(user, EmailToken.VERIFY, 24))
+        send_verification(user, EmailToken.issue(user, EmailToken.VERIFY, 24))
         login(request._request, user)
         return Response(user_json(user), status=201)
 
@@ -187,7 +186,7 @@ class ResendVerificationView(Throttled):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         _require(request)
-        if not settings.PILOT_MODE and not request.user.email_verified:
+        if not request.user.email_verified:
             send_verification(request.user, EmailToken.issue(request.user, EmailToken.VERIFY, 24))
         return Response(status=204)
 

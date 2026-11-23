@@ -1,153 +1,169 @@
 .tr {
   --lg-spring: cubic-bezier(.22, .8, .25, 1);
+  --motion-soft: cubic-bezier(.2, .7, .2, 1);
 }
 
-/* Keep the hit region and label stationary. */
+/* Motion stays inside existing hit areas so controls never jump or change size. */
 .tr :is(.btn, .trk-iconbtn, .chipf, .opt, .trk-slots .date, .trk-slots .slot, .trk-month-nav, .trk-month-day, .seg a, .trk-tabs button) {
   position: relative;
-  transform: none !important;
+  transform: none;
   translate: none;
   scale: none;
-  transition: --lg-control-fill 320ms var(--lg-spring), --lg-control-rim 320ms var(--lg-spring), background-color 320ms, color 250ms, box-shadow 320ms;
+  transition: color 220ms var(--motion-soft), background-color 260ms var(--motion-soft), box-shadow 260ms var(--motion-soft), border-color 260ms var(--motion-soft);
 }
 
-.tr :is(.trk-modal, .trh-drop-menu, dialog.trh-fpage, .trh-menu) {
-  animation: lg-surface-arrive 180ms ease-out backwards;
+@keyframes motion-section-in {
+  from { opacity: .5; transform: translateY(-9px); }
+  to { opacity: 1; transform: none; }
 }
-@keyframes lg-surface-arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes motion-step-in {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes motion-card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes motion-surface-in {
+  from { opacity: 0; transform: translateY(-5px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes motion-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes motion-menu-row-in {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes motion-faq-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes motion-choice-in {
+  from { opacity: .65; }
+  to { opacity: 1; }
+}
+@keyframes motion-date-in {
+  from { opacity: .5; }
+  to { opacity: 1; }
+}
+@keyframes motion-check-in {
+  from { opacity: 0; transform: scale(.72); }
+  70% { opacity: 1; transform: scale(1.08); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes motion-progress-in { from { transform: scaleX(.1); } to { transform: scaleX(1); } }
+@keyframes motion-profile-rise { from { opacity: .4; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes motion-message-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes motion-send-flight { 35% { transform: translate(2px, -2px) rotate(-8deg); } to { transform: none; } }
+@keyframes motion-toast-in { from { opacity: 0; transform: translateY(-8px) scale(.98); } 70% { opacity: 1; transform: translateY(1px); } to { opacity: 1; transform: none; } }
+@keyframes motion-badge-in { from { opacity: 0; scale: .5; } 70% { opacity: 1; scale: 1.14; } to { opacity: 1; scale: 1; } }
+@keyframes motion-error-shake { 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); } to { transform: none; } }
+@keyframes motion-skeleton { 0%, 100% { opacity: .78; } 50% { opacity: 1; } }
+@keyframes motion-button-glint { from { transform: translateX(-120%); opacity: 0; } 25% { opacity: .34; } to { transform: translateX(120%); opacity: 0; } }
+@keyframes motion-chip-glow { from { opacity: .6; } to { opacity: 0; } }
+@keyframes motion-spin { to { transform: rotate(360deg); } }
+@keyframes motion-star-in { from { opacity: .45; transform: scale(.76) rotate(-12deg); } 72% { opacity: 1; transform: scale(1.12) rotate(3deg); } to { opacity: 1; transform: none; } }
 
-.tr .trk-input-box:focus-within::after {
-  transition: box-shadow 180ms var(--lg-spring);
+@media (prefers-reduced-motion: no-preference) {
+  /* 1–3: section, process steps and tutor/article rows arrive as a quiet sequence. */
+  .tr [data-section-visible] { animation: motion-section-in 520ms var(--lg-spring) both; }
+  .tr .trh-steps[data-step-reveal] > li:not([data-step-visible]) { opacity: 0; }
+  .tr .trh-steps > [data-step-visible] { animation: motion-step-in 660ms var(--lg-spring) calc(var(--i, 0) * 72ms) both; }
+  .tr :is(.tcg, .trk-blog-grid, .trk-list) > :is(.tc, .trk-blog-card, .card, .lesson) {
+    animation: motion-card-in 520ms var(--lg-spring) both;
+  }
+  .tr :is(.tcg, .trk-blog-grid, .trk-list) > :nth-child(2) { animation-delay: 55ms; }
+  .tr :is(.tcg, .trk-blog-grid, .trk-list) > :nth-child(3) { animation-delay: 105ms; }
+  .tr :is(.tcg, .trk-blog-grid, .trk-list) > :nth-child(4) { animation-delay: 155ms; }
+  .tr :is(.tcg, .trk-blog-grid, .trk-list) > :nth-child(n+5) { animation-delay: 195ms; }
+
+  /* 4–8: buttons, icons and navigation respond without changing their geometry. */
+  .tr .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 24%) 50%, transparent 62%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .tr .trk-iconbtn .i { transition: transform 240ms var(--lg-spring), color 220ms var(--motion-soft); }
+  .tr .trk-navrow .i:last-child { transition: transform 240ms var(--lg-spring), color 220ms var(--motion-soft); }
+  .tr .hdr .trh-nav a { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 5px; transition: color 220ms var(--motion-soft), text-decoration-color 220ms var(--motion-soft); }
+  .tr .trh-menu { animation: motion-surface-in 280ms var(--lg-spring) both; transform-origin: top center; }
+  .tr .trh-menu-list a { animation: motion-menu-row-in 380ms var(--lg-spring) both; }
+  .tr .trh-menu-list a:nth-child(2) { animation-delay: 35ms; }
+  .tr .trh-menu-list a:nth-child(3) { animation-delay: 70ms; }
+  .tr .trh-menu-list a:nth-child(4) { animation-delay: 105ms; }
+  .tr .trh-menu-list a:nth-child(n+5) { animation-delay: 140ms; }
+
+  /* 9–13: dropdown, dialog and disclosure states. */
+  .tr .trh-drop-menu { animation: motion-surface-in 240ms var(--lg-spring) both; transform-origin: top right; }
+  .tr .trh-drop-menu button { transition: color 180ms var(--motion-soft), background-color 180ms var(--motion-soft); }
+  .tr .trk-scrim { animation: motion-scrim-in 220ms ease-out both; }
+  .tr .trk-modal { animation: motion-surface-in 340ms var(--lg-spring) both; transform-origin: center; }
+  .tr .faq details[open] > p { animation: motion-faq-in 320ms var(--lg-spring) both; }
+  .tr .faq details[open] summary .i { transform: rotate(45deg); }
+
+  /* 14–20: filters, fields, dates and form progress. Selection is shown by the existing orange state. */
+  .tr .opt.on::after, .tr .chipf.on::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 18% 50%, rgb(242 106 46 / 14%), transparent 62%);
+    pointer-events: none;
+    animation: motion-chip-glow 360ms ease-out both;
+  }
+  .tr .chk.on > i .i { animation: motion-check-in 240ms var(--lg-spring) both; }
+  .tr .switch::after { transition: left 340ms var(--lg-spring), transform 340ms var(--lg-spring); }
+  .tr .trk-input-box::after, .tr .search { transition: box-shadow 220ms var(--motion-soft), background-color 220ms var(--motion-soft); }
+  .tr .trk-error { animation: motion-error-shake 300ms ease-out both; }
+  .tr .trk-slots .date.sel { animation: motion-date-in 240ms var(--lg-spring) both; }
+  .tr .trk-slots .slot.sel { transition: background-color 280ms var(--lg-spring), box-shadow 280ms var(--lg-spring), color 220ms; }
+  .tr .trk-rating-star.on .i { animation: motion-star-in 300ms var(--lg-spring) both; }
+  .tr .trk-rating-star.on:nth-child(2) .i { animation-delay: 25ms; }
+  .tr .trk-rating-star.on:nth-child(3) .i { animation-delay: 50ms; }
+  .tr .trk-rating-star.on:nth-child(4) .i { animation-delay: 75ms; }
+  .tr .trk-rating-star.on:nth-child(5) .i { animation-delay: 100ms; }
+  .tr .trk-filepick.is-loading .i, .tr .trk-filepick-round.is-loading .i { animation: motion-spin 1.1s linear infinite; transform-origin: center; }
+  .tr .trk-filepick-preview { transition: opacity 220ms var(--motion-soft), box-shadow 220ms var(--motion-soft); }
+  .tr .trk-input[autocomplete="one-time-code"] { transition: letter-spacing 220ms var(--motion-soft), color 220ms var(--motion-soft); }
+  .tr .trk-progress .prog i.on { animation: motion-progress-in 580ms var(--lg-spring) both; transform-origin: left; }
+  .tr .trk-progress .prog i.on:nth-child(2) { animation-delay: 55ms; }
+  .tr .trk-progress .prog i.on:nth-child(3) { animation-delay: 110ms; }
+  .tr .trk-progress .prog i.on:nth-child(4) { animation-delay: 165ms; }
+
+  /* 21–28: profiles, feedback, chat and loading. */
+  .tr .trh-pf-top .trh-pf-sheet { animation: motion-profile-rise 620ms var(--lg-spring) both; }
+  .tr .tg-msg { animation: motion-message-in 420ms var(--lg-spring) both; }
+  .tr .tg-fragment:nth-child(2) .tg-msg { animation-delay: 30ms; }
+  .tr .tg-fragment:nth-child(3) .tg-msg { animation-delay: 60ms; }
+  .tr .tg-send:not(:disabled):hover .i { animation: motion-send-flight 340ms var(--lg-spring) both; }
+  .tr .tg-compose:focus-within { transition: background-color 220ms var(--motion-soft), box-shadow 220ms var(--motion-soft); }
+  .tr .trk-toast { animation: motion-toast-in 420ms var(--lg-spring) both; }
+  .tr .trk-badge, .tr .tab .dot, .tr .side .cnt { animation: motion-badge-in 360ms var(--lg-spring) both; }
+  .tr .trk-skel { animation: motion-skeleton 1.7s ease-in-out infinite; }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .tr .btn:hover::before { animation: motion-button-glint 680ms var(--motion-soft) both; }
+  .tr .btn:hover { filter: brightness(1.025); }
+  .tr .trk-iconbtn:hover .i { transform: rotate(-4deg); }
+  .tr .trk-navrow:hover { color: var(--accent); }
+  .tr .trk-navrow:hover .i:last-child { transform: translateX(2px); color: var(--accent); }
+  .tr .hdr .trh-nav a:hover, .tr .hdr .trh-nav a:focus-visible { text-decoration-color: currentColor; }
+  .tr .trh-menu-list a:hover { color: var(--accent); }
+  .tr .tc:hover .trh-tutor-name, .tr .trk-blog-title a:hover { color: var(--accent); }
+  .tr .trh-drop-menu button:hover { color: var(--accent); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tr :is(.btn, .trk-iconbtn, .chipf, .opt, .trk-slots .date, .trk-slots .slot, .trk-month-nav, .trk-month-day, .seg a, .trk-tabs button, .trk-modal, .trh-drop-menu, .trh-fpage, .trh-menu),
-  .tr .trk-input-box::after {
+  .tr :is(.btn, .trk-iconbtn, .chipf, .opt, .trk-slots .date, .trk-slots .slot, .trk-month-nav, .trk-month-day, .seg a, .trk-tabs button, .trk-modal, .trk-scrim, .trh-drop-menu, .trh-fpage, .trh-menu, .trh-menu-list a, .trk-toast, .tg-msg, .trh-pf-sheet, .trk-error, .trk-skel, .trk-rating-star .i, .trk-filepick .i, .trk-filepick-round .i),
+  .tr :is(.btn, .trk-iconbtn, .opt, .chipf, .trk-navrow, .hdr .trh-nav a, .trk-input-box, .search, .switch)::before,
+  .tr :is(.btn, .trk-iconbtn, .opt, .chipf, .trk-navrow, .hdr .trh-nav a, .trk-input-box, .search, .switch)::after,
+  .tr .faq details[open] > p, .tr .chk.on > i .i, .tr .trk-progress .prog i.on,
+  .tr [data-section-visible], .tr [data-step-visible] {
     animation: none !important;
     transition: none !important;
-  }
-
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .tr .trh-steps[data-step-reveal] > li:not([data-step-visible]) { opacity: 0; }
-  .tr .trh-steps > [data-step-visible] {
-    animation: tr-step-arrive 800ms cubic-bezier(.16, 1, .3, 1) calc(var(--i, 0) * 85ms) backwards;
-  }
-}
-
-@keyframes tr-step-arrive {
-  from { opacity: 0; transform: translateY(-14px); }
-  to { opacity: 1; transform: none; }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .tr [data-section-visible] { animation: lg-section-arrive 520ms var(--lg-spring) backwards; }
-}
-@keyframes lg-section-arrive {
-  from { opacity: .55; transform: translateY(-8px); }
-  to { opacity: 1; transform: none; }
-}
-
-/* DesignBookmark-inspired motion applied to actual product controls.
-   Keep the page geometry fixed: motion lives on opacity, color, borders and
-   small inner details. Source studies are listed in docs/motion-sources.md. */
-@media (prefers-reduced-motion: no-preference) {
-  .tr [data-motion-visible] { animation: lg-section-arrive 560ms var(--lg-spring) both; }
-  .tr [data-motion="card-reveal"][data-motion-visible],
-  .tr [data-motion="profile-card"][data-motion-visible] { animation-name: lg-card-arrive; }
-  .tr [data-motion="stat-card"][data-motion-visible] > * { animation: lg-stat-arrive 520ms var(--lg-spring) both; }
-  .tr [data-motion="stat-card"][data-motion-visible] > *:nth-child(2) { animation-delay: 70ms; }
-  .tr [data-motion="stat-card"][data-motion-visible] > *:nth-child(3) { animation-delay: 140ms; }
-  .tr [data-motion="stat-card"][data-motion-visible] > *:nth-child(4) { animation-delay: 210ms; }
-  .tr .tc.s img { transform: translate(var(--motion-photo-x, 0px), var(--motion-photo-y, 0px)) scale(1.015); transition: transform 420ms var(--lg-spring); }
-  .tr [data-motion="profile-card"]:hover img { transform: translate(var(--motion-photo-x, 0px), var(--motion-photo-y, 0px)) scale(1.035); }
-  .tr [data-motion="streaming-reply"] { animation: lg-message-arrive 420ms cubic-bezier(.2,.85,.25,1) both; transform-origin: bottom left; }
-  .tr [data-motion="streaming-reply"].out { transform-origin: bottom right; }
-  .tr [data-motion="prompt-box"] { transition: border-color 240ms var(--lg-spring), box-shadow 280ms var(--lg-spring), background-color 280ms var(--lg-spring); }
-  .tr [data-motion="prompt-box"]:focus-within { box-shadow: 0 0 0 3px rgb(249 104 43 / 10%), inset 0 1px 0 var(--lg-edge); }
-  .tr [data-motion="expand-card"] > summary .i { transition: transform 320ms var(--lg-spring), color 220ms ease; }
-  .tr [data-motion="expand-card"][open] > summary .i { transform: rotate(45deg); color: var(--accent); }
-  .tr [data-motion="expand-card"] > p { animation: lg-faq-open 320ms var(--lg-spring) both; }
-  .tr [data-motion="dynamic-menu"] .i { transition: transform 280ms var(--lg-spring); }
-  .tr [data-motion="dynamic-menu"][aria-expanded="true"] .i { transform: rotate(90deg); }
-  .tr [data-motion="roll-links"] { transition: color 180ms ease; }
-  .tr [data-motion="roll-links"]:hover,
-  .tr [data-motion="roll-links"]:focus-visible { color: var(--accent); }
-  .tr [data-motion="icon-response"]:hover .i { animation: lg-icon-arrive 320ms var(--lg-spring) both; }
-  .tr [data-motion="spring-input"]:focus-within { animation: lg-focus-arrive 360ms var(--lg-spring) both; }
-  .tr .trk-field.has-error .trk-input-box { animation: lg-field-error 360ms ease-out both; }
-  .tr [data-motion="otp-code"]:focus { letter-spacing: .24em; transition: letter-spacing 260ms var(--lg-spring); }
-  .tr [data-motion="file-drop"] { transition: border-color 240ms ease, color 240ms ease, background-color 240ms ease; }
-  .tr [data-motion="file-drop"]:hover { border-color: var(--accent); color: var(--accent); background-color: #fffaf7; }
-  .tr [data-motion="star-rating"] .trk-rating-star { transition: color 180ms ease; }
-  .tr [data-motion="star-rating"] .trk-rating-star:hover ~ .trk-rating-star { color: var(--muted); }
-  .tr [data-motion="star-rating"] .trk-rating-star:has(input:checked) .i { animation: lg-star-burst 380ms cubic-bezier(.2,.85,.25,1) both; }
-  .tr [data-motion="pagination-dots"] { animation: lg-calendar-arrive 360ms var(--lg-spring) both; }
-  .tr [data-motion="number-stepper"]:focus-visible,
-  .tr [data-motion="range-slider"]:focus-visible,
-  .tr [data-motion="option-chip"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .tr [data-motion="number-stepper"], .tr [data-motion="range-slider"], .tr [data-motion="option-chip"] { outline: var(--motion-selection-rim, 0px) solid rgb(249 104 43 / 32%); outline-offset: -2px; }
-  .tr .trk-toast[data-motion="loading-success"] { animation: lg-toast-arrive 480ms var(--lg-spring) both; }
-  .tr [data-unread]:not([data-unread="0"])::after { animation: lg-badge-arrive 460ms cubic-bezier(.2,1.5,.35,1) both; }
-  .tr .trh-menu { transform-origin: top right; }
-  .tr .trh-menu-list > * { animation: lg-menu-row 360ms var(--lg-spring) both; }
-  .tr .trh-menu-list > *:nth-child(2) { animation-delay: 35ms; }
-  .tr .trh-menu-list > *:nth-child(3) { animation-delay: 70ms; }
-  .tr .trh-menu-list > *:nth-child(4) { animation-delay: 105ms; }
-}
-
-@keyframes lg-card-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-@keyframes lg-stat-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes lg-message-arrive { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
-@keyframes lg-faq-open { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-@keyframes lg-icon-arrive { 50% { transform: translateY(-1px); } }
-@keyframes lg-focus-arrive { from { filter: saturate(.9); } to { filter: saturate(1); } }
-@keyframes lg-field-error { 25%, 75% { transform: translateX(-2px); } 50% { transform: translateX(2px); } }
-@keyframes lg-star-burst { 45% { transform: scale(1.16); } }
-@keyframes lg-calendar-arrive { from { opacity: .7; transform: translateY(3px); } to { opacity: 1; transform: none; } }
-@keyframes lg-toast-arrive { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
-@keyframes lg-badge-arrive { from { opacity: .5; scale: .65; } to { opacity: 1; scale: 1; } }
-@keyframes lg-menu-row { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
-
-/* Source https://designbookmark.com/motion-src/tab-pill/tabs.js
-   and https://designbookmark.com/motion-src/toggle-switch/switch.js.
-   The source spring engine writes the live edge/knob values. */
-.tr .trk-tabs { position: relative; }
-.tr .trk-tabs button.on { box-shadow: none; }
-.tr .trk-tab-indicator {
-  position: absolute;
-  height: 2px;
-  bottom: 0;
-  left: 0;
-  background: var(--accent);
-  pointer-events: none;
-}
-.tr .switch::after {
-  left: 2px;
-  width: var(--motion-knob-width, 28px);
-  transform: translateX(var(--motion-knob-x, 0px));
-  transition: none;
-}
-.tr .switch.on::after { left: 2px; transform: translateX(var(--motion-knob-x, 20px)); }
-.tr .prog i { position: relative; overflow: hidden; }
-.tr .prog i::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  transform: scaleX(var(--motion-fill, 0));
-  transform-origin: left;
-}
-.tr .prog i.on { animation: none; background: var(--fill-strong); }
-.tr .prog i.on::after { transform: scaleX(var(--motion-fill, 1)); }
-.tr :is(.trk-modal, .trh-drop-menu, .trh-menu, .trk-toast) { animation: none; transform-origin: top center; }
-.tr .trk-check > i .i { animation: none; }
-@media (prefers-reduced-motion: reduce) {
-  .tr *, .tr *::before, .tr *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
   }
 }

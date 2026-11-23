@@ -9,7 +9,7 @@ import type {
  * Рядом с методом указан REST-адрес, по которому его ждёт http-клиент.
  */
 export interface Api {
-  features(): Promise<{ pilotMode: boolean; testPayments: boolean }>;
+  mode: 'mock' | 'http';
 
   // Авторизация
   me(): Promise<User | null>; // GET /auth/me
@@ -36,7 +36,6 @@ export interface Api {
   createBooking(input: CreateBookingInput): Promise<Lesson>; // POST /bookings
   listLessons(scope: 'upcoming' | 'past'): Promise<Lesson[]>; // GET /me/lessons?scope=
   getLesson(id: Id): Promise<Lesson>; // GET /lessons/:id
-  setLessonMeeting(id: string, url: string): Promise<Lesson>;
   cancelLesson(id: Id, reason: string): Promise<Lesson>; // POST /lessons/:id/cancel
   proposeMove(id: Id, start: IsoDate): Promise<Lesson>; // POST /lessons/:id/move
   answerMove(id: Id, accept: boolean): Promise<Lesson>; // POST /lessons/:id/move/answer

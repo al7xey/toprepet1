@@ -18,7 +18,7 @@ export default function PaymentsPage() {
   const [tab, setTab] = useState<'history' | 'cards'>('history');
   return (
     <AppLayout role="student">
-      <PageHeader title="Платежи" />
+      <PageHeader title="Платежи" back={{ to: '/me/account', label: 'Профиль' }} />
       <Tabs items={[{ value: 'history', label: 'История' }, { value: 'cards', label: 'Карты' }]} value={tab} onChange={setTab} />
       {tab === 'history' ? <History /> : <Cards />}
     </AppLayout>
@@ -47,8 +47,6 @@ function History() {
 
 function Cards() {
   const toast = useToast();
-  const features = useQuery('features', () => api.features());
-  const canAdd = features.data?.testPayments === true;
   const cards = useQuery('my-cards', () => api.listCards());
   const [open, setOpen] = useState(false);
   const [removing, setRemoving] = useState<PayCard | null>(null);
@@ -58,8 +56,8 @@ function Cards() {
     if (await remove.run(removing.id)) { setRemoving(null); cards.reload(); toast('Карта удалена'); }
   };
   return (
-    <Section title="Мои карты" action={canAdd ? <IconButton icon="plus" label="Добавить карту" onClick={() => setOpen(true)} className="trk-addbtn" /> : undefined}>
-      <QueryView query={cards} empty={(items) => items.length === 0 ? <EmptyState icon="card" title="Карт пока нет" text={canAdd ? "Добавьте тестовую карту для проверки записи." : "Подключение карт пока недоступно."} actions={canAdd ? <Button onClick={() => setOpen(true)}>Добавить карту</Button> : undefined} /> : null}>
+    <Section title="Мои карты" action={<IconButton icon="plus" label="Добавить карту" onClick={() => setOpen(true)} className="trk-addbtn" />}>
+      <QueryView query={cards} empty={(items) => items.length === 0 ? <EmptyState icon="card" title="Карт пока нет" text="Добавьте карту, чтобы записываться на платные уроки." actions={<Button onClick={() => setOpen(true)}>Добавить карту</Button>} /> : null}>
         {(items) => (
           <div className="trk-list">
             {items.map((c) => (
@@ -74,7 +72,7 @@ function Cards() {
         )}
       </QueryView>
       <FormError error={remove.error} />
-      <AddCardModal open={canAdd && open} onClose={() => setOpen(false)} onAdded={() => { setOpen(false); cards.reload(); toast('Карта добавлена'); }} />
+      <AddCardModal open={open} onClose={() => setOpen(false)} onAdded={() => { setOpen(false); cards.reload(); toast('Карта добавлена'); }} />
       <ConfirmDialog open={!!removing} onClose={() => setRemoving(null)} onConfirm={() => void confirmRemove()} title="Удалить карту?" text={removing ? `Карта ${removing.brand} ···· ${removing.last4} будет удалена. Уроки, за которые деньги уже заморожены, не изменятся.` : undefined} confirmLabel="Удалить" variant="danger" pending={remove.pending} error={remove.error} />
     </Section>
   );

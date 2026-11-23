@@ -14,13 +14,13 @@ import { Button, FormError, Note, onChoiceTabKey, Person, Status, TextField, typ
 /** Карточка репетитора: фото, имя, предметы, цена третьей строкой. Одна на главной, в каталоге и в подборках. */
 export function TutorCard({ tutor, priority }: { priority?: boolean; tutor: Pick<Tutor, 'id' | 'name' | 'photo' | 'photoSrcSet' | 'cardSubjects' | 'studentPrice' | 'rating' | 'reviewsCount'>}) {
   const { pathname, search } = useLocation();
-  const back = pathname + search;
+  const back = /^\/teachers\/?$/.test(pathname) ? pathname + search : undefined;
   return (
-    <Link state={{ back }} className="tc s" data-motion="profile-card" to={`/teachers/${tutor.id}/`} aria-label={`${tutor.name}, ${tutor.cardSubjects}`} draggable={false}>
-      {tutor.photo ? <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} /> : <span className="trk-tutor-placeholder" aria-hidden="true"><Icon name="user" /></span>}
+    <Link state={back ? { back } : undefined} className="tc s" to={`/teachers/${tutor.id}/`} aria-label={`${tutor.name}, ${tutor.cardSubjects}`} draggable={false}>
+      <img src={tutor.photo} srcSet={tutor.photoSrcSet} sizes="(min-width: 761px) 280px, 50vw" alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} />
       <span className="pl">
         <b><span className="trh-tutor-name">{tutor.name}</span></b>
-        <span className="trh-tutor-subjects">{tutor.cardSubjects}</span>
+        <span>{tutor.cardSubjects}</span>
         <span className="trh-price">{fromRub(tutor.studentPrice)}</span>
       </span>
     </Link>
@@ -80,7 +80,7 @@ export function LessonCard({ lesson, role, actions }: { lesson: Lesson; role: Ro
     <article className="lesson trk-lesson">
       <Link className="trk-lesson-link" to={lessonHref(lesson, role)} aria-label={`${lessonTitle(lesson)}, ${whenLabel(lesson.start)}`} />
       <div className="lesson-when"><b className="tn">{whenLabel(lesson.start)}</b><span>{lessonTitle(lesson)} · {minutes(lesson.durationMin)}</span></div>
-      <Person name={who.name} photo={who.photo} sub={lesson.status === 'pending' && lesson.confirmBy && role === 'tutor' ? `Ответьте ${until(lesson.confirmBy)}` : lesson.isDemo ? 'Тестовая запись' : lesson.kind === 'intro' ? 'Знакомство бесплатно' : rub(role === 'tutor' ? lesson.tutorPrice : lesson.price)} />
+      <Person name={who.name} photo={who.photo} sub={lesson.status === 'pending' && lesson.confirmBy && role === 'tutor' ? `Ответьте ${until(lesson.confirmBy)}` : lesson.kind === 'intro' ? 'Знакомство бесплатно' : rub(role === 'tutor' ? lesson.tutorPrice : lesson.price)} />
       <div className="trk-lesson-status"><LessonStatus lesson={lesson} role={role} /></div>
       {actions && <div className="trk-lesson-actions">{actions}</div>}
     </article>
@@ -115,12 +115,12 @@ export function SlotPicker({ slots, value, values, onChange, days = 7, loading, 
   if (!byDay.length) return <p className="muted">Свободного времени на ближайшие дни нет. Напишите репетитору или загляните позже.</p>;
 
   return (
-    <div className="trk-slots" data-motion="jelly-slider">
+    <div className="trk-slots">
       <div className="dates trh-dates" role="tablist" aria-label="День">
         {byDay.map(([key, items]) => {
           const date = new Date(items[0].start);
           return (
-            <button key={key} type="button" role="tab" aria-selected={key === current} tabIndex={key === current ? 0 : -1} data-motion="number-stepper" className={`date${key === current ? ' sel' : ''}`} onKeyDown={onChoiceTabKey} onClick={() => setDay(key)}>
+            <button key={key} type="button" role="tab" aria-selected={key === current} tabIndex={key === current ? 0 : -1} className={`date${key === current ? ' sel' : ''}`} onKeyDown={onChoiceTabKey} onClick={() => setDay(key)}>
               <small>{date.toLocaleDateString('ru-RU', { weekday: 'short' }).replace('.', '')}</small><b>{date.getDate()}</b>
             </button>
           );
@@ -128,7 +128,7 @@ export function SlotPicker({ slots, value, values, onChange, days = 7, loading, 
       </div>
       <div key={current} className="slots trh-slots" aria-label={list[0] ? dayLabel(list[0].start) : undefined}>
         {list.map((s) => (
-          <button key={s.start} type="button" data-motion="range-slider" className={`slot${(values ? values.includes(s.start) : s.start === value) ? ' sel' : ''}`} aria-pressed={values ? values.includes(s.start) : s.start === value} onClick={() => onChange(s.start)}>
+          <button key={s.start} type="button" className={`slot${(values ? values.includes(s.start) : s.start === value) ? ' sel' : ''}`} aria-pressed={values ? values.includes(s.start) : s.start === value} onClick={() => onChange(s.start)}>
             {timeLabel(s.start)}
           </button>
         ))}
@@ -141,8 +141,8 @@ export function SlotPicker({ slots, value, values, onChange, days = 7, loading, 
 /* ---------- Сообщения ---------- */
 
 export function Bubble({ mine, system, text, at }: { mine?: boolean; system?: boolean; text: string; at?: string }) {
-  if (system) return <div className="bubble b-sys" data-motion="streaming-reply">{text}</div>;
-  return <div className={`bubble ${mine ? 'b-out' : 'b-in'}`} data-motion="streaming-reply">{text}{at && <small>{timeLabel(at)}</small>}</div>;
+  if (system) return <div className="bubble b-sys">{text}</div>;
+  return <div className={`bubble ${mine ? 'b-out' : 'b-in'}`}>{text}{at && <small>{timeLabel(at)}</small>}</div>;
 }
 
 /** Добавление карты. В демо-режиме поля ввода; с настоящим бэкендом здесь встанет виджет платёжного провайдера (номер карты не должен попадать на наш сервер). */
@@ -156,8 +156,8 @@ export function AddCardModal({ open, onClose, onAdded }: { open: boolean; onClos
     if (card) { setNumber(''); setExpiry(''); setCvc(''); onAdded(card); }
   };
   return (
-    <Modal open={open} onClose={onClose} title="Тестовая карта" footer={<><Button variant="fill" onClick={onClose}>Отмена</Button><Button onClick={save} loading={add.pending}>Сохранить карту</Button></>}>
-      <Note tone="plain">Используйте только тестовые данные. Номер карты для проверки: 4000 0000 0000 0002.</Note>
+    <Modal open={open} onClose={onClose} title="Новая карта" footer={<><Button variant="fill" onClick={onClose}>Отмена</Button><Button onClick={save} loading={add.pending}>Сохранить карту</Button></>}>
+      {api.mode === 'mock' && <Note tone="plain" icon="lock">Не вводите настоящие данные карты. Для проверки используйте номер 4000 0000 0000 0002.</Note>}
       <TextField label="Номер карты" inputMode="numeric" autoComplete="cc-number" placeholder="0000 0000 0000 0000" value={number} onChange={(e) => setNumber(e.target.value)} />
       <div className="trk-two">
         <TextField label="Срок" autoComplete="cc-exp" placeholder="ММ/ГГ" value={expiry} onChange={(e) => setExpiry(e.target.value)} />

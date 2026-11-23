@@ -1,6 +1,6 @@
 # Бэкенд TopRepet (Django)
 
-Сервер лежит в `backend/`. Фронтенд использует HTTP API. Контракт и типы описаны в `src/new-design/api`. Подробности по защите и обновлению базы — [backend-security.md](backend-security.md).
+Сервер лежит в `backend/`. Фронтенд переключается на него переменной `VITE_API_URL`; для демонстрации нужен явный `VITE_API_MODE=demo` (или `pnpm build:e2e`). Адреса, поля и ошибки описаны в `src/new-design/api/contract.ts` и `types.ts`. Подробный разбор защиты и порядок обновления существующей базы — [backend-security.md](backend-security.md).
 
 ## Быстрый старт
 
@@ -10,12 +10,14 @@ python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt
 export DEBUG=1
 python manage.py migrate
+python manage.py seed_demo          # демо-данные: olga@mail.ru, anastasia@toprepet.ru, admin@toprepet.ru, пароль demo
 python manage.py runserver 8000
 # в другом терминале, в корне репозитория:
 VITE_API_URL=http://127.0.0.1:8000 pnpm dev
 ```
 
 Тесты: `cd backend && python -m pytest`. Контрактные тесты (те же сценарии, что у мока, но против сервера на чистой базе): `bash backend/scripts/contract.sh` из корня репозитория.
+Демо-каталог выгружается из фронтенда командой `pnpm exec tsx scripts/export-demo.mjs` (файл `backend/tutors/fixtures/demo_tutors.json`).
 
 ## Переменные окружения
 
@@ -30,7 +32,7 @@ VITE_API_URL=http://127.0.0.1:8000 pnpm dev
 | `SESSION_COOKIE_DOMAIN` | необязателен; host-only cookie API достаточно для credentials fetch | пусто |
 | `EMAIL_URL` | `smtp://user:pass@host:587` (или `smtps://` для SSL) | консоль только DEBUG; без SMTP production отвечает 503 |
 | `DEFAULT_FROM_EMAIL` | отправитель писем | `TopRepet <noreply@toprepet.ru>` |
-| `PAYMENT_PROVIDER` | `fake` — заглушка для разработки; настоящего провайдера пока нет | disabled, в автоматическом тесте задаётся fake |
+| `PAYMENT_PROVIDER` | `fake` — заглушка для разработки; настоящего провайдера пока нет | fake при DEBUG=1, иначе disabled |
 | `MEETING_URL` | ссылка на видеоурок (пока общая) | `https://telemost.yandex.ru/` |
 | `MEDIA_ROOT`, `MEDIA_URL` | публичные аватары | `backend/media`, `/media/` |
 | `PRIVATE_MEDIA_ROOT` | приватные документы и вложения чата, вне web root | `backend/private-media` |

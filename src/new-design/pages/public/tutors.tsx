@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { api, studentPriceOf } from '../../api';
+import { api, staticTutors, studentPriceOf } from '../../api';
 import { homeFor, useSession } from '../../api/session';
 import { useQuery } from '../../api/hooks';
 import { PublicLayout } from '../../layout/layouts';
@@ -32,7 +32,8 @@ export default function TutorsLandingPage() {
   const entryHref = user ? homeFor(user.role) : '/signup?role=tutor';
   const entryLabel = user?.role === 'tutor' ? 'Мой кабинет' : user ? 'Перейти в кабинет' : 'Создать анкету';
   const canReadRequests = user?.role === 'tutor' || user?.role === 'student';
-  const tutors = useQuery('tutors-landing', () => api.listTutors({ limit: 6 }).then((p) => p.items));
+  const first = staticTutors().slice(0, 6);
+  const tutors = useQuery('tutors-landing', () => api.listTutors({ limit: 6 }).then((p) => p.items), first);
   return (
     <PublicLayout>
       <section className="trh-hero" aria-labelledby="hero-title">

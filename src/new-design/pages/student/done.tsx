@@ -16,24 +16,17 @@ export default function BookDonePage() {
       <QueryView query={lesson} empty={() => null}>
         {(l) => (
           <>
-            <PageHeader
-              title={l.status === 'confirmed' ? 'Запись подтверждена' : 'Запись отправлена'}
-              lead={l.isDemo ? <>Вы записаны к репетитору <b>{l.tutorName}</b>. Оплата не требуется.</> : <>Мы передали запись репетитору <b>{l.tutorName}</b>.</>}
-              actions={l.status === 'confirmed' ? <Status tone="ok" icon="tick">Подтверждена</Status> : <Status tone="wait" icon="clock">Ждёт подтверждения</Status>}
-            />
+            <PageHeader title="Запись отправлена" lead={<>Мы передали запись репетитору <b>{l.tutorName}</b>.</>} actions={<Status tone="wait" icon="clock">Ждёт подтверждения</Status>} />
             <Card>
               <Rows rows={[
                 ['Когда', whenLabel(l.start)],
                 ['Предмет', l.kind === 'intro' ? 'Бесплатное знакомство' : l.subject],
                 ['Длительность', minutes(l.durationMin)],
-                ['Стоимость', l.isDemo ? '0 ₽ · тестовая запись' : l.price ? rub(l.price) : 'Бесплатно'],
+                ['Стоимость', l.price ? rub(l.price) : 'Бесплатно'],
               ]} />
             </Card>
             <Section title="Что дальше">
-              <Steps items={l.isDemo ? [
-                { title: 'Урок в расписании', text: 'Вы и репетитор можете открыть карточку занятия.', state: 'done' },
-                { title: 'Ссылка на урок', text: 'Когда репетитор добавит ссылку, она появится в карточке урока.', state: 'current' },
-              ] : [
+              <Steps items={[
                 { title: 'Запись отправлена', text: l.payment === 'hold' ? 'Деньги заморожены на карте, пока репетитор не ответит.' : 'Знакомство бесплатное, оплата не нужна.', state: 'done' },
                 { title: 'Репетитор подтверждает', text: l.confirmBy ? `Ответ ожидается до ${whenLabel(l.confirmBy)}. Если репетитор не ответит, запись отменится, а деньги вернутся.` : 'Мы сообщим, как только репетитор ответит.', state: 'current' },
                 { title: 'Ссылка на урок', text: 'Она появится в карточке урока за 10 минут до начала.', state: 'todo' },

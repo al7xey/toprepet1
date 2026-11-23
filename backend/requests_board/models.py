@@ -16,7 +16,6 @@ class StudyRequest(models.Model):
     budget_max = models.PositiveIntegerField(null=True, blank=True)
     schedule = models.JSONField(default=list)
     description = models.TextField()
-    urgent = models.BooleanField(default=False)
     status = models.CharField(max_length=10, default='open')
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()

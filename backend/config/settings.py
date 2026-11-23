@@ -146,25 +146,18 @@ if _email:
     EMAIL_USE_SSL = _u.scheme == 'smtps'
 elif env('CONTRACT_TESTS') == '1':
     EMAIL_BACKEND = 'core.testmail.CaptureBackend'
-elif DEBUG and env('LOCAL_EMAIL_DIR'):
-    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-    EMAIL_FILE_PATH = env('LOCAL_EMAIL_DIR')
 elif DEBUG or TESTING:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 EMAIL_CONFIGURED = bool(_email) or DEBUG or TESTING
-SEND_EVENT_EMAILS = env('SEND_EVENT_EMAILS', '1' if _email else '0') == '1' and EMAIL_CONFIGURED
-EXTERNAL_EMAIL = bool(_email)
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', 'TopRepet <noreply@toprepet.ru>')
 SITE_URL = env('SITE_URL', 'http://localhost:5173').rstrip('/')
 
 # Платежи: сейчас заглушка; провайдера меняет одна переменная (см. payments/providers.py).
-PILOT_MODE = DEBUG and env('PILOT_MODE') == '1'
-PAYMENT_PROVIDER = env('PAYMENT_PROVIDER', 'fake' if TESTING else 'disabled')
+PAYMENT_PROVIDER = env('PAYMENT_PROVIDER', 'fake' if DEBUG else 'disabled')
 SERVICE_FEE = 0.10
-# Видеосвязь: можно задать сервер комнат или указать ссылку вручную в карточке занятия.
-MEETING_ROOM_BASE_URL = env('MEETING_ROOM_BASE_URL').rstrip('/')
+# Видеосвязь: пока одна общая ссылка-заглушка, на этапе подключения Телемоста/Zoom здесь будет создание комнаты на урок.
 MEETING_URL = env('MEETING_URL', 'https://telemost.yandex.ru/')
 # Только для контрактных тестов фронтенда (CONTRACT_TESTS=1, только при DEBUG): отдаёт токен из последнего письма.
 EXPOSE_TEST_ENDPOINTS = env('CONTRACT_TESTS') == '1' and DEBUG

@@ -4,11 +4,11 @@ import { api } from '../../api';
 import { trackGoal } from '../../../shared/lib/analytics';
 import { useMutation } from '../../api/hooks';
 import type { Role } from '../../api/types';
-import { needsEmailVerification, useSession } from '../../api/session';
+import { homeFor, useSession } from '../../api/session';
 import { AuthLayout } from '../../layout/layouts';
 import { safeNext } from '../../lib/safeNext';
 import { Button, ChoiceCards, Checkbox, FormError, PageHeader, PasswordField, TextField } from '../../ui';
-import { afterRegistration, AuthCard, emailValid } from './shared';
+import { AuthCard, emailValid } from './shared';
 
 type SignupRole = Exclude<Role, 'admin'>;
 
@@ -25,9 +25,8 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; agree?: string }>({});
   const signup = useMutation((input: Parameters<typeof api.signup>[0]) => api.signup(input));
 
-  const next = safeNext(params.get('next'), '');
-  if (user && !needsEmailVerification(user)) return <Navigate to={afterRegistration(user, next)} replace />;
-  if (user) return <Navigate to={'/verify-email' + (next ? '?next=' + encodeURIComponent(next) : '')} replace />;
+  if (user && user.emailVerified) return <Navigate to={homeFor(user.role)} replace />;
+  if (user) return <Navigate to="/verify-email" replace />;
 
   const submit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -42,10 +41,8 @@ export default function SignupPage() {
     const created = await signup.run({ role, name: name.trim(), email: email.trim(), password });
     if (created) {
       trackGoal('signup_submit', { role }); setUser(created);
-      const destination = needsEmailVerification(created)
-        ? '/verify-email?sent=1' + (next ? '&next=' + encodeURIComponent(next) : '')
-        : afterRegistration(created, next);
-      void navigate(destination, { replace: true });
+      const next = safeNext(params.get('next'), '');
+      void navigate('/verify-email?sent=1' + (next ? `&next=${encodeURIComponent(next)}` : ''), { replace: true });
     }
   };
 

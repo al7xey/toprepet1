@@ -10,7 +10,6 @@ from core.views import APIView
 
 from chats.service import direct_message
 from core.errors import ApiError, forbidden, not_found
-from core.inputs import boolean_input
 from core.perm import my_tutor, require_role, require_user
 from core.utils import iso, parse_iso
 from notifications.service import notify
@@ -35,7 +34,7 @@ def request_json(r, short_name: bool = False) -> dict:
     name = r.student.name
     return {'id': r.id, 'studentId': r.student_id, 'studentName': name.split(' ')[0] if short_name else name, 'studentPhoto': r.student.photo or None, 'subject': r.subject, 'subjects': request_subjects(r), 'customSubject': r.custom_subject, 'goal': r.goal, 'level': r.level,
             'budgetMin': r.budget_min, 'budgetMax': r.budget_max, 'schedule': r.schedule, 'description': r.description, 'status': effective_status(r), 'createdAt': iso(r.created_at),
-            'urgent': r.urgent, 'expiresAt': iso(r.expires_at), 'responsesCount': r.response_count if hasattr(r, 'response_count') else r.responses.count()}
+            'expiresAt': iso(r.expires_at), 'responsesCount': r.response_count if hasattr(r, 'response_count') else r.responses.count()}
 
 
 def response_json(x) -> dict:
@@ -70,7 +69,7 @@ class RequestsView(APIView):
         """Лента открытых заявок, только для вошедших. Репетитор видит заявки по предметам своей анкеты."""
         user = require_user(request)
         subject = request.query_params.get('subject')
-        items = StudyRequest.objects.filter(status='open', expires_at__gt=timezone.now()).select_related('student').annotate(response_count=Count('responses')).order_by('-urgent', '-created_at', 'id')
+        items = StudyRequest.objects.filter(status='open', expires_at__gt=timezone.now()).select_related('student').annotate(response_count=Count('responses'))
         mine = tutor_subjects(user) if user.role == 'tutor' else None
         result = []
         for item in items.iterator(chunk_size=100):
@@ -88,7 +87,6 @@ class RequestsView(APIView):
     def post(self, request):
         user = require_role(request, 'student')
         d = request.data
-        urgent = boolean_input(d, 'urgent', default=False)
         subjects = d.get('subjects')
         if subjects is None and d.get('subject'):
             subjects = [d.get('subject')]
@@ -121,7 +119,7 @@ class RequestsView(APIView):
         if StudyRequest.objects.filter(student=user, status='open', expires_at__gt=timezone.now()).count() >= MAX_OPEN:
             raise ApiError(f'Одновременно можно держать до {MAX_OPEN} открытых заявок. Закройте ненужные.', 409, 'too_many')
         r = StudyRequest.objects.create(student=user, subject=subject[:120], subjects=subjects, custom_subject=custom, goal=str(d.get('goal', ''))[:200], level=str(d.get('level', ''))[:120], budget_min=budget_min, budget_max=budget,
-                                        schedule=schedule[:7], description=description[:3000], urgent=urgent, expires_at=timezone.now() + timedelta(days=1 if urgent else 14))
+                                        schedule=schedule[:7], description=description[:3000], expires_at=timezone.now() + timedelta(days=14))
         return Response(request_json(r), status=201)
 
 

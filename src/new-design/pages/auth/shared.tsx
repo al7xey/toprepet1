@@ -1,19 +1,30 @@
-import { type ReactNode } from 'react';
-import { Card } from '../../ui';
-import { homeFor } from '../../api/session';
-import type { User } from '../../api/types';
-import { safeNext } from '../../lib/safeNext';
+import { useState, type ReactNode } from 'react';
+import { api } from '../../api';
+import { Card, Note } from '../../ui';
 
 /** Рамка форм входа и регистрации: карточка по центру. */
 export function AuthCard({ children }: { children: ReactNode }) {
   return <Card className="trk-auth-card" pad="lg">{children}</Card>;
 }
 
-export const emailValid = (value: string) => /^\S+@\S+\.\S+$/.test(value.trim());
+export const DEMO_ACCOUNTS = [
+  { label: 'ученик', email: 'olga@mail.ru' },
+  { label: 'репетитор', email: 'anastasia@toprepet.ru' },
+  { label: 'администратор', email: 'admin@toprepet.ru' },
+];
 
-export const afterRegistration = (user: Pick<User, 'role' | 'onboarded'>, next?: string | null) => {
-  if (!user.onboarded && user.role === 'tutor') return '/tutor/profile/edit';
-  const destination = safeNext(next, '');
-  if (!user.onboarded && user.role === 'student') return '/onboarding' + (destination && !destination.startsWith('/onboarding') ? `?next=${encodeURIComponent(destination)}` : '');
-  return destination || homeFor(user.role);
-};
+/** Быстрый вход в локальные демо-кабинеты без сервера. */
+export function DemoHint({ onLogin, pending }: { onLogin: (email: string, password: string) => void; pending?: boolean }) {
+  const [open] = useState(api.mode === 'mock');
+  if (!open) return null;
+  return (
+    <Note tone="plain" icon="info">
+      <span><b>Тестовый вход.</b> Откройте кабинет с демонстрационными данными — сервер не нужен.</span>
+      <span className="trk-demo-list">
+        {DEMO_ACCOUNTS.map((a) => <button key={a.email} type="button" className="trk-demo" disabled={pending} onClick={() => onLogin(a.email, 'demo')}>{pending ? 'Открываем…' : `Войти как ${a.label}`}</button>)}
+      </span>
+    </Note>
+  );
+}
+
+export const emailValid = (value: string) => /^\S+@\S+\.\S+$/.test(value.trim());

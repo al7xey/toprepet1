@@ -125,7 +125,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
     event.preventDefault()
     let href = link.trim()
     if (!href) {
-      const range = linkRange.current
+      const range = linkRange.curren
       const chain = editor.chain().focus()
       if (range) chain.setTextSelection(range)
       chain.unsetLink().run()
@@ -140,7 +140,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
       setError('Введите корректный адрес сайта.')
       return
     }
-    const range = linkRange.current
+    const range = linkRange.curren
     const chain = editor.chain().focus()
     if (range) chain.setTextSelection(range)
     chain.setLink({ href }).run()
@@ -190,7 +190,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
   return (
     <div className="paper simple-editor">
       <div className="simple-editor-toolbar" role="toolbar" aria-label="Форматирование статьи">
-        <select
+        <selec
           aria-label="Стиль текста"
           value={block}
           disabled={busy}
@@ -242,12 +242,12 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
         <form className="simple-editor-inline-panel" onSubmit={applyLink}>
           <label className="label" htmlFor="editor-link">Адрес ссылки</label>
           <div className="simple-editor-inline-row">
-            <input
+            <inpu
               id="editor-link"
               className="field"
               type="url"
               inputMode="url"
-              
+
               value={link}
               placeholder="https://example.ru"
               onChange={(event) => setLink(event.target.value)}
@@ -263,7 +263,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
         <form className="simple-editor-image-form" onSubmit={uploadImage}>
           <div>
             <label className="label" htmlFor="editor-image-file">Изображение</label>
-            <input
+            <inpu
               id="editor-image-file"
               type="file"
               accept="image/*"

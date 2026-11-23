@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../../api';
 import { useQuery } from '../../api/hooks';
-import { needsEmailVerification, useSession } from '../../api/session';
+import { useSession } from '../../api/session';
 import { AppLayout } from '../../layout/layouts';
 import { ago, count } from '../../lib/format';
 import { Avatar, Button, Card, ErrorState, IconButton, LoadingList, Note, NavigationRow, PageHeader, UnreadDot, useToast } from '../../ui';
@@ -9,7 +9,6 @@ const STUDENT_SECTIONS = [
   { label: 'Мои заявки', to: '/me/requests', icon: 'list' },
   { label: 'Мои репетиторы', to: '/me/tutors', icon: 'book' },
   { label: 'Занятия', to: '/me/lessons', icon: 'clock' },
-  { label: 'Учебный прогресс', to: '/me/progress', icon: 'book' },
   { label: 'Сообщения', to: '/me/chats', icon: 'chat' },
   { label: 'Уведомления', to: '/me/notifications', icon: 'bell' },
   { label: 'Платежи', to: '/me/payments', icon: 'card' },
@@ -27,12 +26,11 @@ const TUTOR_SECTIONS = [
 
 /** Заголовок блока профиля: тот же уровень, что у заголовка страницы. Справа круглые кнопки: добавить и открыть весь раздел. */
 function BlockHead({ title, add, all }: { title: string; add?: { label: string; onClick: () => void }; all: { label: string; to: string } }) {
-  const { pathname, search } = useLocation();
   return (
     <div className="trk-block-head">
       <h2 className="trk-blocktitle trh-h1">{title}</h2>
       {add && <IconButton icon="plus" label={add.label} onClick={add.onClick} className="trk-addbtn" />}
-      <IconButton icon="arrow" label={all.label} to={all.to} state={{ from: pathname + search }} />
+      <IconButton icon="arrow" label={all.label} to={all.to} />
     </div>
   );
 }
@@ -43,7 +41,7 @@ export function AccountView({ role }: { role: 'student' | 'tutor' }) {
   const toast = useToast();
   const { pathname } = useLocation();
   const past = useQuery(`account-lessons-${role}`, () => api.listLessons('past'));
-  const reviews = useQuery(role === 'tutor' ? 'account-reviews-tutor' : null, () => api.listMyReviews());
+  const reviews = useQuery(`account-reviews-${role}`, () => api.listMyReviews());
   const notes = useQuery(role === 'tutor' ? `account-notes-${role}` : null, () => api.listNotifications());
   const done = past.data?.filter((l) => l.status === 'completed').length ?? 0;
   const latestNotes = [...(notes.data ?? [])].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 3);
@@ -60,13 +58,13 @@ export function AccountView({ role }: { role: 'student' | 'tutor' }) {
             <div className="trk-account-who">
               <h2 className="trk-account-name">{user?.name}</h2>
               <span className="muted">{user?.email}</span>
-              <span className="muted sm">{count(done, 'занятие', 'занятия', 'занятий')}{reviews.data && ' · ' + count(reviews.data.length, 'отзыв', 'отзыва', 'отзывов')}</span>
+              <span className="muted sm">{count(done, 'занятие', 'занятия', 'занятий')} · {count(reviews.data?.length ?? 0, 'отзыв', 'отзыва', 'отзывов')}</span>
             </div>
           </Link>
           <IconButton icon="pen" label="Изменить личные данные" to={`${settingsTo}?section=data`} state={{ from: pathname }} />
         </Card>
 
-        <nav className="trk-navlist" aria-label="Разделы профиля">
+        <nav className="trk-navlist" aria-label="Разделы кабинета">
           {(role === 'tutor' ? TUTOR_SECTIONS : STUDENT_SECTIONS).map((section) => (
             <NavigationRow key={section.to} icon={section.icon} to={section.to}>{section.label}</NavigationRow>
           ))}
@@ -93,7 +91,7 @@ export function AccountView({ role }: { role: 'student' | 'tutor' }) {
           ) : <span className="muted">Пока тихо: здесь появятся ответы на заявки, подтверждения уроков и сообщения.</span>}
         </section>}
 
-        {user && needsEmailVerification(user) && (
+        {user && !user.emailVerified && (
           <Note tone="bad">Почта не подтверждена. <Button to="/verify-email" variant="line" size="s">Подтвердить</Button></Note>
         )}
       </div>

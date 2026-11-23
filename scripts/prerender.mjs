@@ -20,11 +20,10 @@ let template = await readFile(distIndexPath, 'utf8');
 const manifest = JSON.parse(await readFile(resolve('dist/.vite/manifest.json'), 'utf8'));
 const assetBase = (process.env.VITE_BASE_PATH || '/').replace(/^\/+|\/+$/g, '');
 const assetUrl = path => `/${assetBase ? `${assetBase}/` : ''}${path.replace(/^\/+/, '')}`;
-const previewUrl = route => `https://al7xey.github.io${assetUrl(route === '/' ? '' : `${route.replace(/^\/+|\/+$/g, '')}/`)}`;
 if (assetBase) {
   template = template.replace(
     /<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/i,
-    '<meta name="robots" content="noindex,follow,max-image-preview:large" />',
+    '<meta name="robots" content="noindex,nofollow" />',
   );
 }
 const fontFiles = (await readdir(resolve('dist/assets')))
@@ -36,6 +35,7 @@ function addRouteAssets(html, route) {
   const entry = route.startsWith('/blog/admin') ? 'src/blog/admin.tsx'
     : route.startsWith('/blog') ? 'src/new-design/pages/public/blog.tsx'
     : route === '/' ? 'src/pages/home/home-page.tsx'
+    : route.startsWith('/teachers/') ? 'src/pages/teacher/teacher-page.tsx'
     : route === '/teachers' ? 'src/pages/teachers/teachers-page.tsx'
     : route === '/for-repetitor' ? 'src/pages/for-tutors/for-tutors-page.tsx'
     : route === '/help' ? 'src/new-design/pages/public/help.tsx'
@@ -65,7 +65,7 @@ function addRouteAssets(html, route) {
   return html.replace('</head>', `${[...new Set(links)].join('\n')}\n</head>`);
 }
 
-const { render } = await import(
+const { render, teachers: teacherCatalog, CATALOG_PAGE_SIZE } = await import(
   pathToFileURL(serverEntryPath).href
 );
 
@@ -90,7 +90,48 @@ const breadcrumbNames = {
   '/teachers':
     'Преподаватели',
 
+  '/teachers/informatics':
+    'Алексей',
+
+  '/teachers/english':
+    'Анастасия',
+
+  '/teachers/russian':
+    'Артём',
+
+  '/teachers/chemistry-biology':
+    'Александра',
+
+  '/teachers/mathematics':
+    'Ерлан',
+
+  '/teachers/russian-literature':
+    'Анна',
+
+  '/teachers/physics-mathematics':
+    'Дарья',
+
+  '/teachers/english-elizaveta':
+    'Елизавета',
+
+  '/teachers/chemistry':
+    'Дмитрий',
+
+  '/teachers/history':
+    'Александра',
 };
+
+const teacherSchemas = Object.fromEntries(teacherCatalog.map(teacher => {
+  const route = `/teachers/${teacher.id}`;
+  const url = canonicalForRoute(route);
+  return [route, {
+    '@context': 'https://schema.org', '@type': 'ProfilePage',
+    '@id': `${url}#webpage`, url, name: titles[route],
+    description: descriptions[route], inLanguage: 'ru-RU',
+    mainEntity: { '@type': 'Person', name: teacher.name, jobTitle: teacher.role,
+      url, image: new URL(teacher.photo, 'https://toprepet.ru').href },
+  }];
+}));
 
 function updateMetaContent(html, attribute, key, value) {
   const tag = new RegExp(
@@ -126,11 +167,22 @@ function addPageMeta(html, route) {
   for (const [attribute, key, value] of [
     ['property', 'og:title', title],
     ['property', 'og:description', description],
-    ['property', 'og:url', assetBase ? previewUrl(route) : canonical],
+    ['property', 'og:url', canonical],
     ['name', 'twitter:title', title],
     ['name', 'twitter:description', description],
   ]) {
     result = updateMetaContent(result, attribute, key, value);
+  }
+
+  const teacher = teacherCatalog.find(item => route === `/teachers/${item.id}`);
+  if (teacher) {
+    const image = new URL(teacher.photo, 'https://toprepet.ru').href;
+    const alt = `${teacher.name} — ${teacher.role}`;
+    result = updateMetaContent(result, 'property', 'og:image', image);
+    result = updateMetaContent(result, 'name', 'twitter:image', image);
+    result = updateMetaContent(result, 'property', 'og:image:alt', alt);
+    result = updateMetaContent(result, 'name', 'twitter:image:alt', alt);
+    result = result.replace(/<meta property="og:image:(?:width|height)"[^>]*>/g, '');
   }
 
   if (route === '/for-repetitor') {
@@ -157,7 +209,21 @@ function addPageSchema(html, route) {
     '@type': 'CollectionPage',
     name: titles[route],
     url: canonicalForRoute(route),
-  } : (['/', '/help', '/for-repetitor'].includes(route) || route.startsWith('/legal') ? {
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: teacherCatalog.slice(0, CATALOG_PAGE_SIZE).map((teacher, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Person',
+          name: teacher.name,
+          jobTitle: teacher.role,
+          url: canonicalForRoute(`/teachers/${teacher.id}`),
+          image: new URL(teacher.photo, 'https://toprepet.ru').href,
+        },
+      })),
+    },
+  } : teacherSchemas[route] || (['/', '/help', '/for-repetitor'].includes(route) || route.startsWith('/legal') ? {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     '@id': `${canonicalForRoute(route)}#webpage`,
@@ -341,7 +407,7 @@ for (const page of blogPages) {
   let html = template.replace(rootPlaceholder, `<div id="root" data-prerendered="${page.route}">${appHtml}</div>`);
   html = html.replace(/<title>.*?<\/title>/s, `<title>${escapeMeta(page.title)}</title>`)
     .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeMeta(page.description)}" />`);
-  for (const [key, value] of [['og:title', page.title], ['og:description', page.description], ['og:url', assetBase ? previewUrl(page.route) : url], ['twitter:title', page.title], ['twitter:description', page.description]]) {
+  for (const [key, value] of [['og:title', page.title], ['og:description', page.description], ['og:url', url], ['twitter:title', page.title], ['twitter:description', page.description]]) {
     html = updateMetaContent(html, key.startsWith('og:') ? 'property' : 'name', key, escapeMeta(value));
   }
   if (page.article) {
@@ -371,7 +437,7 @@ for (const [route, label] of Object.entries(privatePages).filter(([route]) => !r
     .replace(/<title>.*?<\/title>/s, `<title>${escapeMeta(title)}</title>`);
   html = updateMetaContent(html, 'name', 'description', escapeMeta(description));
   html = updateMetaContent(html, 'name', 'robots', 'noindex,follow');
-  for (const [attribute, key, value] of [['property', 'og:title', title], ['property', 'og:description', description], ['property', 'og:url', assetBase ? previewUrl(route) : canonicalForRoute(route)], ['name', 'twitter:title', title], ['name', 'twitter:description', description]]) {
+  for (const [attribute, key, value] of [['property', 'og:title', title], ['property', 'og:description', description], ['property', 'og:url', canonicalForRoute(route)], ['name', 'twitter:title', title], ['name', 'twitter:description', description]]) {
     html = updateMetaContent(html, attribute, key, escapeMeta(value));
   }
   html = addRouteAssets(html, route);
@@ -389,22 +455,25 @@ if (previousLastmod) await writeFile(resolve('dist', lastmodManifestName), `${JS
 // Keep the legacy URL out of the sitemap and redirect it immediately.
 const legacyTutorPath = resolve('dist/for-tutors/index.html');
 await mkdir(dirname(legacyTutorPath), { recursive: true });
-const legacyTutorDestination = assetBase ? previewUrl('/for-repetitor') : 'https://toprepet.ru/for-repetitor/';
-await writeFile(legacyTutorPath, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${legacyTutorDestination}"><link rel="canonical" href="https://toprepet.ru/for-repetitor/"><title>Переход на страницу для репетиторов</title></head><body><p>Страница переехала: <a href="${legacyTutorDestination}">работа репетитором с TopRepet</a>.</p></body></html>`, 'utf8');
+await writeFile(legacyTutorPath, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=https://toprepet.ru/for-repetitor/"><link rel="canonical" href="https://toprepet.ru/for-repetitor/"><title>Переход на страницу для репетиторов</title></head><body><p>Страница переехала: <a href="https://toprepet.ru/for-repetitor/">работа репетитором с TopRepet</a>.</p></body></html>`, 'utf8');
 
 // Страницы, которые переехали на новые адреса: статический редирект для поисковиков и внешних ссылок.
 const movedPages = { '/lessons': '/teachers', '/contact': '/help', '/free-intro': '/teachers?intro=1' };
 for (const [from, to] of Object.entries(movedPages)) {
-  const destinationRoute = to.split('?')[0];
-  const destination = to.includes('?')
-    ? `${assetBase ? previewUrl(destinationRoute) : canonicalForRoute(destinationRoute)}?${to.split('?')[1]}`
-    : assetBase ? previewUrl(destinationRoute) : canonicalForRoute(destinationRoute);
+  const destination = to.includes('?') ? canonicalForRoute(to.split('?')[0]) + '?' + to.split('?')[1] : canonicalForRoute(to);
   const canonical = canonicalForRoute(to.split('?')[0]);
   const path = resolve('dist', from.slice(1), 'index.html');
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${destination}"><link rel="canonical" href="${canonical}"><title>Страница переехала — TopRepet</title></head><body><p>Страница переехала: <a href="${destination}">открыть новый адрес</a>.</p></body></html>`, 'utf8');
 }
 
+for (const route of routes.filter(path => path.startsWith('/teachers/'))) {
+  const oldRoute = route.replace('/teachers/', '/teacher/');
+  const destination = canonicalForRoute(route);
+  const oldPath = resolve('dist', oldRoute.slice(1), 'index.html');
+  await mkdir(dirname(oldPath), { recursive: true });
+  await writeFile(oldPath, `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${destination}"><link rel="canonical" href="${destination}"><title>Анкета преподавателя переехала — TopRepet</title></head><body><p>Анкета переехала: <a href="${destination}">открыть новый адрес</a>.</p></body></html>`, 'utf8');
+}
 
 let notFoundHtml = addRouteAssets(template, '/this-page-does-not-exist')
   .replace(rootPlaceholder, `<div id="root">${await render('/this-page-does-not-exist')}</div>`)

@@ -1,7 +1,14 @@
-.tr .trh-pf-top { position: relative; }
-.tr .trh-pf-controls { display: flex; align-items: center; gap: 8px; }
-.tr .trh-pf-top .trh-pf-photo { aspect-ratio: 3 / 4; }
+/* The portrait uses the same 3:4 crop as the catalog cards. */
+.tr .trh-pf-top { gap: clamp(18px, 3vw, 36px); }
+.tr .trh-pf-top .trh-pf-photo {
+  flex-basis: min(40%, 300px);
+  aspect-ratio: 3 / 4;
+  border-radius: 28px;
+}
+.tr .trh-pf-top .trh-pf-sheet { flex-basis: 220px; align-self: center; }
 
+.tr .trh-pf-top .trh-pf-photo .trk-iconbtn { position: absolute; top: 12px; }
+.tr .trh-pf-top .trh-pf-photo .trh-pf-share { display: grid; right: 12px; }
 .tr .trh-pf .ach li { grid-template-columns: 46px minmax(0, 1fr); }
 .tr .trh-pf-ach-icon { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid var(--line); border-radius: 16px; color: var(--ink); }
 .tr .trh-pf-ach-icon .i { width: 28px; height: 28px; }
@@ -25,11 +32,7 @@
     height: auto;
     border-radius: 0;
   }
-  .tr .trh-pf-controls {
-    position: absolute;
-    z-index: 2;
-    inset: calc(12px + env(safe-area-inset-top, 0px)) auto auto 12px;
-  }
+  .tr .trh-pf-top .trh-pf-photo .trh-pf-back { display: grid; left: 12px; }
   .tr .trh-pf-top .trh-pf-sheet {
     margin: -48px 0 0;
     padding: 26px 20px 12px;
@@ -45,7 +48,14 @@
 @keyframes tr-profile-text-in { from { transform: translateY(24px); } to { transform: none; } }
 
 .tr .trh-pf:has(.trh-pf-booking) { display: block; width: 100%; }
+.tr .trh-pf-name-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.tr .trh-pf-name-row h1 { min-width: 0; overflow-wrap: anywhere; }
+.tr .trh-pf-name-row .trh-pf-rating { flex-shrink: 0; }
 .tr .trh-pf-booking { margin-top: 0; gap: 14px; }
+
+@media (min-width: 761px) {
+  .tr .trh-pf-top .trh-pf-photo .trh-pf-back { display: none; }
+}
 
 .tr .trh-pf-scheduling { display: grid; gap: 14px; }
 .tr .trh-pf-calendar .trh-sec { gap: 12px; }
@@ -53,24 +63,3 @@
 @media (max-width: 760px) {
   .tr .trh-pf-actions { gap: 10px; }
 }
-
-@media (min-width: 761px) {
-  .tr .trh-pf-top {
-    display: grid;
-    grid-template-columns: min(40%, 300px) minmax(0, 1fr);
-    align-items: start;
-    gap: clamp(18px, 3vw, 36px);
-  }
-  .tr .trh-pf-controls { grid-column: 1 / -1; }
-  .tr .trh-pf-top .trh-pf-sheet { padding-top: 10px; }
-  .tr .trh-pf-sheet .trh-sec { gap: 14px; }
-  .tr .trh-pf-scheduling { align-items: start; gap: 24px; }
-  .tr .trh-pf-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 28rem; }
-}
-
-@media (min-width: 1080px) {
-  .tr .trh-pf-scheduling { grid-template-columns: minmax(0, 1.5fr) minmax(19rem, 1fr); }
-}
-
-.tr .trh-portrait-credit { font-size: 12px; }
-.tr .trh-portrait-credit a { text-decoration: underline; text-underline-offset: 2px; }

@@ -299,7 +299,7 @@ export function PublicLayout({ children, tight, bareMobile, narrow, hideSignIn }
               {PUBLIC_NAV.map(([label, to]) => <NavLink key={to} to={to} className={({ isActive }) => (isActive ? 'cur' : undefined)}>{label}</NavLink>)}
             </nav>
             {!hideSignIn && <span className="fr trh-actions"><SessionActions /></span>}
-            <button ref={menuButton} type="button" className="btn btn-icon trh-burger" data-motion="dynamic-menu" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls={menu ? 'public-menu' : undefined} onClick={() => setMenu(!menu)}><Icon name={menu ? 'x' : 'menu'} /></button>
+            <button ref={menuButton} type="button" className="btn btn-icon trh-burger" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls={menu ? 'public-menu' : undefined} onClick={() => setMenu(!menu)}><Icon name={menu ? 'x' : 'menu'} /></button>
           </header>
           {menu && (
             <div id="public-menu" ref={menuPanel} className="trh-menu">
@@ -335,11 +335,6 @@ function useCounters(role: Role) {
     return () => window.removeEventListener('tr:notes', reloadNotes);
   }, [reloadNotes]);
   const chats = useQuery(user ? `chats-${user.id}` : null, () => api.listConversations());
-  const reloadChats = chats.reload;
-  useEffect(() => {
-    window.addEventListener('tr:chats', reloadChats);
-    return () => window.removeEventListener('tr:chats', reloadChats);
-  }, [reloadChats]);
   const prefix = role === 'tutor' ? '/tutor' : '/me';
   return {
     notifications: notes.data?.filter((n) => !n.read).length ?? 0,
@@ -358,7 +353,7 @@ const ready = (to: string) => READY.some((p) => to === p || to.startsWith(`${p}/
 const NAV: Record<Role, { top: NavItem[]; tabs: NavItem[] }> = {
   student: {
     top: [{ label: 'Найти репетитора', to: '/teachers', icon: 'search' }, { label: 'Мои уроки', to: '/me/lessons', icon: 'cal' }, { label: 'Заявки', to: '/me/requests', icon: 'list' }, { label: 'Платежи', to: '/me/payments', icon: 'card' }],
-    tabs: [{ label: 'Поиск', to: '/teachers', icon: 'search' }, { label: 'Занятия', to: '/me/lessons', icon: 'book' }, { label: 'Чаты', to: '/me/chats', icon: 'chat-bubble' }, { label: 'Профиль', to: '/me/account', icon: 'user', also: ['/me/progress', '/me/tutors', '/me/requests', '/me/payments', '/me/notifications'] }],
+    tabs: [{ label: 'Поиск', to: '/teachers', icon: 'search' }, { label: 'Занятия', to: '/me/lessons', icon: 'book' }, { label: 'Чаты', to: '/me/chats', icon: 'chat-bubble' }, { label: 'Профиль', to: '/me/account', icon: 'user', also: ['/me/tutors', '/me/requests', '/me/payments', '/me/notifications'] }],
   },
   tutor: {
     top: [{ label: 'Уроки', to: '/tutor/lessons', icon: 'cal' }, { label: 'Расписание', to: '/tutor/schedule', icon: 'clock' }, { label: 'Ученики', to: '/tutor/students', icon: 'person-plus' }, { label: 'Заявки', to: '/tutor/requests', icon: 'list' }, { label: 'Финансы', to: '/tutor/finance', icon: 'wallet' }, { label: 'Отзывы', to: '/tutor/reviews', icon: 'star' }, { label: 'Анкета', to: '/tutor/profile', icon: 'user' }],
@@ -374,7 +369,7 @@ const NAV: Record<Role, { top: NavItem[]; tabs: NavItem[] }> = {
  * Кабинет ученика, репетитора или администратора.
  * Компьютер: стеклянная шапка с разделами и значками. Телефон: без закреплённой шапки, снизу стеклянная панель вкладок.
  */
-export function AppLayout({ role, children, narrow, chatThread }: { role: Role; children: ReactNode; narrow?: boolean; chatThread?: boolean }) {
+export function AppLayout({ role, children, narrow, chat }: { role: Role; children: ReactNode; narrow?: boolean; chat?: 'list' | 'thread' }) {
   const { user, logout } = useSession();
   const exit = useMutation(() => logout());
   const counters = useCounters(role);
@@ -383,8 +378,8 @@ export function AppLayout({ role, children, narrow, chatThread }: { role: Role; 
   const tabs = nav.tabs.filter((t) => ready(t.to)).map((t) => (t.icon === 'chat-bubble' ? { ...t, badge: counters.chats } : t));
   const accountTo = role === 'admin' ? '/admin/disputes' : `${counters.prefix}/account`;
   return (
-    <div className={cx('wash trh-page trh-tight trk-app', `tabs-${tabs.length}`, chatThread && 'trk-chat-thread')} style={{ '--n': tabs.length } as CSSProperties}>
-      <header className="hdr surf trh-hdr trk-app-hdr" data-role={role}>
+    <div className={cx('wash trh-page trh-tight trk-app', `tabs-${tabs.length}`, chat && `trk-chat-${chat}`)} style={{ '--n': tabs.length } as CSSProperties}>
+      <header className="hdr surf trh-hdr trk-app-hdr">
         <Logo />
         <nav className="trh-nav" aria-label="Разделы кабинета">
           {top.map((item) => <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'cur' : undefined)}>{item.label}</NavLink>)}
@@ -393,7 +388,7 @@ export function AppLayout({ role, children, narrow, chatThread }: { role: Role; 
           <span className="icons">
             {ready(`${counters.prefix}/notifications`) && <IconButton icon="bell" label="Уведомления" to={`${counters.prefix}/notifications`} badge={counters.notifications} className="trk-hdr-ic" />}
             {ready(`${counters.prefix}/chats`) && <IconButton icon="chat" label="Сообщения" to={`${counters.prefix}/chats`} badge={counters.chats || false} className="trk-hdr-ic" />}
-            <Link className="trk-ava-link" to={accountTo} aria-label="Профиль"><Avatar name={user?.name ?? '•'} photo={user?.photo} size={44} /></Link>
+            <Link className="trk-ava-link" to={accountTo} aria-label="Профиль"><Avatar name={user?.name ?? '•'} size={44} /></Link>
           </span>
         )}
       </header>

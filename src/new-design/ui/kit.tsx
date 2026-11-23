@@ -11,8 +11,8 @@ export function NavigationRow({ icon, children, to, onClick }: { icon: string; c
   const location = useLocation();
   const content = <><Icon name={icon} /><span>{children}</span><Icon name="right" /></>;
   return to
-    ? <Link className="trk-navrow" data-motion="roll-links" to={to} state={{ from: location.pathname + location.search }}>{content}</Link>
-    : <button type="button" className="trk-navrow" data-motion="roll-links" onClick={onClick}>{content}</button>;
+    ? <Link className="trk-navrow" to={to} state={{ from: location.pathname + location.search }}>{content}</Link>
+    : <button type="button" className="trk-navrow" onClick={onClick}>{content}</button>;
 }
 
 const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ');
@@ -50,7 +50,7 @@ export function Button({ children, variant = 'primary', size = 'md', block, icon
   if (to && !inactive) return <Link className={cls} to={to} state={state} style={style} aria-label={rest['aria-label']} onClick={onClick}>{inner}</Link>;
   if (href && !inactive) return <a className={cls} href={href} target="_blank" rel="noreferrer" style={style} aria-label={rest['aria-label']} onClick={onClick}>{inner}</a>;
   return (
-    <button type={type} className={cls} onClick={onClick} disabled={inactive} aria-busy={loading || undefined} style={style} aria-label={rest['aria-label']} data-motion={loading ? 'loading-success' : undefined}>
+    <button type={type} className={cls} onClick={onClick} disabled={inactive} aria-busy={loading || undefined} style={style} aria-label={rest['aria-label']}>
       {inner}
     </button>
   );
@@ -61,8 +61,8 @@ export function IconButton({ icon, label, to, onClick, surf, badge, className, t
   const cls = cx('trk-iconbtn', surf && 'surf', !className?.includes('trk-addbtn') && 'trk-round', className);
   // непрочитанное показываем точкой, без числа: так принято в современных приложениях
   const dot = badge ? <span className="trk-badge" aria-hidden="true" /> : null;
-  if (to && !disabled) return <Link className={cls} to={to} state={state} aria-label={label} data-unread={typeof badge === 'number' ? badge : undefined} data-motion="icon-response"><Icon name={icon} />{dot}</Link>;
-  return <button type={type} className={cls} onClick={onClick} aria-label={label} disabled={disabled} data-motion="icon-response"><Icon name={icon} />{dot}</button>;
+  if (to && !disabled) return <Link className={cls} to={to} state={state} aria-label={label} data-unread={typeof badge === 'number' ? badge : undefined}><Icon name={icon} />{dot}</Link>;
+  return <button type={type} className={cls} onClick={onClick} aria-label={label} disabled={disabled}><Icon name={icon} />{dot}</button>;
 }
 
 /** Круглая стрелка «назад»: одна на всех страницах. Подпись остаётся для скринридеров. */
@@ -94,7 +94,7 @@ export function PageHeader({ title, lead, back, actions, center }: { title: Reac
 }
 
 /** Секция с заголовком второго уровня: 24 px на компьютере, 21 px на телефоне. */
-export function Section({ title, action, lead, children, id, className, reveal }: { title?: ReactNode; action?: ReactNode; lead?: ReactNode; children?: ReactNode; id?: string; className?: string; reveal?: boolean }) {
+export function Section({ title, action, lead, children, id, className, reveal = true }: { title?: ReactNode; action?: ReactNode; lead?: ReactNode; children?: ReactNode; id?: string; className?: string; reveal?: boolean }) {
   const headingId = useId();
   const section = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -108,7 +108,7 @@ export function Section({ title, action, lead, children, id, className, reveal }
     return () => observer.disconnect();
   }, [reveal]);
   return (
-    <section ref={section} className={cx('trh-sec', className)} id={id} aria-labelledby={title ? headingId : undefined} data-motion="section-reveal">
+    <section ref={section} className={cx('trh-sec', className)} id={id} aria-labelledby={title ? headingId : undefined}>
       {(title || action) && (
         <div className="sec-h">
           {title && <h2 id={headingId} className="h2 trh-h2">{title}</h2>}
@@ -128,7 +128,7 @@ export const CardTitle = ({ children }: { children: ReactNode }) => <h3 classNam
 
 export function Card({ children, className, pad = 'md', as = 'div', style }: { children: ReactNode; className?: string; pad?: 'sm' | 'md' | 'lg'; as?: 'div' | 'section' | 'article' | 'aside'; style?: CSSProperties }) {
   const Tag = as;
-  return <Tag className={cx('card', 'trk-card', `pad-${pad}`, className)} style={style} data-motion="card-reveal">{children}</Tag>;
+  return <Tag className={cx('card', 'trk-card', `pad-${pad}`, className)} style={style}>{children}</Tag>;
 }
 
 export function Panel({ children, className }: { children: ReactNode; className?: string }) {
@@ -230,7 +230,7 @@ export function Rows({ rows, boxed }: { rows: ([ReactNode, ReactNode] | [ReactNo
 
 /** Плитки с цифрами (опыт, цена, уроки). */
 export function Stats({ items }: { items: [ReactNode, ReactNode][] }) {
-  return <div className="stats trk-stats" data-motion="stat-card">{items.map(([v, l], i) => <div key={i}><b>{v}</b><span>{l}</span></div>)}</div>;
+  return <div className="stats trk-stats">{items.map(([v, l], i) => <div key={i}><b>{v}</b><span>{l}</span></div>)}</div>;
 }
 
 export function Tags({ items }: { items: string[] }) {
@@ -243,7 +243,7 @@ export interface StepItem { title: ReactNode; text?: ReactNode; state?: 'done' |
  * Нумерованные шаги с линией (главная, «Для репетиторов», «Что будет дальше»).
  * size="s" — компактный вариант для карточек.
  */
-export function Steps({ items, size = 'md', revealOnScroll }: { items: StepItem[]; size?: 'md' | 's'; revealOnScroll?: boolean }) {
+export function Steps({ items, size = 'md', revealOnScroll = true }: { items: StepItem[]; size?: 'md' | 's'; revealOnScroll?: boolean }) {
   const list = useRef<HTMLOListElement>(null);
   useEffect(() => {
     if (!revealOnScroll || !list.current || typeof IntersectionObserver === 'undefined' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -274,9 +274,9 @@ export function Steps({ items, size = 'md', revealOnScroll }: { items: StepItem[
 
 export function Faq({ items }: { items: [string, ReactNode][] }) {
   return (
-    <div className="faq" data-motion="expand-card">
+    <div className="faq">
       {items.map(([q, a]) => (
-        <details key={q} data-motion="expand-card"><summary>{q}<Icon name="plus" /></summary><p>{a}</p></details>
+        <details key={q}><summary>{q}<Icon name="plus" /></summary><p>{a}</p></details>
       ))}
     </div>
   );
@@ -305,8 +305,7 @@ export function onChoiceTabKey(event: KeyboardEvent<HTMLButtonElement>) {
 /** Сегментный переключатель вкладок. */
 export function Tabs<T extends string>({ items, value, onChange, wide }: { items: { value: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; wide?: boolean }) {
   return (
-    <div className={cx('seg trk-tabs', wide && 'wide')} role="tablist" data-motion="tab-pill">
-      <span className="trk-tab-indicator" aria-hidden="true" />
+    <div className={cx('seg trk-tabs', wide && 'wide')} role="tablist">
       {items.map((item) => (
         <button key={item.value} type="button" role="tab" aria-selected={item.value === value} tabIndex={item.value === value ? 0 : -1} className={item.value === value ? 'on' : undefined} onKeyDown={onChoiceTabKey} onClick={() => onChange(item.value)}>
           {item.label}{item.count ? <span className="cnt2">{item.count}</span> : null}
@@ -319,7 +318,7 @@ export function Tabs<T extends string>({ items, value, onChange, wide }: { items
 /** Прогресс многошагового мастера. */
 export function WizardProgress({ step, total, label }: { step: number; total: number; label?: string }) {
   return (
-    <div className="trk-progress" data-motion="step-progress">
+    <div className="trk-progress">
       <progress className="trk-sr" aria-label={label ?? 'Заполнение формы'} value={step} max={total} aria-valuetext={`Шаг ${step} из ${total}`} />
       {label && <span className="mini">{label}</span>}
       <div className="prog" aria-hidden="true">{Array.from({ length: total }, (_, i) => <i key={i} className={i < step ? 'on' : undefined} />)}</div>
@@ -346,7 +345,7 @@ export function TextField({ label, hint, error, right, labelAction, id, ...input
   const fid = id ?? auto;
   return (
     <FieldWrap id={fid} label={label} hint={hint} error={error} labelAction={labelAction}>
-      <div className="field ink trk-input-box" data-motion="spring-input">
+      <div className="field ink trk-input-box">
         <input id={fid} className="trk-input" aria-invalid={error ? true : undefined} aria-describedby={error ? `${fid}-err` : hint ? `${fid}-hint` : undefined} {...input} />
         {right}
       </div>
@@ -370,7 +369,7 @@ export function TextArea({ label, hint, error, labelAction, id, ...area }: Field
   const fid = id ?? auto;
   return (
     <FieldWrap id={fid} label={label} hint={hint} error={error} labelAction={labelAction}>
-      <div className="field area ink trk-input-box" data-motion="spring-input"><textarea id={fid} className="trk-input" aria-invalid={error ? true : undefined} rows={4} {...area} /></div>
+      <div className="field area ink trk-input-box"><textarea id={fid} className="trk-input" aria-invalid={error ? true : undefined} rows={4} {...area} /></div>
     </FieldWrap>
   );
 }
@@ -380,7 +379,7 @@ export function SelectField({ label, hint, error, options, id, ...select }: Fiel
   const fid = id ?? auto;
   return (
     <FieldWrap id={fid} label={label} hint={hint} error={error}>
-      <div className="field ink trk-input-box trk-select" data-motion="spring-input">
+      <div className="field ink trk-input-box trk-select">
         <select id={fid} className="trk-input" {...select}>
           {options.map((o) => (typeof o === 'string' ? <option key={o} value={o}>{o}</option> : <option key={o.value} value={o.value}>{o.label}</option>))}
         </select>
@@ -392,7 +391,7 @@ export function SelectField({ label, hint, error, options, id, ...select }: Fiel
 
 export function Checkbox({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
   return (
-    <label className={cx('chk trk-check', checked && 'on')} data-motion="checkbox-list">
+    <label className={cx('chk trk-check', checked && 'on')}>
       <input type="checkbox" className="trk-sr" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       <i aria-hidden="true"><Icon name="check" /></i>
       <span>{children}</span>
@@ -405,7 +404,7 @@ export function Switch({ checked, onChange, title, text, disabled }: { checked: 
     <label className="trk-switch-row">
       <span className="trk-switch-text"><b>{title}</b>{text && <span className="muted sm">{text}</span>}</span>
       <input type="checkbox" role="switch" aria-checked={checked} className="trk-sr" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
-      <span className={cx('switch', checked && 'on')} aria-hidden="true" data-motion="toggle-switch" />
+      <span className={cx('switch', checked && 'on')} aria-hidden="true" />
     </label>
   );
 }
@@ -425,13 +424,13 @@ export function OptionChips<T extends string>(props: OptionChipsProps<T>) {
     props.onChange(props.value.includes(v) ? props.value.filter((x) => x !== v) : [...props.value, v]);
   };
   return (
-    <fieldset className="field-row trk-fieldset" data-motion="tag-input">
+    <fieldset className="field-row trk-fieldset">
       {label && <legend className="label">{label}</legend>}
       <div className="optrow">
         {options.map((o) => {
           const item = typeof o === 'string' ? { value: o, label: o } : o;
           return (
-            <button key={item.value} type="button" data-motion="option-chip" className={cx('opt', props.multiple && 'ck', selected(item.value) && 'on')} aria-pressed={selected(item.value)} onClick={() => toggle(item.value)}>
+            <button key={item.value} type="button" className={cx('opt', props.multiple && 'ck', selected(item.value) && 'on')} aria-pressed={selected(item.value)} onClick={() => toggle(item.value)}>
               {item.label}{'hint' in item && item.hint ? <small>{item.hint}</small> : null}
             </button>
           );
@@ -477,14 +476,14 @@ export function FilePick({ children, accept, onPick, loading, icon = 'upload', r
   if (preview) return <label className="trk-filepick trk-filepick-preview">{input}<span className="trk-sr">{children}</span>{preview}</label>;
   if (round) {
     return (
-      <label data-motion="file-drop" className={cx('trk-iconbtn trk-filepick-round', round === 'add' ? 'trk-addbtn' : 'trk-round', loading && 'is-loading')} title={typeof children === 'string' ? children : undefined}>
+      <label className={cx('trk-iconbtn trk-filepick-round', round === 'add' ? 'trk-addbtn' : 'trk-round', loading && 'is-loading')} title={typeof children === 'string' ? children : undefined}>
         {input}
         <span className="trk-sr">{children}</span><Icon name={loading ? 'clock' : icon} />
       </label>
     );
   }
   return (
-    <label data-motion="file-drop" className={cx('btn btn-line trk-filepick', loading && 'is-loading')}>
+    <label className={cx('btn btn-line trk-filepick', loading && 'is-loading')}>
       {input}
       <Icon name={icon} />{loading ? 'Загружаем…' : children}
     </label>
@@ -508,7 +507,7 @@ const RATING_WORDS = ['', 'Ужасно', 'Плохо', 'Нормально', '�
 export function RatingInput({ value, onChange, label = 'Оценка', error }: { value: number; onChange: (v: number) => void; label?: string; error?: string }) {
   const name = useId();
   return (
-    <fieldset className={cx('field-row trk-fieldset', error && 'has-error')} data-motion="star-rating">
+    <fieldset className={cx('field-row trk-fieldset', error && 'has-error')}>
       <legend className="label">{label}</legend>
       <div className="trk-rating">
         {[1, 2, 3, 4, 5].map((n) => (

@@ -4,6 +4,7 @@ import {
   goals,
   exams,
 } from '../../entities/lesson';
+import { teachers } from '../../entities/teacher';
 import { cookieChoice, clearAnalyticsCookies } from './cookie-consent';
 
 export const METRIKA_ID = 112922088;
@@ -183,8 +184,12 @@ export function trackPage() {
   if (kind === 'lessons') trackGoal('lesson_picker_view');
   if (kind === 'teachers') trackGoal('teachers_catalog_view');
   if (kind === 'teacher_profile') {
-    const teacher = location.pathname.split('/')[2];
-    if (teacher) trackGoal('teacher_profile_view', { teacher });
+    const teacher = teachers.find(
+      (item) =>
+        location.pathname === `/teachers/${item.id}/` ||
+        location.pathname === `/teachers/${item.id}`,
+    );
+    if (teacher) trackGoal('teacher_profile_view', { teacher: teacher.id });
   }
   if (kind === 'blog_article') trackGoal('blog_article_view');
 }
@@ -192,8 +197,10 @@ export function trackPage() {
 export function trackMessenger(
   messenger: 'telegram' | 'whatsapp' | 'vk' | 'max',
 ) {
-  const teacher = /^\/teachers\/([^/]+)/.exec(location.pathname)?.[1];
-  const params = { messenger, ...(teacher ? { teacher } : {}) };
+  const teacher = teachers.find(
+    (item) => location.pathname.replace(/\/$/, '') === `/teachers/${item.id}`,
+  );
+  const params = { messenger, ...(teacher ? { teacher: teacher.id } : {}) };
   trackGoal(
     location.pathname.startsWith('/for-repetitor')
       ? 'contact_tutor_click'

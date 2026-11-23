@@ -2,6 +2,8 @@
   {
     "id": "english",
     "name": "Анастасия",
+    "photo": "/images/teachers/english-960.webp",
+    "photoSrcSet": "/images/teachers/english-480.webp 480w, /images/teachers/english-960.webp 960w",
     "headline": "Репетитор по английскому языку, истории и школьным предметам",
     "subjects": [
       "Английский",
@@ -45,6 +47,8 @@
   {
     "id": "russian-literature",
     "name": "Анна",
+    "photo": "/images/teachers/russian-literature-960.webp",
+    "photoSrcSet": "/images/teachers/russian-literature-480.webp 480w, /images/teachers/russian-literature-960.webp 960w",
     "headline": "Репетитор по русскому языку и литературе",
     "subjects": [
       "Русский",
@@ -84,6 +88,8 @@
   {
     "id": "chemistry-biology",
     "name": "Александра",
+    "photo": "/images/teachers/chemistry-biology-960.webp",
+    "photoSrcSet": "/images/teachers/chemistry-biology-480.webp 480w, /images/teachers/chemistry-biology-960.webp 960w",
     "headline": "Репетитор по химии и биологии",
     "subjects": [
       "Химия",
@@ -122,6 +128,8 @@
   {
     "id": "informatics",
     "name": "Алексей",
+    "photo": "/images/teachers/informatics-960.webp",
+    "photoSrcSet": "/images/teachers/informatics-480.webp 480w, /images/teachers/informatics-960.webp 960w",
     "headline": "Репетитор по информатике",
     "subjects": [
       "Информатика"
@@ -167,6 +175,8 @@
   {
     "id": "russian",
     "name": "Артём",
+    "photo": "/images/teachers/russian-960.webp",
+    "photoSrcSet": "/images/teachers/russian-480.webp 480w, /images/teachers/russian-960.webp 900w",
     "headline": "Репетитор по русскому языку и школьным предметам",
     "subjects": [
       "Русский язык"
@@ -203,6 +213,8 @@
   {
     "id": "mathematics",
     "name": "Ерлан",
+    "photo": "/images/teachers/mathematics-960.webp",
+    "photoSrcSet": "/images/teachers/mathematics-480.webp 480w, /images/teachers/mathematics-960.webp 900w",
     "headline": "Репетитор по математике и школьным предметам",
     "subjects": [
       "Математика"
@@ -243,6 +255,8 @@
   {
     "id": "physics-mathematics",
     "name": "Дарья",
+    "photo": "/images/teachers/physics-mathematics-960.webp",
+    "photoSrcSet": "/images/teachers/physics-mathematics-480.webp 480w, /images/teachers/physics-mathematics-960.webp 960w",
     "headline": "Репетитор по физике и математике",
     "subjects": [
       "Физика",
@@ -302,6 +316,8 @@
   {
     "id": "english-elizaveta",
     "name": "Елизавета",
+    "photo": "/images/teachers/english-elizaveta-960.webp",
+    "photoSrcSet": "/images/teachers/english-elizaveta-480.webp 480w, /images/teachers/english-elizaveta-960.webp 960w",
     "headline": "Репетитор по английскому языку",
     "subjects": [
       "Английский язык"
@@ -335,6 +351,8 @@
   {
     "id": "history",
     "name": "Александра",
+    "photo": "/images/teachers/history-960.webp",
+    "photoSrcSet": "/images/teachers/history-480.webp 480w, /images/teachers/history-960.webp 960w",
     "headline": "Репетитор по истории",
     "subjects": [
       "История"
@@ -368,6 +386,8 @@
   {
     "id": "chemistry",
     "name": "Дмитрий",
+    "photo": "/images/teachers/chemistry-960.webp",
+    "photoSrcSet": "/images/teachers/chemistry-480.webp 480w, /images/teachers/chemistry-960.webp 960w",
     "headline": "Репетитор по химии",
     "subjects": [
       "Химия"
@@ -411,6 +431,8 @@
   {
     "id": "russian-literature-math",
     "name": "Анна",
+    "photo": "/images/teachers/anna-russian-literature-math-960.webp",
+    "photoSrcSet": "/images/teachers/anna-russian-literature-math-480.webp 480w, /images/teachers/anna-russian-literature-math-960.webp 960w",
     "headline": "Репетитор по русскому языку, литературе и математике",
     "subjects": [
       "Русский",

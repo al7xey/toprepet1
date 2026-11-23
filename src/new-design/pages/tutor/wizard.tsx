@@ -135,7 +135,7 @@ function Wizard({ initial, initialWeek }: { initial: TutorProfileDraft; initialW
           )}
           {step === 5 && <Finish draft={draft} week={week} />}
           <FormError error={saveProfile.error ?? saveWeek.error ?? publish.error} />
-          <div className="trk-actions trk-step-actions">
+          <div className="trk-actions">
             {step > 1 && <Button variant="fill" onClick={() => setStep(step - 1)}>Назад</Button>}
             {step < STEPS.length
               ? <Button onClick={next} loading={busy}>Дальше</Button>

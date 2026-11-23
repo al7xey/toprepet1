@@ -14,8 +14,6 @@ import './home.css';
 import './ui/kit.css';
 import { LiquidGlassEffects } from './ui/liquid-glass';
 import './ui/liquid-motion.css';
-import { MotionEffects } from './ui/motion';
-import './ui/desktop.css';
 
 const NotFoundPage = lazy(() => import('./pages/public/notfound'));
 
@@ -31,7 +29,6 @@ export function NewApp() {
     <SessionProvider>
       <div className="tr">
         <LiquidGlassEffects />
-        <MotionEffects />
         <ToastProvider>
           <ScrollToTop />
           <Suspense fallback={<div className="trk-route-loading"><LoadingList rows={3} height={88} /></div>}>

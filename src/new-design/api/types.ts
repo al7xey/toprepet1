@@ -14,7 +14,6 @@ export interface User {
   name: string;
   email: string;
   emailVerified: boolean;
-  emailVerificationRequired?: boolean;
   timezone: string;
   /** Для репетитора: id его анкеты. */
   tutorId?: Id;
@@ -33,7 +32,6 @@ export const LESSON_MINUTES = 60;
 
 export interface Tutor {
   durations?: number[];
-  levels?: string[];
   id: Id;
   name: string;
   photo: string;
@@ -90,7 +88,6 @@ export type LessonStatus =
 export type PaymentState = 'none' | 'hold' | 'captured' | 'refunded' | 'paid_out';
 
 export interface Lesson {
-  isDemo?: boolean;
   id: Id;
   kind: LessonKind;
   tutorId: Id;
@@ -139,7 +136,6 @@ export interface CreateBookingInput {
 export type RequestStatus = 'open' | 'booked' | 'expired' | 'closed';
 
 export interface StudyRequest {
-  urgent?: boolean;
   id: Id;
   studentId: Id;
   studentName: string;
@@ -162,7 +158,6 @@ export interface StudyRequest {
 }
 
 export interface CreateRequestInput {
-  urgent?: boolean;
   subjects: string[];
   customSubject: string;
   goal: string;

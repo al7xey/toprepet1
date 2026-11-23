@@ -13,7 +13,7 @@ const FOR_WHOM = ['Для себя', 'Для ребёнка'] as const;
 const GOALS = ['Подтянуть школьную программу', 'Подготовиться к экзамену', 'Разговорная практика', 'Работа и карьера', 'Другое'];
 const SUBJECTS = subjects.filter((s) => s !== 'Другой предмет');
 
-/** Онбординг ученика: три необязательных вопроса, чтобы открыть каталог с нужным предметом. */
+/** Онбординг ученика: три коротких вопроса, чтобы открыть каталог с нужным предметом. Можно пропустить. */
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -24,17 +24,18 @@ export default function OnboardingPage() {
   const [goal, setGoal] = useState<string | null>(null);
   const save = useMutation((input: { forWhom: string; subjects: string[]; goal: string }) => api.completeOnboarding(input));
 
-  const finish = async () => {
-    const user = await save.run({ forWhom: forWhom ?? '', subjects: picked, goal: goal ?? '' });
+  const finish = async (skip: boolean) => {
+    const user = await save.run(skip ? { forWhom: '', subjects: [], goal: '' } : { forWhom: forWhom ?? '', subjects: picked, goal: goal ?? '' });
     if (!user) return;
     setUser(user);
-    const fallback = picked[0] ? `/teachers?subject=${encodeURIComponent(picked[0])}` : '/teachers';
+    const fallback = !skip && picked[0] ? `/teachers?subject=${encodeURIComponent(picked[0])}` : '/teachers';
     const next = safeNext(params.get('next'), fallback);
     void navigate(next.startsWith('/onboarding') ? fallback : next, { replace: true });
   };
 
   const titles = ['Для кого занятия?', 'Какие предметы нужны?', 'Какая цель?'];
-  const next = () => (step < 3 ? setStep(step + 1) : finish());
+  const next = () => (step < 3 ? setStep(step + 1) : finish(false));
+  const ready = step === 1 ? forWhom !== null : step === 2 ? picked.length > 0 : goal !== null;
 
   return (
     <AuthLayout>
@@ -46,9 +47,10 @@ export default function OnboardingPage() {
           {step === 2 && <OptionChips multiple options={SUBJECTS} value={picked} onChange={setPicked} label="Предметы" />}
           {step === 3 && <OptionChips options={GOALS} value={goal} onChange={setGoal} label="Цель" />}
           <FormError error={save.error} />
-          <div className="trk-actions trk-step-actions">
-            {step > 1 && <Button variant="fill" onClick={() => setStep(step - 1)} disabled={save.pending}>Назад</Button>}
-            <Button onClick={next} loading={save.pending}>{step < 3 ? 'Дальше' : 'Готово'}</Button>
+          <div className="trk-actions">
+            {step > 1 && <Button variant="fill" onClick={() => setStep(step - 1)}>Назад</Button>}
+            <Button onClick={next} disabled={!ready} loading={save.pending && step === 3}>{step < 3 ? 'Дальше' : 'Готово'}</Button>
+            <Button variant="line" onClick={() => finish(true)} loading={save.pending && step < 3}>Пропустить</Button>
           </div>
         </div>
       </AuthCard>

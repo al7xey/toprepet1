@@ -4,6 +4,8 @@ import { prerenderToNodeStream } from 'react-dom/static';
 import { renderToString } from 'react-dom/server';
 
 import { AppContent } from './app';
+export { teachers } from '../entities/teacher';
+export { CATALOG_PAGE_SIZE } from '../new-design/lib/catalog-list';
 
 const routerBase = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
 const routerEntry = (url: string) => routerBase === '/' ? url : `${routerBase}${url}`;
