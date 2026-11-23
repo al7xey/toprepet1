@@ -3,7 +3,7 @@
 
 .tr {
   --lg-canvas: #fff;
-  --lg-active-ink: var(--ink);
+  --lg-active-ink: var(--accent);
   --lg-rim: rgb(41 58 81 / 13%);
   --lg-selection: #e5e9ef;
   --lg-glass: rgb(255 255 255 / 40%);
@@ -461,3 +461,8 @@ html:has(.tr) { scrollbar-gutter: stable; }
 }
 @media (max-width: 420px) { .tr .trh-public-nav-slot { height: 56px; } }
 @media (min-width: 761px) { .tr .trh-menu-scrim { display: none; } }
+
+.tr.tr .trk-tabbar .tab.cur { color: var(--accent); }
+.tr.tr .trk-tabbar .tab.cur .avatar { box-shadow: 0 0 0 2px var(--accent); }
+.tr .trk-search input { flex: 1; width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 16px; }
+.tr .trk-search { cursor: text; }

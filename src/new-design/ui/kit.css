@@ -1081,3 +1081,6 @@ html{overflow-y:scroll}
 .tr .trk-lesson-status .st { min-height: 30px; }
 .tr .trk-lesson-status .st .i { width: 17px; height: 17px; }
 .tr .tg-row > .trk-note-dot { margin: 0; }
+
+/* A toolbar action must not shift the title baseline between cabinet pages. */
+.tr .trk-pagehead-row { min-height: 44px; align-items: center; }

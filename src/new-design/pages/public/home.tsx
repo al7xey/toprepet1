@@ -15,7 +15,8 @@ export default function HomePage() {
 
   return (
     <PublicLayout>
-      <section className="trh-hero" aria-labelledby="hero-title">
+      <div className="p-home-layout">
+      <section className="trh-hero p-home-hero" aria-labelledby="hero-title">
         <div className="trh-hero-text">
           <h1 id="hero-title" className="hero-h trh-hero-h">
             <span className="trh-ln"><span>Топ репет —</span></span>
@@ -32,7 +33,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Section title="Как всё устроено" id="how">
+      <Section title="Как всё устроено" id="how" className="p-home-process">
         <Steps items={HOW_STEPS} revealOnScroll />
       </Section>
 
@@ -44,7 +45,7 @@ export default function HomePage() {
       </Section>
 
       <Section title="Познакомьтесь до первого занятия" className="trh-intro">
-        <ol className="g16">
+        <ol className="p-home-intro-grid">
           {([['target', 'Определим цель', 'Разберёмся, с чем нужна помощь.'], ['cal', 'Согласуем формат', 'Обсудим график и удобный темп.'], ['route', 'Составим план', 'Определим, с чего начать занятия.']] as const).map(([icon, title, text]) => (
             <li key={title} className="fr p-home-intro-step">
               <span className="ic-sq"><Icon name={icon} /></span>
@@ -66,6 +67,7 @@ export default function HomePage() {
       <Section title="Вопросы и ответы">
         <Faq items={STUDENT_FAQ} />
       </Section>
+      </div>
     </PublicLayout>
   );
 }

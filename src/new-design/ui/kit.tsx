@@ -522,3 +522,8 @@ export function RatingInput({ value, onChange, label = 'Оценка', error }: 
     </fieldset>
   );
 }
+
+/** One search surface for catalogue and messaging. */
+export function SearchInput({ value, onChange, label, placeholder = 'Поиск', action }: { value: string; onChange: (value: string) => void; label: string; placeholder?: string; action?: ReactNode }) {
+  return <label className="search trk-search"><Icon name="search" /><input className="trh-search-input" type="search" autoComplete="off" aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange(event.target.value)} />{action}</label>;
+}

@@ -7,7 +7,7 @@ import { useSession } from '../../api/session';
 import type { Conversation, Message, Role } from '../../api/types';
 import { AppLayout } from '../../layout/layouts';
 import { timeLabel } from '../../lib/format';
-import { Avatar, BackLink, Button, Checkbox, ConfirmDialog, EmptyState, FormError, Icon, IconButton, Modal, OptionChips, Rows, useToast } from '../../ui';
+import { Avatar, Button, Checkbox, ConfirmDialog, EmptyState, FormError, Icon, IconButton, Modal, OptionChips, Rows, SearchInput, PageHeader, useToast } from '../../ui';
 import './messenger.css';
 
 type Side = Extract<Role, 'student' | 'tutor'>;
@@ -49,11 +49,8 @@ export function Messenger({ role }: { role: Side }) {
     <AppLayout role={role} chat={id ? 'thread' : 'list'}>
       <div className={`tg${id ? ' open' : ''}`}>
         <aside className="tg-list" aria-label="Диалоги">
-          <div className="tg-list-title">{!id && profileBack && <BackLink to={profileBack}>Профиль</BackLink>}<h1 className="tg-title">Сообщения</h1></div>
-          <label className="tg-search">
-            <Icon name="search" />
-            <input aria-label="Поиск по сообщениям" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Поиск" />
-          </label>
+          <div className="tg-list-title"><PageHeader title="Сообщения" back={!id && profileBack ? { to: profileBack, label: 'Профиль' } : undefined} /></div>
+          <div className="trh-tools tg-list-search"><SearchInput label="Поиск по сообщениям" value={search} onChange={setSearch} /></div>
           {chats.error && <FormError error={chats.error} />}
           {chats.loading && !chats.data && <p className="muted tg-pad">Загружаем…</p>}
           {chats.data && list.length === 0 && (
@@ -140,7 +137,7 @@ function Dialog({ id, role, base, onRead }: { id: string; role: Side; base: stri
           <button type="button" className="tg-peer-avatar" onClick={() => setProfileOpen(true)} aria-label={`Открыть профиль: ${c.peerName}`}><Avatar name={c.peerName} photo={c.peerPhoto} size={44} /></button>
         </span>
       </header>
-      {searchOpen && <label className="tg-search tg-thread-search"><Icon name="search" /><input type="search" aria-label="Найти в переписке" placeholder="Найти в переписке" value={query} onChange={(event) => setQuery(event.target.value)} /><IconButton icon="x" label="Закрыть поиск" onClick={() => { setSearchOpen(false); setQuery(''); }} /></label>}
+      {searchOpen && <div className="trh-tools tg-thread-search"><SearchInput label="Найти в переписке" placeholder="Найти в переписке" value={query} onChange={setQuery} action={<IconButton icon="x" label="Закрыть поиск" onClick={() => { setSearchOpen(false); setQuery(''); }} />} /></div>}
       <Modal open={profileOpen} onClose={() => setProfileOpen(false)} title="Профиль собеседника" className="tg-profile-modal">
         <div className="tg-profile-summary"><Avatar name={c.peerName} photo={c.peerPhoto} size={112} /><h2>{c.peerName}</h2><p>{role === 'student' ? 'Репетитор' : 'Ученик'}</p></div>
         <div className="tg-profile-links">

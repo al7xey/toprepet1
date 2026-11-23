@@ -13,35 +13,6 @@
   color-scheme: light;
 }
 
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-app-hdr {
-  color: var(--tg-text);
-  background: rgb(255 255 255 / 88%);
-  border: 1px solid var(--tg-rim);
-  box-shadow: inset 0 1px 0 rgb(32 40 56 / 5%);
-  -webkit-backdrop-filter: blur(22px) saturate(1.3);
-  backdrop-filter: blur(22px) saturate(1.3);
-}
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trh-nav a { color: var(--tg-muted); }
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trh-nav a.cur,
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trh-nav a:hover { color: #b94714; }
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-app-hdr .trk-hdr-ic {
-  color: var(--tg-text);
-  background: rgb(255 255 255 / 6%);
-  box-shadow: inset 0 0 0 1px var(--tg-rim);
-}
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-app-hdr .trk-hdr-ic:hover { background: rgb(255 255 255 / 10%); }
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar {
-  background: rgb(255 255 255 / 88%);
-  border: 1px solid var(--tg-rim);
-  box-shadow: inset 0 1px 0 rgb(32 40 56 / 6%);
-  -webkit-backdrop-filter: blur(24px) saturate(1.35);
-  backdrop-filter: blur(24px) saturate(1.35);
-}
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tabpill { background: rgb(32 40 56 / 6%); }
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tab { color: #434b58; }
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tab.on { color: #b94714; }
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tab.cur { --icon-ink: #f26a2e; }
-
 .tr .tg {
   height: min(760px, calc(100dvh - 126px));
   min-height: 520px;
@@ -59,37 +30,6 @@
 .tr .tg-list-title { flex: none; padding: 0 8px 16px; }
 .tr .tg-title { color: var(--tg-text); }
 .tr .tg-pad { color: var(--tg-muted); }
-.tr .tg-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  margin: 0 4px 14px;
-  padding: 0 14px;
-  border: 1px solid var(--tg-rim);
-  border-radius: 16px;
-  background: rgb(255 255 255 / 5%);
-  color: #626a78;
-  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-}
-.tr .tg-search:focus-within {
-  background: rgb(32 40 56 / 6%);
-  border-color: rgb(242 106 46 / 58%);
-  box-shadow: 0 0 0 3px rgb(242 106 46 / 11%);
-}
-.tr .tg-search .i { width: 19px; height: 19px; color: #626a78; }
-.tr .tg-search input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  color: var(--tg-text);
-  background: transparent;
-  font: inherit;
-  font-size: 15px;
-}
-.tr .tg-search input::placeholder { color: #626a78; }
-.tr .tg-search input::-webkit-search-cancel-button { cursor: pointer; }
 .tr .tg-empty-search { padding: 16px 12px; color: var(--tg-muted); font-size: 14px; }
 .tr .tg-rows { gap: 2px; padding: 0 2px 10px; scrollbar-color: rgb(32 40 56 / 18%) transparent; }
 .tr .tg-row {
@@ -416,11 +356,11 @@
 }
 
 @media (max-width: 760px) {
-  .tr .trk-app.trk-chat-list { padding-top: 16px; }
+
   .tr .tg { height: calc(100dvh - 146px); min-height: 440px; grid-template-columns: minmax(0, 1fr); border-radius: 24px; }
   .tr .tg-list { padding: 18px 12px 10px; border: 0; }
   .tr .tg-list-title { padding: 0 4px 14px; }
-  .tr .tg-search { margin-inline: 2px; }
+
   .tr .tg-rows { padding-inline: 0; }
   .tr .tg-row { padding-inline: 8px; }
   .tr .tg.open { position: fixed; inset: 0; z-index: 100; width: 100%; height: 100dvh; min-height: 0; border: 0; border-radius: 0; background: #ffffff; }
@@ -473,7 +413,7 @@
 .tr .tg .tg-msg { box-shadow: none !important; }
 .tr .tg { box-shadow: none; }
 .tr .tg-thread { background: #fff; }
-.tr .tg-search { background: #f7f8fa; }
+
 .tr .tg-head, .tr .tg-compose { background: rgb(255 255 255 / 94%); }
 
 /* One white material and predictable Telegram-style navigation. */
@@ -499,7 +439,7 @@
 .tr .tg-msg { font-weight: 400; }
 @media(max-width:760px) {
   .tr .tg { border: 0; border-radius: 0; }
-  .tr .trk-chat-list .trh-main { padding-inline: 0; }
+
   .tr .tg-list { padding-inline: 16px; }
   .tr .tg-row { border-radius: 12px; }
   .tr .tg-row + .tg-row { position: relative; }
@@ -519,3 +459,22 @@
 
 .tr .tg-title { font-size: 34px; line-height: 1.15; letter-spacing: -.03em; }
 @media(max-width:760px) { .tr .tg-title { font-size: 28px; } }
+
+/* The list inherits the same page inset and heading baseline as every cabinet. */
+@media(max-width:760px) {
+  .tr.tr .trk-chat-list .tg { height: auto; min-height: 0; overflow: visible; }
+  .tr.tr .trk-chat-list .tg-list { padding: 0; }
+  .tr.tr .trk-chat-list .tg-list-title { padding: 0; margin: 0 0 20px; }
+  .tr.tr .trk-chat-list .tg-title { padding: 0; margin: 0; }
+  .tr.tr .trk-chat-list .tg-rows { padding: 0; overflow: visible; }
+  .tr.tr .trk-chat-list .tg-row { padding-inline: 0; grid-template-columns: 52px minmax(0,1fr) auto; }
+  .tr.tr .trk-chat-list .tg-row + .tg-row::before { inset-inline-start: 64px; }
+}
+.tr .tg-list-search { margin-bottom: 16px; }
+.tr .tg-list-search .search { width: 100%; }
+.tr .tg-thread-search { margin: 8px 16px; }
+.tr.tr .tg-compose-row { border: 0; box-shadow: none; background: #f6f7f9; }
+.tr.tr .tg-compose-row::before { display: none; }
+.tr.tr .tg-compose-row:focus-within { box-shadow: none; border: 0; background: #f6f7f9; }
+.tr.tr .tg .tg-compose-row .tg-attach { border: 0 !important; box-shadow: none !important; background: transparent !important; }
+.tr.tr .tg .tg-compose-row .tg-send { border: 0 !important; box-shadow: none !important; }

@@ -3,8 +3,19 @@ import { login, expectNoHorizontalScroll } from './helpers';
 
 test('white messenger: search, contact profile, keyboard actions and send', async ({ page }) => {
   await login(page, 'student');
+  await page.goto('/me/account');
+  await expect(page.getByRole('heading', { name: 'Профиль', exact: true })).toBeVisible();
+  const profileHeading = await page.getByRole('heading', { name: 'Профиль', exact: true }).boundingBox();
+  const menuSurface = await page.locator('.trk-tabbar').evaluate((node) => ({ background: getComputedStyle(node).background, border: getComputedStyle(node).border, shadow: getComputedStyle(node).boxShadow }));
   await page.goto('/me/chats');
   await expect(page.locator('.tg-row').first()).toBeVisible();
+  if ((page.viewportSize()?.width ?? 1440) < 761) {
+    const chatHeading = await page.getByRole('heading', { name: 'Сообщения', exact: true }).boundingBox();
+    expect(chatHeading?.x).toBeCloseTo(profileHeading!.x, 0);
+    expect(chatHeading?.y).toBeCloseTo(profileHeading!.y, 0);
+    expect(await page.locator('.trk-tabbar').evaluate((node) => ({ background: getComputedStyle(node).background, border: getComputedStyle(node).border, shadow: getComputedStyle(node).boxShadow }))).toEqual(menuSurface);
+    await expect(page.locator('.tab.cur .i')).toHaveCSS('color', 'rgb(242, 106, 46)');
+  }
   await page.getByRole('searchbox', { name: 'Поиск по сообщениям' }).fill('Анна');
   await expect(page.locator('.tg-row')).toHaveCount(1);
   await page.getByRole('searchbox', { name: 'Поиск по сообщениям' }).fill('');
