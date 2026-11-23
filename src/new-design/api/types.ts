@@ -217,8 +217,6 @@ export interface Message {
 
 export interface MessageCard { title: string; rows: [string, string][] }
 
-export interface MessageCard { title: string; rows: [string, string][] }
-
 export interface Card { id: Id; brand: string; last4: string; primary: boolean }
 
 export type PaymentKind = 'hold' | 'charge' | 'refund' | 'release';

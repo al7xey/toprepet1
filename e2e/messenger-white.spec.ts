@@ -1,0 +1,30 @@
+import { expect, test } from '@playwright/test';
+import { login, expectNoHorizontalScroll } from './helpers';
+
+test('white messenger: search, contact profile, keyboard actions and send', async ({ page }) => {
+  await login(page, 'student');
+  await page.goto('/me/chats');
+  await expect(page.locator('.tg-row').first()).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Поиск по сообщениям' }).fill('Анна');
+  await expect(page.locator('.tg-row')).toHaveCount(1);
+  await page.getByRole('searchbox', { name: 'Поиск по сообщениям' }).fill('');
+  await page.locator('.tg-row').first().click();
+  await expect(page.locator('.tg-msg').first()).toBeVisible();
+  await expect(page.locator('.tg-thread')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await page.locator('.tg-peer-avatar').click();
+  await expect(page.getByRole('dialog', { name: 'Профиль собеседника' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Найти в переписке', exact: true }).click();
+  await page.getByRole('searchbox', { name: 'Найти в переписке' }).fill('несуществующая фраза');
+  await expect(page.getByText('Сообщения не найдены', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Закрыть поиск' }).click();
+  const action = page.getByRole('button', { name: 'Действия с сообщением' }).first();
+  await action.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog', { name: 'Сообщение', exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('textbox', { name: 'Сообщение', exact: true }).fill('Проверка переписки');
+  await page.getByRole('button', { name: 'Отправить', exact: true }).click();
+  await expect(page.locator('.tg-text').filter({ hasText: 'Проверка переписки' })).toBeVisible();
+  await expectNoHorizontalScroll(page);
+});

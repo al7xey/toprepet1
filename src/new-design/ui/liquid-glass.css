@@ -334,8 +334,6 @@ html:has(.tr) { scrollbar-gutter: stable; }
 .tr.tr .tg-head { flex-shrink: 0; gap: 10px; }
 .tr.tr .tg-peer { min-width: 0; }
 .tr.tr .tg-peer-avatar { display: flex; flex-shrink: 0; }
-.tr.tr .tg-msg .tg-message-actions.trk-iconbtn { position: static; transform: none; width: 32px; min-width: 32px; height: 32px; min-height: 32px; border: 0; background: transparent; box-shadow: none; opacity: .65; pointer-events: auto; }
-.tr.tr .tg-msg .tg-message-actions.trk-iconbtn .i { width: 17px; height: 17px; }
 .tr.tr .trk-modal-foot { display: flex; flex-wrap: wrap; gap: 10px; }
 .tr.tr .trk-modal-foot > .btn { flex: 1 1 140px; min-width: 0; }
 .tr.tr .trk-wizard { display: grid; gap: 24px; min-width: 0; }
@@ -400,7 +398,6 @@ html:has(.tr) { scrollbar-gutter: stable; }
 
 .tr.tr .trk-modal.surf-strong { background: rgb(255 255 255 / 97%); }
 .tr.tr .tg-msg small { align-items: center; }
-.tr.tr .tg-msg .tg-message-actions.trk-iconbtn:focus { opacity: 1; }
 .tr input[autocomplete="one-time-code"] { font-variant-numeric: tabular-nums; font-weight: 500; letter-spacing: .18em; }
 
 .tr.tr .skel { background: #f1f3f6; }

@@ -1,6 +1,6 @@
 import { usePolling } from '../../lib/usePolling';
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
-import { Link, NavLink, useLocation, useParams } from 'react-router-dom';
+import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { api } from '../../api';
 import { useMutation, useQuery } from '../../api/hooks';
 import { useSession } from '../../api/session';
@@ -122,6 +122,9 @@ function Dialog({ id, role, base, onRead }: { id: string; role: Side; base: stri
     setHasOlder(page.length === 100);
   });
   const list = [...new Map([...older, ...(messages.data ?? [])].map((m) => [m.id, m])).values()].sort((a, b) => a.at.localeCompare(b.at) || a.id.localeCompare(b.id));
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const c = conversation.data;
   if (conversation.error && !c) return <div className="tg-placeholder"><span>{conversation.error}</span></div>;
   if (!c) return <div className="tg-placeholder"><span className="muted">Открываем диалог…</span></div>;
@@ -129,71 +132,60 @@ function Dialog({ id, role, base, onRead }: { id: string; role: Side; base: stri
     <>
       <header className="tg-head">
         <IconButton to={base} className="tg-back" icon="back" label="Назад к списку" />
-        {role === 'student' ? (
-          <Link className="tg-peer" to={`/teachers/${c.tutorId}`} state={{ back: `${base}/${c.id}` }} aria-label={`Анкета: ${c.peerName}`}>
-            <span className="tg-head-text"><b>{c.peerName}</b><small>Репетитор</small></span>
-          </Link>
-        ) : (
-          <span className="tg-peer">
-            <span className="tg-head-text"><b>{c.peerName}</b><small>Ученик</small></span>
-          </span>
-        )}
+        <button type="button" className="tg-peer tg-profile-trigger" onClick={() => setProfileOpen(true)} aria-label={`Профиль: ${c.peerName}`}>
+          <span className="tg-head-text"><b>{c.peerName}</b><small>{role === 'student' ? 'Репетитор' : 'Ученик'}</small></span>
+        </button>
         <span className="tg-head-actions">
-          <ReportButton conversation={c} onBlocked={() => conversation.reload()} />
-          {role === 'student'
-            ? <Link className="tg-peer-avatar" to={`/teachers/${c.tutorId}`} state={{ back: `${base}/${c.id}` }} aria-label={`Профиль: ${c.peerName}`}><Avatar name={c.peerName} photo={c.peerPhoto} size={44} /></Link>
-            : <Avatar name={c.peerName} photo={c.peerPhoto} size={44} />}
+          <IconButton icon="search" label="Найти в переписке" onClick={() => setSearchOpen((open) => !open)} />
+          <button type="button" className="tg-peer-avatar" onClick={() => setProfileOpen(true)} aria-label={`Открыть профиль: ${c.peerName}`}><Avatar name={c.peerName} photo={c.peerPhoto} size={44} /></button>
         </span>
       </header>
+      {searchOpen && <label className="tg-search tg-thread-search"><Icon name="search" /><input type="search" aria-label="Найти в переписке" placeholder="Найти в переписке" value={query} onChange={(event) => setQuery(event.target.value)} /><IconButton icon="x" label="Закрыть поиск" onClick={() => { setSearchOpen(false); setQuery(''); }} /></label>}
+      <Modal open={profileOpen} onClose={() => setProfileOpen(false)} title="Профиль собеседника" className="tg-profile-modal">
+        <div className="tg-profile-summary"><Avatar name={c.peerName} photo={c.peerPhoto} size={112} /><h2>{c.peerName}</h2><p>{role === 'student' ? 'Репетитор' : 'Ученик'}</p></div>
+        <div className="tg-profile-links">
+          {role === 'student' && <Button variant="line" to={`/teachers/${c.tutorId}`} state={{ back: `${base}/${c.id}` }}>Открыть анкету<Icon name="right" /></Button>}
+          <Button variant="line" onClick={() => { setProfileOpen(false); setSearchOpen(true); }}><Icon name="search" />Поиск в переписке</Button>
+          <ReportButton conversation={c} onBlocked={() => conversation.reload()} />
+        </div>
+        {list.some((message) => message.imageUrl) && <section className="tg-media"><h3>Фотографии</h3><div>{list.filter((message) => message.imageUrl).map((message) => <a href={message.imageUrl} target="_blank" rel="noreferrer" key={message.id}><img src={message.imageUrl} alt="Фото из переписки" loading="lazy" /></a>)}</div></section>}
+      </Modal>
       {(messages.error || history.error || mark.error) && <FormError error={messages.error ?? history.error ?? mark.error} />}
-      <Thread conversation={c} list={list} older={hasOlder && Boolean(older.length || messages.data?.length === 100)} loadingOlder={history.pending} loadOlder={history.run} loading={messages.loading && !messages.data} onSent={(m) => { messages.setData((prev) => [...(prev ?? []), m]); onRead(); }} onRemoved={(removed) => { setOlder((prev) => prev.filter((m) => m.id !== removed)); messages.setData((prev) => (prev ?? []).filter((m) => m.id !== removed)); }} />
+      <Thread query={searchOpen ? query : ''} conversation={c} list={list} older={hasOlder && Boolean(older.length || messages.data?.length === 100)} loadingOlder={history.pending} loadOlder={history.run} loading={messages.loading && !messages.data} onSent={(m) => { messages.setData((prev) => [...(prev ?? []), m]); onRead(); }} onRemoved={(removed) => { setOlder((prev) => prev.filter((m) => m.id !== removed)); messages.setData((prev) => (prev ?? []).filter((m) => m.id !== removed)); }} />
     </>
   );
 }
 
-function Thread({ conversation, list, loading, onSent, onRemoved, older, loadingOlder, loadOlder }: { conversation: Conversation; list: Message[]; loading: boolean; older: boolean; loadingOlder: boolean; loadOlder: () => Promise<unknown>; onSent: (m: Message) => void; onRemoved: (id: string) => void }) {
+function Thread({ query, conversation, list, loading, onSent, onRemoved, older, loadingOlder, loadOlder }: { query: string; conversation: Conversation; list: Message[]; loading: boolean; older: boolean; loadingOlder: boolean; loadOlder: () => Promise<unknown>; onSent: (m: Message) => void; onRemoved: (id: string) => void }) {
   const { user } = useSession();
   const [text, setText] = useState('');
   const scroller = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const send = useMutation((value: string) => api.sendMessage(conversation.id, value));
   const [removing, setRemoving] = useState<Message | null>(null);
-  const [actionsFor, setActionsFor] = useState<{ message: Message; x: number; y: number } | null>(null);
+  const [actionsFor, setActionsFor] = useState<{ message: Message } | null>(null);
   const messageRefs = useRef(new Map<string, HTMLDivElement>());
   const toast = useToast();
   const remove = useMutation(async (m: Message) => { await api.deleteMessage(conversation.id, m.id); return true; });
   // долгое нажатие на своё сообщение (или правая кнопка мыши) предлагает удалить его, как в Telegram и WhatsApp
   const hold = useRef<number | null>(null);
+  const holdOrigin = useRef({ x: 0, y: 0 });
   const stopHold = () => { if (hold.current !== null) { window.clearTimeout(hold.current); hold.current = null; } };
-  const showActions = (m: Message, x: number, y: number) => {
-    setActionsFor({ message: m, x: Math.max(12, Math.min(x, window.innerWidth - 228)), y: Math.max(12, Math.min(y, window.innerHeight - 156)) });
-  };
+  const showActions = (message: Message) => setActionsFor({ message });
   const holdProps = (m: Message) => ({
     onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => {
       if (event.pointerType === 'mouse') return;
       stopHold();
       const { clientX, clientY } = event;
-      hold.current = window.setTimeout(() => { hold.current = null; showActions(m, clientX, clientY); }, 480);
+      holdOrigin.current = { x: clientX, y: clientY };
+      hold.current = window.setTimeout(() => { hold.current = null; showActions(m); }, 480);
     },
-    onPointerUp: stopHold, onPointerLeave: stopHold, onPointerCancel: stopHold, onPointerMove: stopHold,
-    onContextMenu: (event: ReactMouseEvent<HTMLDivElement>) => { event.preventDefault(); stopHold(); showActions(m, event.clientX, event.clientY); },
+    onPointerUp: stopHold, onPointerLeave: stopHold, onPointerCancel: stopHold, onPointerMove: (event: ReactPointerEvent<HTMLDivElement>) => { if (Math.hypot(event.clientX - holdOrigin.current.x, event.clientY - holdOrigin.current.y) > 10) stopHold(); },
+    onContextMenu: (event: ReactMouseEvent<HTMLDivElement>) => { event.preventDefault(); stopHold(); showActions(m); },
   });
   const confirmRemove = async () => {
     if (removing && await remove.run(removing)) { onRemoved(removing.id); setRemoving(null); }
   };
-  useEffect(() => {
-    if (!actionsFor) return;
-    const closeOnEscape = (event: globalThis.KeyboardEvent) => { if (event.key === 'Escape') setActionsFor(null); };
-    const closeOutside = (event: globalThis.PointerEvent) => {
-      if (event.target instanceof Element && !event.target.closest('.tg-action-menu')) setActionsFor(null);
-    };
-    window.addEventListener('keydown', closeOnEscape);
-    document.addEventListener('pointerdown', closeOutside);
-    return () => {
-      window.removeEventListener('keydown', closeOnEscape);
-      document.removeEventListener('pointerdown', closeOutside);
-    };
-  }, [actionsFor]);
   const copyMessage = async () => {
     if (!actionsFor) return;
     try {
@@ -217,6 +209,8 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
   });
 
   const preservingScroll = useRef(false);
+  const nearBottom = useRef(true);
+  useEffect(() => () => stopHold(), []);
   const previousPage = async () => {
     const node = scroller.current;
     if (!node) return;
@@ -228,7 +222,7 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
   useLayoutEffect(() => {
     if (preservingScroll.current) return;
     const node = scroller.current;
-    if (node) node.scrollTop = node.scrollHeight;
+    if (node && nearBottom.current) node.scrollTop = node.scrollHeight;
   }, [list.length]);
 
   const grow = () => {
@@ -243,12 +237,12 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
     const value = text.trim();
     if (!value || send.pending) return;
     const sent = await send.run(value);
-    if (sent) { setText(''); onSent(sent); input.current?.focus(); }
+    if (sent) { nearBottom.current = true; setText(''); onSent(sent); input.current?.focus(); }
   };
   const pickPhoto = async (file: File | undefined) => {
     if (!file) return;
     const sent = await sendPhoto.run(file);
-    if (sent) { setText(''); onSent(sent); }
+    if (sent) { nearBottom.current = true; setText(''); onSent(sent); }
     if (fileInput.current) fileInput.current.value = '';
   };
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -258,7 +252,8 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
 
   return (
     <>
-      <div className="tg-thread" ref={scroller} aria-live="polite">
+      <div className="tg-thread" ref={scroller} onScroll={() => { const node = scroller.current; if (node) nearBottom.current = node.scrollHeight - node.scrollTop - node.clientHeight < 100; }} role="log" aria-label="Переписка" aria-live="polite">
+        {query.trim() && !list.some((message) => message.text.toLocaleLowerCase('ru-RU').includes(query.trim().toLocaleLowerCase('ru-RU'))) && <p className="tg-note">Сообщения не найдены</p>}
         {older && <Button variant="line" size="s" loading={loadingOlder} onClick={() => void previousPage()}>Предыдущие сообщения</Button>}
         {loading && <p className="muted tg-note">Загружаем сообщения…</p>}
         {!loading && list.length === 0 && <p className="tg-note">Напишите первое сообщение: представьтесь и расскажите, чем нужна помощь.</p>}
@@ -268,7 +263,7 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
           const mine = m.authorId === user?.id;
           const joined = !newDay && m.kind !== 'event' && prev?.kind !== 'event' && prev?.authorId === m.authorId;
           return (
-            <div key={m.id} className="tg-fragment">
+            <div key={m.id} className="tg-fragment" hidden={Boolean(query.trim()) && !m.text.toLocaleLowerCase('ru-RU').includes(query.trim().toLocaleLowerCase('ru-RU'))}>
               {newDay && <div className="tg-day"><span>{dayLabel(m.at)}</span></div>}
               {m.kind === 'event'
                 ? <div className="tg-sys">{m.text}</div>
@@ -282,19 +277,19 @@ function Thread({ conversation, list, loading, onSent, onRemoved, older, loading
                       </div>
                     ) : m.text && <span className="tg-text">{m.text}</span>}
                     <small><time dateTime={m.at}>{timeLabel(m.at)}</time>{mine && <Icon name={m.read ? 'ticks' : 'tick'} />}</small>
-                    <IconButton icon="more" label="Действия с сообщением" className="tg-message-actions" onClick={() => { const rect = messageRefs.current.get(m.id)?.getBoundingClientRect(); if (rect) showActions(m, rect.right, rect.bottom); }} />
+                    <IconButton icon="more" label="Действия с сообщением" className="tg-message-actions" onClick={() => { const rect = messageRefs.current.get(m.id)?.getBoundingClientRect(); if (rect) showActions(m); }} />
                   </div>
                 )}
             </div>
           );
         })}
       </div>
-      {actionsFor && <div className="tg-action-scrim" aria-hidden="true">
-        <div className="tg-action-menu" role="menu" tabIndex={-1} aria-label="Действия с сообщением" style={{ left: actionsFor.x, top: actionsFor.y }}>
-          <button role="menuitem" type="button" onClick={() => void copyMessage()}><Icon name="copy" />Скопировать</button>
-          {actionsFor.message.authorId === user?.id && <button role="menuitem" type="button" className="danger" onClick={requestDelete}><Icon name="trash" />Удалить</button>}
-        </div>
-      </div>}
+      <Modal open={Boolean(actionsFor)} onClose={() => setActionsFor(null)} title="Сообщение" className="tg-message-modal" width={360}>
+        {actionsFor && <div className="tg-action-menu">
+          <button type="button" onClick={() => void copyMessage()}><Icon name="copy" />Скопировать</button>
+          {actionsFor.message.authorId === user?.id && <button type="button" className="danger" onClick={requestDelete}><Icon name="trash" />Удалить</button>}
+        </div>}
+      </Modal>
       <ConfirmDialog className="tg-report-modal" open={Boolean(removing)} onClose={() => setRemoving(null)} onConfirm={() => void confirmRemove()} title="Удалить сообщение?" text="Оно исчезнет у вас и у собеседника." confirmLabel="Удалить" variant="danger" pending={remove.pending} error={remove.error} />
       {conversation.blocked ? <p className="tg-blocked">Диалог заблокирован: писать в него нельзя.</p> : (
         <form className="tg-compose" onSubmit={(e) => { e.preventDefault(); void submit(); }}>

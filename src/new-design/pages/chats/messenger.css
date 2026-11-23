@@ -5,7 +5,7 @@
   --tg-surface-raised: rgb(247 248 250 / 94%);
   --tg-rim: rgb(32 40 56 / 10%);
   --tg-text: #202838;
-  --tg-muted: #737987;
+  --tg-muted: #626a78;
   --tg-orange: #f26a2e;
   --icon-ink: #202838;
   background: var(--tg-bg);
@@ -23,7 +23,7 @@
 }
 .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trh-nav a { color: var(--tg-muted); }
 .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trh-nav a.cur,
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trh-nav a:hover { color: #f26a2e; }
+.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trh-nav a:hover { color: #b94714; }
 .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-app-hdr .trk-hdr-ic {
   color: var(--tg-text);
   background: rgb(255 255 255 / 6%);
@@ -39,7 +39,7 @@
 }
 .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tabpill { background: rgb(32 40 56 / 6%); }
 .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tab { color: #434b58; }
-.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tab.on { color: #f26a2e; }
+.tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tab.on { color: #b94714; }
 .tr .trk-app:is(.trk-chat-list, .trk-chat-thread) .trk-tabbar .tab.cur { --icon-ink: #f26a2e; }
 
 .tr .tg {
@@ -69,7 +69,7 @@
   border: 1px solid var(--tg-rim);
   border-radius: 16px;
   background: rgb(255 255 255 / 5%);
-  color: #737987;
+  color: #626a78;
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 .tr .tg-search:focus-within {
@@ -77,7 +77,7 @@
   border-color: rgb(242 106 46 / 58%);
   box-shadow: 0 0 0 3px rgb(242 106 46 / 11%);
 }
-.tr .tg-search .i { width: 19px; height: 19px; color: #737987; }
+.tr .tg-search .i { width: 19px; height: 19px; color: #626a78; }
 .tr .tg-search input {
   width: 100%;
   min-width: 0;
@@ -88,7 +88,7 @@
   font: inherit;
   font-size: 15px;
 }
-.tr .tg-search input::placeholder { color: #737987; }
+.tr .tg-search input::placeholder { color: #626a78; }
 .tr .tg-search input::-webkit-search-cancel-button { cursor: pointer; }
 .tr .tg-empty-search { padding: 16px 12px; color: var(--tg-muted); font-size: 14px; }
 .tr .tg-rows { gap: 2px; padding: 0 2px 10px; scrollbar-color: rgb(32 40 56 / 18%) transparent; }
@@ -106,9 +106,9 @@
 .tr .tg-row.on { background: rgb(242 106 46 / 12%); border-color: rgb(242 106 46 / 20%); }
 .tr .tg-row-text { gap: 4px; }
 .tr .tg-row-text b { color: var(--tg-text); font-size: 15px; font-weight: 700; }
-.tr .tg-row-text span { color: #737987; font-size: 13px; }
+.tr .tg-row-text span { color: #626a78; font-size: 13px; }
 .tr .tg-row-meta { display: grid; align-content: space-between; justify-items: end; min-height: 48px; padding-block: 1px; }
-.tr .tg-row-meta time { color: #737987; font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tr .tg-row-meta time { color: #626a78; font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tr .tg-unread {
   display: grid;
   min-width: 20px;
@@ -126,7 +126,7 @@
 
 .tr .tg-main { position: relative; min-height: 0; background: #ffffff; }
 .tr .tg-placeholder { color: var(--tg-muted); }
-.tr .tg-placeholder .i { color: #737987; }
+.tr .tg-placeholder .i { color: #626a78; }
 .tr .tg-head {
   position: relative;
   z-index: 2;
@@ -238,7 +238,7 @@
   align-items: center;
   gap: 3px;
   margin: 4px 0 0 9px;
-  color: #737987;
+  color: #626a78;
   font-size: 11px;
   line-height: 1.1;
   white-space: nowrap;
@@ -281,7 +281,7 @@
   max-height: 140px;
   padding: 10px 8px;
   color: var(--tg-text);
-  caret-color: #f26a2e;
+  caret-color: #b94714;
   background: transparent;
   border: 0;
   border-radius: 20px;
@@ -289,7 +289,7 @@
   font-size: 16px;
   line-height: 1.35;
 }
-.tr .tg-input::placeholder { color: #737987; opacity: 1; }
+.tr .tg-input::placeholder { color: #626a78; opacity: 1; }
 .tr .tg-compose-row .tg-attach,
 .tr .tg-compose-row .tg-send {
   display: grid;
@@ -327,7 +327,7 @@
   border-color: rgb(32 40 56 / 6%) !important;
   box-shadow: inset 0 1px 0 rgb(32 40 56 / 5%) !important;
 }
-.tr .tg-compose-row .tg-send:disabled { color: #737987; background: rgb(32 40 56 / 5%); opacity: 1; }
+.tr .tg-compose-row .tg-send:disabled { color: #626a78; background: rgb(32 40 56 / 5%); opacity: 1; }
 .tr .tg-blocked { color: #434b58; background: #f7f8fa; border-top: 1px solid var(--tg-rim); }
 
 .tr .tg-message-actions {
@@ -406,7 +406,7 @@
 .tr .tg-report-modal .cap,
 .tr .tg-report-modal .trk-modal-body { color: #434b58; }
 .tr .tg-report-modal .opt { color: var(--tg-text); background: rgb(255 255 255 / 5%); border-color: var(--tg-rim); }
-.tr .tg-report-modal .opt.on { color: #f26a2e; background: rgb(242 106 46 / 14%); border-color: rgb(242 106 46 / 60%); }
+.tr .tg-report-modal .opt.on { color: #b94714; background: rgb(242 106 46 / 14%); border-color: rgb(242 106 46 / 60%); }
 .tr .tg-report-modal .btn-line,
 .tr .tg-report-modal .btn-fill { color: var(--tg-text); background: rgb(32 40 56 / 6%); }
 
@@ -475,3 +475,47 @@
 .tr .tg-thread { background: #fff; }
 .tr .tg-search { background: #f7f8fa; }
 .tr .tg-head, .tr .tg-compose { background: rgb(255 255 255 / 94%); }
+
+/* One white material and predictable Telegram-style navigation. */
+.tr .tg-profile-trigger { border: 0; background: transparent; padding: 0; font: inherit; cursor: pointer; }
+.tr button.tg-peer-avatar { border: 0; padding: 0; background: transparent; cursor: pointer; }
+.tr .tg-thread-search { margin: 8px 16px; flex: none; }
+.tr .tg-fragment[hidden] { display: none; }
+.tr .tg-profile-summary { display: grid; justify-items: center; gap: 8px; padding-block: 8px 24px; }
+.tr .tg-profile-summary h2 { margin: 8px 0 0; font-size: 24px; }
+.tr .tg-profile-summary p { margin: 0; color: var(--muted); }
+.tr .tg-profile-links { display: grid; gap: 12px; }
+.tr .tg-profile-links > .trk-iconbtn { justify-self: center; }
+.tr .tg-media { margin-top: 24px; }
+.tr .tg-media h3 { margin: 0 0 12px; font-size: 18px; }
+.tr .tg-media > div { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 4px; }
+.tr .tg-media img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
+.tr .tg-message-modal .tg-action-menu { position: static; width: 100%; padding: 0; border: 0; background: transparent; box-shadow: none; backdrop-filter: none; }
+.tr .tg-message-modal .tg-action-menu button { width: 100%; }
+.tr .tg-message-modal, .tr .tg-profile-modal { background: #fff; color: var(--ink); }
+.tr .tg-msg.in .tg-message-actions { right: auto; left: calc(100% + 4px); margin: 0; }
+.tr .tg-msg.out .tg-message-actions { left: auto; right: calc(100% + 4px); margin: 0; }
+.tr .tg .tg-message-actions:focus-visible { opacity: 1; pointer-events: auto; outline: 2px solid var(--accent); outline-offset: 2px; }
+.tr .tg-msg { font-weight: 400; }
+@media(max-width:760px) {
+  .tr .tg { border: 0; border-radius: 0; }
+  .tr .trk-chat-list .trh-main { padding-inline: 0; }
+  .tr .tg-list { padding-inline: 16px; }
+  .tr .tg-row { border-radius: 12px; }
+  .tr .tg-row + .tg-row { position: relative; }
+  .tr .tg-row + .tg-row::before { content: ''; position: absolute; inset: 0 0 auto 72px; height: 1px; background: #eceef1; }
+  .tr .tg .tg-message-actions { display: grid; width: 28px; min-width: 28px; height: 28px; min-height: 28px; opacity: .55; pointer-events: auto; background: transparent; border: 0; }
+  .tr .tg .tg-message-actions .i { width: 17px; height: 17px; }
+  .tr .tg-msg { max-width: calc(100% - 38px); }
+}
+
+.tr .tg .tg-msg .tg-message-actions { position: absolute; top: 50%; transform: translateY(-50%); opacity: 0; }
+.tr .tg .tg-msg:hover .tg-message-actions,
+.tr .tg .tg-msg:focus-within .tg-message-actions { opacity: 1; }
+.tr .tg .tg-msg.in .tg-message-actions { left: calc(100% + 4px); right: auto; }
+.tr .tg .tg-msg.out .tg-message-actions { right: calc(100% + 4px); left: auto; }
+@media (hover:none) { .tr .tg .tg-msg:hover .tg-message-actions { opacity: 0; } }
+.tr .tg .tg-msg .tg-message-actions:focus-visible { opacity: 1; }
+
+.tr .tg-title { font-size: 34px; line-height: 1.15; letter-spacing: -.03em; }
+@media(max-width:760px) { .tr .tg-title { font-size: 28px; } }

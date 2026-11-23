@@ -47,7 +47,7 @@ export function Modal({ open, onClose, title, children, footer, width = 520, cla
   // на телефоне окно-шторку можно смахнуть вниз: жест начинается, только когда содержимое прокручено до верха
   useEffect(() => {
     const el = box.current;
-    if (!open || !el || !window.matchMedia('(max-width: 760px)').matches) return undefined;
+    if (!open || !el || !window.matchMedia('(max-width: 760px)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     let startY = 0;
     let startAt = 0;
     let delta = 0;
