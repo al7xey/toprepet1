@@ -7,7 +7,7 @@ import { Button, FormError, type ButtonVariant } from './kit';
  * Модальное окно: на компьютере по центру, на телефоне шторкой снизу. Закрывается по Esc и клику по фону,
  * фокус переносится внутрь и возвращается обратно.
  */
-export function Modal({ open, onClose, title, children, footer, width = 520 }: { open: boolean; onClose: () => void; title: ReactNode; children?: ReactNode; footer?: ReactNode; width?: number }) {
+export function Modal({ open, onClose, title, children, footer, width = 520, className }: { open: boolean; onClose: () => void; title: ReactNode; children?: ReactNode; footer?: ReactNode; width?: number; className?: string }) {
   const box = useRef<HTMLDialogElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
@@ -101,7 +101,7 @@ export function Modal({ open, onClose, title, children, footer, width = 520 }: {
   return createPortal(
     <div className="tr trk-modal-root" ref={root}>
       <div className="trk-scrim" onClick={onClose} aria-hidden="true" />
-      <dialog open tabIndex={-1} className="trk-modal surf-strong" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} ref={box} style={{ maxWidth: width }}>
+      <dialog open tabIndex={-1} className={`trk-modal surf-strong${className ? ` ${className}` : ''}`} aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} ref={box} style={{ maxWidth: width }}>
         <div className="grab trk-grab" aria-hidden="true" />
         <div className="trk-modal-head">
           <h2 className="trk-cardtitle">{title}</h2>
@@ -116,9 +116,9 @@ export function Modal({ open, onClose, title, children, footer, width = 520 }: {
 }
 
 /** Подтверждение необратимого действия. */
-export function ConfirmDialog({ open, onClose, onConfirm, title, text, confirmLabel, variant = 'primary', pending, error }: { open: boolean; onClose: () => void; onConfirm: () => void; title: string; text?: ReactNode; confirmLabel: string; variant?: ButtonVariant; pending?: boolean; error?: string | null }) {
+export function ConfirmDialog({ open, onClose, onConfirm, title, text, confirmLabel, variant = 'primary', pending, error, className }: { open: boolean; onClose: () => void; onConfirm: () => void; title: string; text?: ReactNode; confirmLabel: string; variant?: ButtonVariant; pending?: boolean; error?: string | null; className?: string }) {
   return (
-    <Modal open={open} onClose={onClose} title={title} footer={<><Button variant="line" onClick={onClose}>Не сейчас</Button><Button variant={variant} onClick={onConfirm} loading={pending}>{confirmLabel}</Button></>}>
+    <Modal open={open} onClose={onClose} title={title} className={className} footer={<><Button variant="line" onClick={onClose}>Не сейчас</Button><Button variant={variant} onClick={onConfirm} loading={pending}>{confirmLabel}</Button></>}>
       {text && <p className="cap">{text}</p>}
       <FormError error={error} />
     </Modal>
