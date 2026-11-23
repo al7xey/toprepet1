@@ -190,7 +190,7 @@ export function RichEditor({ initial, onChange, onUpload, onDeleteImage }: Props
   return (
     <div className="paper simple-editor">
       <div className="simple-editor-toolbar" role="toolbar" aria-label="Форматирование статьи">
-        <selec
+        <select
           aria-label="Стиль текста"
           value={block}
           disabled={busy}
