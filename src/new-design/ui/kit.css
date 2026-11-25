@@ -746,13 +746,15 @@ html{overflow-y:scroll}
 .tr .trk-navrow span{flex:1}
 .tr .trk-navrow .i{width:22px;height:22px;color:var(--accent)}
 .tr .trk-navrow > .i:last-child{width:18px;height:18px;color:var(--muted)}
-.tr .tg-list-title{display:flex;align-items:center;gap:12px;padding:16px}
-.tr .tg-list-title .tg-title{padding:0;margin:0}
+.tr .tg-list-title{display:flex;align-items:center;gap:12px;padding:0 0 18px}
+.tr .tg-list-title .tg-title{padding:0;margin:0;min-height:44px}
 .tr .trk-request{gap:10px}
 .tr .trk-request-title{font-size:18px}
 @media (max-width:760px){
   .tr .trk-app .trh-pf-photo{margin-top:-32px}
   .tr .trk-app .trh-pf-cta{position:static;bottom:auto}
+  .tr .tg-list-title{padding-bottom:14px}
+  .tr .tg-list-title .tg-title{min-height:0;margin:0}
 }
 .tr .trk-student{display:flex;align-items:center;gap:14px;min-width:0}
 .tr .trk-student-photo{flex:none;display:grid;place-items:center;width:72px;height:72px;border-radius:18px;overflow:hidden;background:#fdece3;color:var(--accent)}
