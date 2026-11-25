@@ -1,73 +1,62 @@
-name: Deploy to GitHub Pages
+name: Deploy demo to GitHub Pages
 
 on:
   push:
-    branches: [main, preview]
+    branches: [preview]
   workflow_dispatch:
-  schedule:
-    - cron: '*/15 * * * *'
 
 permissions:
   contents: read
 
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout production source
+      - name: Checkout demo branch
         uses: actions/checkout@v4
-        with:
-          ref: main
-          path: production
-      - name: Checkout public demo preview
-        uses: actions/checkout@v4
-        with:
-          ref: preview
-          path: preview
-      - uses: pnpm/action-setup@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: |
-            production/pnpm-lock.yaml
-            preview/pnpm-lock.yaml
-      - name: Build production site at domain root
-        working-directory: production
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build demo for repository root
         env:
           VITE_API_MODE: demo
-        run: pnpm install --frozen-lockfile && pnpm run build
-      - name: Build demo branch under /preview/
-        working-directory: preview
-        env:
-          VITE_API_MODE: demo
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/preview/
-        run: pnpm install --frozen-lockfile && pnpm run build:e2e && pnpm exec tsc --noEmit
-      - name: Combine the unchanged production root and isolated demo preview
-        run: |
-          mkdir -p site/preview
-          cp -a production/dist/. site/
-          cp -a preview/dist/. site/preview/
-      - uses: actions/upload-pages-artifact@v3
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+        run: pnpm run build:e2e && pnpm exec tsc --noEmit
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: dist
 
   deploy:
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     steps:
-      - id: deployment
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
