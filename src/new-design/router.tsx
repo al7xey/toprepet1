@@ -1,3 +1,4 @@
+import { StudioMotion } from './ui/studio-motion';
 import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { SessionProvider } from './api/session';
@@ -27,6 +28,7 @@ function ScrollToTop() {
 export function NewApp() {
   return (
     <SessionProvider>
+      <StudioMotion />
       <div className="tr">
         <LiquidGlassEffects />
         <ToastProvider>

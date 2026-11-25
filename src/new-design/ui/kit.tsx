@@ -1,3 +1,4 @@
+import { useSpringPill } from '../lib/useSpringPill';
 import { useEffect, useId, useRef, useState, type CSSProperties, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import type { Query } from '../api/hooks';
@@ -304,8 +305,10 @@ export function onChoiceTabKey(event: KeyboardEvent<HTMLButtonElement>) {
 
 /** Сегментный переключатель вкладок. */
 export function Tabs<T extends string>({ items, value, onChange, wide }: { items: { value: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; wide?: boolean }) {
+  const { host, pill } = useSpringPill(value);
   return (
-    <div className={cx('seg trk-tabs', wide && 'wide')} role="tablist">
+    <div ref={host} className={cx('seg trk-tabs motion-tabs', wide && 'wide')} role="tablist">
+      <span ref={pill} className="motion-tab-pill" aria-hidden="true" />
       {items.map((item) => (
         <button key={item.value} type="button" role="tab" aria-selected={item.value === value} tabIndex={item.value === value ? 0 : -1} className={item.value === value ? 'on' : undefined} onKeyDown={onChoiceTabKey} onClick={() => onChange(item.value)}>
           {item.label}{item.count ? <span className="cnt2">{item.count}</span> : null}
