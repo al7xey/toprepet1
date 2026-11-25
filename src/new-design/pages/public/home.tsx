@@ -55,8 +55,22 @@ export default function HomePage() {
         <Button to="/teachers?intro=1" size="lg" block>Бесплатное знакомство</Button>
       </Section>
 
-      <Section className="p-home-trust" title="100% гарантия возврата средств">
-          <p className="cap">Если оплаченное занятие не состоялось, вернём деньги полностью. Оплата списывается после подтверждения записи, а репетитор получает её после занятия. В спорной ситуации поможет поддержка.</p>
+      <Section className="p-home-trust" reveal>
+        <div className="p-home-trust-panel">
+          <img
+            className="p-home-trust-art"
+            src={publicAssetPath('/images/payment-trust.webp')}
+            alt="Ученик спокойно читает книгу рядом с большим замком — символ безопасной оплаты"
+            width={1536}
+            height={1024}
+            loading="lazy"
+          />
+          <div className="p-home-trust-copy">
+            <h2 className="h2 trh-h2">100% гарантия возврата средств</h2>
+            <p className="cap">Если оплаченное занятие не состоялось, вернём деньги полностью.</p>
+            <p className="muted">TopRepet выступает посредником между вами и репетитором: деньги не перечисляются преподавателю сразу, а выплачиваются только после проведённого занятия. В других спорных ситуациях поддержка поможет разобраться и при наличии оснований оформить возврат.</p>
+          </div>
+        </div>
       </Section>
 
       <Section title="Вы репетитор? Найдём для вас учеников" className="trh-recruit" reveal>
