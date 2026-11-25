@@ -47,7 +47,7 @@ jobs:
         working-directory: preview
         env:
           VITE_API_MODE: demo
-          VITE_BASE_PATH: /preview/
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/preview/
         run: pnpm install --frozen-lockfile && pnpm run build:e2e && pnpm exec tsc --noEmit
       - name: Combine the unchanged production root and isolated demo preview
         run: |
