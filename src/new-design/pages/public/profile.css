@@ -1,0 +1,65 @@
+/* The portrait uses the same 3:4 crop as the catalog cards. */
+.tr .trh-pf-top { gap: clamp(18px, 3vw, 36px); }
+.tr .trh-pf-top .trh-pf-photo {
+  flex-basis: min(40%, 300px);
+  aspect-ratio: 3 / 4;
+  border-radius: 28px;
+}
+.tr .trh-pf-top .trh-pf-sheet { flex-basis: 220px; align-self: center; }
+
+.tr .trh-pf-top .trh-pf-photo .trk-iconbtn { position: absolute; top: 12px; }
+.tr .trh-pf-top .trh-pf-photo .trh-pf-share { display: grid; right: 12px; }
+.tr .trh-pf .ach li { grid-template-columns: 46px minmax(0, 1fr); }
+.tr .trh-pf-ach-icon { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid var(--line); border-radius: 16px; color: var(--ink); }
+.tr .trh-pf-ach-icon .i { width: 28px; height: 28px; }
+.tr .trh-pf-aside .trh-pf-booking { border: 0; box-shadow: none; padding-inline: 0; }
+
+@media (761px <= width <= 1080px) {
+  .tr .trh-pf { gap: 24px; }
+  .tr .trh-pf-main { flex-basis: 0; }
+  .tr .trh-pf-aside { flex-basis: 286px; }
+}
+
+@media (max-width: 760px) {
+  .tr .trh-page.trh-bare:has(.trh-pf) { padding-top: 0; }
+  .tr .trh-bare:has(.trh-pf) .trh-public-nav { display: none; }
+  .tr .trh-pf-top { margin-inline: -16px; }
+  .tr .trh-pf-top .trh-pf-photo {
+    position: sticky;
+    top: 0;
+    margin: 0;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+  }
+  .tr .trh-pf-top .trh-pf-photo .trh-pf-back { display: grid; left: 12px; }
+  .tr .trh-pf-top .trh-pf-sheet {
+    margin: -48px 0 0;
+    padding: 26px 20px 12px;
+    border-radius: 32px 32px 0 0;
+    background: white;
+  }
+}
+
+@media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+  .tr .trh-pf-top .trh-pf-sheet { animation: tr-profile-text-in 680ms var(--lg-spring) both; }
+}
+
+@keyframes tr-profile-text-in { from { transform: translateY(24px); } to { transform: none; } }
+
+.tr .trh-pf:has(.trh-pf-booking) { display: block; width: 100%; }
+.tr .trh-pf-name-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.tr .trh-pf-name-row h1 { min-width: 0; overflow-wrap: anywhere; }
+.tr .trh-pf-name-row .trh-pf-rating { flex-shrink: 0; }
+.tr .trh-pf-booking { margin-top: 0; gap: 14px; }
+
+@media (min-width: 761px) {
+  .tr .trh-pf-top .trh-pf-photo .trh-pf-back { display: none; }
+}
+
+.tr .trh-pf-scheduling { display: grid; gap: 14px; }
+.tr .trh-pf-calendar .trh-sec { gap: 12px; }
+.tr .trh-pf-actions { display: grid; gap: 14px; }
+@media (max-width: 760px) {
+  .tr .trh-pf-actions { gap: 10px; }
+}

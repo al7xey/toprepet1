@@ -1,0 +1,56 @@
+import { Link, useLocation } from 'react-router-dom';
+import { api } from '../../api';
+import { useMutation, useQuery } from '../../api/hooks';
+import { useSession } from '../../api/session';
+import type { Notification } from '../../api/types';
+import { AppLayout } from '../../layout/layouts';
+import { ago } from '../../lib/format';
+import { Card, EmptyState, FormError, Icon, IconButton, PageHeader, QueryView, UnreadDot, useToast } from '../../ui';
+
+const ICON: Record<Notification['kind'], string> = { lesson: 'book', request: 'circle-check', message: 'chat-bubble', payment: 'card', review: 'star', system: 'info' };
+
+/** Уведомления: уроки, заявки, сообщения, платежи, отзывы. Общая страница для ученика и репетитора. */
+export default function NotificationsPage() {
+  const { user } = useSession();
+  const toast = useToast();
+  const role = user?.role === 'tutor' ? 'tutor' : 'student';
+  const list = useQuery(user ? `notes-page-${user.id}` : null, () => api.listNotifications());
+  const { pathname } = useLocation();
+  const readAll = useMutation(async () => { await api.markNotificationsRead(); return true; });
+  const unread = list.data?.some((n) => !n.read) ?? false;
+  const markAll = async () => {
+    if (!(await readAll.run())) return;
+    list.setData((prev) => (prev ?? []).map((n) => ({ ...n, read: true })));
+    window.dispatchEvent(new Event('tr:notes'));
+  };
+  // открыв уведомление, считаем его прочитанным: точка пропадает сразу
+  const open = (n: Notification) => {
+    if (n.read) return;
+    list.setData((prev) => (prev ?? []).map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+    void api.markNotificationRead(n.id).then(() => window.dispatchEvent(new Event('tr:notes'))).catch(() => {
+      list.setData((prev) => (prev ?? []).map((item) => item.id === n.id ? { ...item, read: false } : item));
+      toast('Не удалось отметить уведомление прочитанным');
+    });
+  };
+  return (
+    <AppLayout role={role}>
+      <PageHeader title="Уведомления" back={{ to: role === 'tutor' ? '/tutor/account' : '/me/account', label: 'Профиль' }} actions={unread ? <IconButton icon="checks" label="Прочитать все" disabled={readAll.pending} onClick={() => void markAll()} /> : undefined} />
+      <FormError error={readAll.error} />
+      <QueryView query={list} empty={(items) => items.length === 0 ? <EmptyState icon="bell" title="Пока тихо" text="Здесь появятся ответы на заявки, подтверждения уроков и сообщения." /> : null}>
+        {(items) => (
+          <div className="trk-list">
+            {[...items].sort((a, b) => b.at.localeCompare(a.at)).map((n) => {
+              const body = (
+                <>
+                  <span className="trk-note-ic"><Icon name={ICON[n.kind]} /></span>
+                  <span className="trk-note-text"><b>{n.title}{!n.read && <UnreadDot />}</b><span>{n.text}</span><small>{ago(n.at)}</small></span>
+                </>
+              );
+              return <Card key={n.id} pad="sm">{n.link ? <Link className="trk-note-row" to={n.link} state={{ from: pathname }} onClick={() => open(n)}>{body}</Link> : <div className="trk-note-row">{body}</div>}</Card>;
+            })}
+          </div>
+        )}
+      </QueryView>
+    </AppLayout>
+  );
+}

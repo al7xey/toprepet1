@@ -1,0 +1,41 @@
+import { lazy } from 'react';
+import { Navigate, Route } from 'react-router-dom';
+import { RequireRole } from '../api/session';
+
+const DocumentsPage = lazy(() => import('../pages/tutor/documents'));
+const TutorLessonsPage = lazy(() => import('../pages/tutor/lessons'));
+const TutorLessonPage = lazy(() => import('../pages/tutor/lesson'));
+const SchedulePage = lazy(() => import('../pages/tutor/schedule'));
+const FinancePage = lazy(() => import('../pages/tutor/finance'));
+const TutorStudentsPage = lazy(() => import('../pages/tutor/students'));
+const TutorAccountPage = lazy(() => import('../pages/tutor/account'));
+const TutorSettingsPage = lazy(() => import('../pages/tutor/settings'));
+const TutorRequestsPage = lazy(() => import('../pages/requests/tutor'));
+const TutorChatsPage = lazy(() => import('../pages/chats/tutor-list'));
+const TutorChatPage = lazy(() => import('../pages/chats/tutor-view'));
+const TutorReviewsPage = lazy(() => import('../pages/tutor/reviews'));
+const TutorDisputePage = lazy(() => import('../pages/tutor/dispute'));
+const NotificationsPage = lazy(() => import('../pages/shared/notifications'));
+
+const tutor = (page: React.ReactNode) => <RequireRole role="tutor">{page}</RequireRole>;
+
+/** Кабинет репетитора: уроки, расписание, финансы, ученики, настройки. */
+export const tutorRoutes = (
+  <>
+    <Route path="/tutor/documents" element={tutor(<DocumentsPage />)} />
+    <Route path="/tutor/lessons" element={tutor(<TutorLessonsPage />)} />
+    <Route path="/tutor/lessons/:id" element={tutor(<TutorLessonPage />)} />
+    <Route path="/tutor/schedule" element={tutor(<SchedulePage />)} />
+    <Route path="/tutor/finance" element={tutor(<FinancePage />)} />
+    <Route path="/tutor/students" element={tutor(<TutorStudentsPage />)} />
+    <Route path="/tutor/account" element={tutor(<TutorAccountPage />)} />
+    <Route path="/tutor/account/settings" element={tutor(<TutorSettingsPage />)} />
+    <Route path="/tutor/requests" element={tutor(<TutorRequestsPage />)} />
+    <Route path="/tutor/requests/:id" element={tutor(<Navigate to="/tutor/requests" replace />)} />
+    <Route path="/tutor/chats" element={tutor(<TutorChatsPage />)} />
+    <Route path="/tutor/chats/:id" element={tutor(<TutorChatPage />)} />
+    <Route path="/tutor/reviews" element={tutor(<TutorReviewsPage />)} />
+    <Route path="/tutor/disputes/:id" element={tutor(<TutorDisputePage />)} />
+    <Route path="/tutor/notifications" element={tutor(<NotificationsPage />)} />
+  </>
+);
